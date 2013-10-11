@@ -1,5 +1,5 @@
 PROG= 	kcn
-SRCS=	main.c chunk.c uri.c search.c
+SRCS=	main.c buf.c uri.c search.c
 NOMAN=
 #
 CPPFLAGS+=-W -Wall -Werror

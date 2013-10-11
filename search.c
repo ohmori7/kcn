@@ -7,7 +7,7 @@
 #include <curl/curl.h>
 #include <jansson.h>
 
-#include "chunk.h"
+#include "buf.h"
 #include "uri.h"
 #include "search.h"
 
