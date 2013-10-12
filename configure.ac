@@ -39,7 +39,7 @@ AC_CHECK_TOOL(RANLIB, ranlib, :)
 # Checks for header files.
 AC_HEADER_STDC
 AC_CHECK_HEADERS([							\
-	sys/types.h sys/socket.h					\
+	sys/types.h sys/socket.h sys/un.h 				\
 	netinet/in.h netinet6/in6.h					\
 	stdbool.h							\
 	])
@@ -60,7 +60,6 @@ AC_CHECK_TYPES([
 	#endif /* HAVE_NETINET_IN_H */
 	])
 AC_CHECK_TYPES([
-	struct sockaddr_dl,
 	struct sockaddr_in,
 	struct sockaddr_in6,
 	struct sockaddr_storage,
@@ -77,9 +76,6 @@ AC_CHECK_TYPES([
 	#ifdef HAVE_SYS_UN_H
 	#include <sys/un.h>
 	#endif /* HAVE_SYS_UN_H */
-	#ifdef HAVE_NET_IF_DL_H
-	#include <net/if_dl.h>
-	#endif /* HAVE_NET_IF_DL_H */
 	#ifdef HAVE_NETINET_IN_H
 	#include <netinet/in.h>
 	#endif /* HAVE_NETINET_IN_H */
