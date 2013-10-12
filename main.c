@@ -93,6 +93,6 @@ doit(enum kcn_loc_type type, size_t nmaxlocs, int argc, char * const argv[])
 	if (error != 0)
 		errx(EXIT_FAILURE, "search failure: %s", strerror(error));
 	for (i = 0; i < kcn_search_res_nlocs(ksr); i++)
-		fprintf(stderr, "%s\n", kcn_search_res_loc(ksr, i));
+		printf("%s\n", kcn_search_res_loc(ksr, i));
 	kcn_search_res_destroy(ksr);
 }
