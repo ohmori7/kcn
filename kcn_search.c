@@ -7,6 +7,7 @@
 #include <curl/curl.h>
 #include <jansson.h>
 
+#include "kcn.h"
 #include "kcn_buf.h"
 #include "kcn_uri.h"
 #include "kcn_search.h"
@@ -18,14 +19,14 @@
 	"http://ajax.googleapis.com/ajax/services/search/web?v=1.0&q="
 
 struct kcn_search_res {
-	enum kcn_search_type ksr_type;
+	enum kcn_loc_type ksr_type;
 	size_t ksr_maxnlocs;
 	size_t ksr_nlocs;
 	char *ksr_locs[1];
 };
 
 struct kcn_search_res *
-kcn_search_res_new(enum kcn_search_type type, size_t maxnlocs)
+kcn_search_res_new(enum kcn_loc_type type, size_t maxnlocs)
 {
 	struct kcn_search_res *ksr;
 
@@ -115,14 +116,14 @@ kcn_search(int keyc, char * const keyv[], struct kcn_search_res *ksr)
 	json_t *jroot, *jval, *jresdata, *jres, *jloc;
 	const char *jlocstr;
 	const char *jlockey[] = {
-		[KCN_SEARCH_TYPE_DOMAINNAME] = "visibleUrl",
-		[KCN_SEARCH_TYPE_URI] = "url"
+		[KCN_LOC_TYPE_DOMAINNAME] = "visibleUrl",
+		[KCN_LOC_TYPE_URI] = "url"
 	};
 	size_t i;
 	int error;
 
-	assert(ksr->ksr_type == KCN_SEARCH_TYPE_DOMAINNAME ||
-	    ksr->ksr_type == KCN_SEARCH_TYPE_URI);
+	assert(ksr->ksr_type == KCN_LOC_TYPE_DOMAINNAME ||
+	    ksr->ksr_type == KCN_LOC_TYPE_URI);
 	assert(ksr->ksr_maxnlocs > 0);
 
 	error = 0;
