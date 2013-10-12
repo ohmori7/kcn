@@ -168,8 +168,10 @@ fi
 #
 CPPFLAGS="$CPPFLAGS -I../lib"
 CFLAGS="$CFLAGS $DEBUG -W -Wall -Werror -Wmissing-declarations"
+KCN_LIBS="-L../lib -lkcn"
 
 AC_SUBST(CPPFLAGS)
 AC_SUBST(CFLAGS)
+AC_SUBST(KCN_LIBS)
 AC_CONFIG_FILES([Makefile lib/Makefile key2loc/Makefile])
 AC_OUTPUT
