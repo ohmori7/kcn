@@ -70,7 +70,7 @@
 #undef HAVE_STRUCT_SOCKADDR_STORAGE
 
 /* Define to 1 if `ss_len' is a member of `struct sockaddr_storage '. */
-#undef HAVE_STRUCT_SOCKADDR_STORAGE_SS_LEN____
+#undef HAVE_STRUCT_SOCKADDR_STORAGE_SS_LEN__
 
 /* Define to 1 if the system has the type `struct sockaddr_un'. */
 #undef HAVE_STRUCT_SOCKADDR_UN

@@ -5594,7 +5594,26 @@ _ACEOF
 
 fi
 
-ac_fn_c_check_member "$LINENO" "struct sockaddr" "sa_len" "ac_cv_member_struct_sockaddr_sa_len" "$ac_includes_default"
+ac_fn_c_check_member "$LINENO" "struct sockaddr" "sa_len" "ac_cv_member_struct_sockaddr_sa_len" "
+	#ifdef HAVE_SYS_TYPES_H
+	#include <sys/types.h>
+	#endif /* HAVE_SYS_TYPES_H */
+	#ifdef HAVE_SYS_SOCKET_H
+	#include <sys/socket.h>
+	#endif /* HAVE_SYS_SOCKET_H */
+	#ifdef HAVE_SYS_UN_H
+	#include <sys/un.h>
+	#endif /* HAVE_SYS_UN_H */
+	#include <net/if.h>
+	#ifdef HAVE_NET_IF_VAR_H
+	#include <net/if_var.h>
+	#endif /* HAVE_NET_IF_VAR_H */
+	#include <netinet/in.h>
+	#ifdef HAVE_NETINET6_IN6_H
+	#include <netinet6/in6.h>
+	#endif /* HAVE_NETINET6_IN6_H */
+
+"
 if test "x$ac_cv_member_struct_sockaddr_sa_len" = xyes; then :
 
 cat >>confdefs.h <<_ACEOF
@@ -5602,8 +5621,8 @@ cat >>confdefs.h <<_ACEOF
 _ACEOF
 
 
-else
-
+fi
+ac_fn_c_check_member "$LINENO" "struct sockaddr_in" "sin_len" "ac_cv_member_struct_sockaddr_in_sin_len" "
 	#ifdef HAVE_SYS_TYPES_H
 	#include <sys/types.h>
 	#endif /* HAVE_SYS_TYPES_H */
@@ -5622,8 +5641,7 @@ else
 	#include <netinet6/in6.h>
 	#endif /* HAVE_NETINET6_IN6_H */
 
-fi
-ac_fn_c_check_member "$LINENO" "struct sockaddr_in" "sin_len" "ac_cv_member_struct_sockaddr_in_sin_len" "$ac_includes_default"
+"
 if test "x$ac_cv_member_struct_sockaddr_in_sin_len" = xyes; then :
 
 cat >>confdefs.h <<_ACEOF
@@ -5631,8 +5649,8 @@ cat >>confdefs.h <<_ACEOF
 _ACEOF
 
 
-else
-
+fi
+ac_fn_c_check_member "$LINENO" "struct sockaddr_in" "sin_zero" "ac_cv_member_struct_sockaddr_in_sin_zero" "
 	#ifdef HAVE_SYS_TYPES_H
 	#include <sys/types.h>
 	#endif /* HAVE_SYS_TYPES_H */
@@ -5651,8 +5669,7 @@ else
 	#include <netinet6/in6.h>
 	#endif /* HAVE_NETINET6_IN6_H */
 
-fi
-ac_fn_c_check_member "$LINENO" "struct sockaddr_in" "sin_zero" "ac_cv_member_struct_sockaddr_in_sin_zero" "$ac_includes_default"
+"
 if test "x$ac_cv_member_struct_sockaddr_in_sin_zero" = xyes; then :
 
 cat >>confdefs.h <<_ACEOF
@@ -5660,8 +5677,8 @@ cat >>confdefs.h <<_ACEOF
 _ACEOF
 
 
-else
-
+fi
+ac_fn_c_check_member "$LINENO" "struct sockaddr_in6" "sin6_len" "ac_cv_member_struct_sockaddr_in6_sin6_len" "
 	#ifdef HAVE_SYS_TYPES_H
 	#include <sys/types.h>
 	#endif /* HAVE_SYS_TYPES_H */
@@ -5680,8 +5697,7 @@ else
 	#include <netinet6/in6.h>
 	#endif /* HAVE_NETINET6_IN6_H */
 
-fi
-ac_fn_c_check_member "$LINENO" "struct sockaddr_in6" "sin6_len" "ac_cv_member_struct_sockaddr_in6_sin6_len" "$ac_includes_default"
+"
 if test "x$ac_cv_member_struct_sockaddr_in6_sin6_len" = xyes; then :
 
 cat >>confdefs.h <<_ACEOF
@@ -5689,8 +5705,8 @@ cat >>confdefs.h <<_ACEOF
 _ACEOF
 
 
-else
-
+fi
+ac_fn_c_check_member "$LINENO" "struct sockaddr_in6" "sin6_scope_id" "ac_cv_member_struct_sockaddr_in6_sin6_scope_id" "
 	#ifdef HAVE_SYS_TYPES_H
 	#include <sys/types.h>
 	#endif /* HAVE_SYS_TYPES_H */
@@ -5709,8 +5725,7 @@ else
 	#include <netinet6/in6.h>
 	#endif /* HAVE_NETINET6_IN6_H */
 
-fi
-ac_fn_c_check_member "$LINENO" "struct sockaddr_in6" "sin6_scope_id" "ac_cv_member_struct_sockaddr_in6_sin6_scope_id" "$ac_includes_default"
+"
 if test "x$ac_cv_member_struct_sockaddr_in6_sin6_scope_id" = xyes; then :
 
 cat >>confdefs.h <<_ACEOF
@@ -5718,8 +5733,8 @@ cat >>confdefs.h <<_ACEOF
 _ACEOF
 
 
-else
-
+fi
+ac_fn_c_check_member "$LINENO" "struct sockaddr_un" "sun_len" "ac_cv_member_struct_sockaddr_un_sun_len" "
 	#ifdef HAVE_SYS_TYPES_H
 	#include <sys/types.h>
 	#endif /* HAVE_SYS_TYPES_H */
@@ -5738,8 +5753,7 @@ else
 	#include <netinet6/in6.h>
 	#endif /* HAVE_NETINET6_IN6_H */
 
-fi
-ac_fn_c_check_member "$LINENO" "struct sockaddr_un" "sun_len" "ac_cv_member_struct_sockaddr_un_sun_len" "$ac_includes_default"
+"
 if test "x$ac_cv_member_struct_sockaddr_un_sun_len" = xyes; then :
 
 cat >>confdefs.h <<_ACEOF
@@ -5747,39 +5761,9 @@ cat >>confdefs.h <<_ACEOF
 _ACEOF
 
 
-else
-
-	#ifdef HAVE_SYS_TYPES_H
-	#include <sys/types.h>
-	#endif /* HAVE_SYS_TYPES_H */
-	#ifdef HAVE_SYS_SOCKET_H
-	#include <sys/socket.h>
-	#endif /* HAVE_SYS_SOCKET_H */
-	#ifdef HAVE_SYS_UN_H
-	#include <sys/un.h>
-	#endif /* HAVE_SYS_UN_H */
-	#include <net/if.h>
-	#ifdef HAVE_NET_IF_VAR_H
-	#include <net/if_var.h>
-	#endif /* HAVE_NET_IF_VAR_H */
-	#include <netinet/in.h>
-	#ifdef HAVE_NETINET6_IN6_H
-	#include <netinet6/in6.h>
-	#endif /* HAVE_NETINET6_IN6_H */
-
 fi
 ac_fn_c_check_member "$LINENO" "struct sockaddr_storage" "ss_len"
-
-	 "ac_cv_member_struct_sockaddr_storage_ss_len____" "$ac_includes_default"
-if test "x$ac_cv_member_struct_sockaddr_storage_ss_len____" = xyes; then :
-
-cat >>confdefs.h <<_ACEOF
-#define HAVE_STRUCT_SOCKADDR_STORAGE_SS_LEN____ 1
-_ACEOF
-
-
-else
-
+	 "ac_cv_member_struct_sockaddr_storage_ss_len__" "
 	#ifdef HAVE_SYS_TYPES_H
 	#include <sys/types.h>
 	#endif /* HAVE_SYS_TYPES_H */
@@ -5797,6 +5781,14 @@ else
 	#ifdef HAVE_NETINET6_IN6_H
 	#include <netinet6/in6.h>
 	#endif /* HAVE_NETINET6_IN6_H */
+
+"
+if test "x$ac_cv_member_struct_sockaddr_storage_ss_len__" = xyes; then :
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_STRUCT_SOCKADDR_STORAGE_SS_LEN__ 1
+_ACEOF
+
 
 fi
 
