@@ -1,1 +1,1 @@
-SUBDIRS = lib loc2kcn
+SUBDIRS = lib kcn2loc
