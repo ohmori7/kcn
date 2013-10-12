@@ -123,6 +123,11 @@ AC_CHECK_FUNCS([							\
 	])
 
 #
+PKG_CHECK_MODULES(CURL, libcurl)
+AC_SUBST(CURL_CFLAGS)
+AC_SUBST(CURL_LIBS)
+
+#
 # Check for debug
 #
 AC_MSG_CHECKING(debug)
