@@ -1,0 +1,5 @@
+KCN implementations
+
+Required:
+  * curl and its related libraries that ones can obtain by `curl --libs'.
+  * jansson
