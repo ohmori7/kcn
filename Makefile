@@ -2,7 +2,7 @@ PROG= 	kcn
 SRCS=	main.c kcn_buf.c kcn_uri.c kcn_search.c
 NOMAN=
 #
-CPPFLAGS+=-W -Wall -Werror
+CPPFLAGS+=-W -Wall -Werror -Wmissing-prototypes
 CPPFLAGS+=-I../jansson-2.5/src
 CPPFLAGS+=-I/usr/pkg/include
 CFLAGS+=-g
