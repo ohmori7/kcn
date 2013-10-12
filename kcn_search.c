@@ -12,73 +12,73 @@
 #include "kcn_search.h"
 
 /* XXX: is there any appropriate library defins HTTP response code? */
-#define SEARCH_HTTP_OK	200
+#define KCN_SEARCH_HTTP_OK	200
 
-#define	SEARCH_URI_BASE_GOOGLE						\
+#define	KCN_SEARCH_URI_BASE_GOOGLE					\
 	"http://ajax.googleapis.com/ajax/services/search/web?v=1.0&q="
 
-struct search_res {
-	enum search_type sr_type;
-	size_t sr_maxnlocs;
-	size_t sr_nlocs;
-	char *sr_locs[1];
+struct kcn_search_res {
+	enum kcn_search_type ksr_type;
+	size_t ksr_maxnlocs;
+	size_t ksr_nlocs;
+	char *ksr_locs[1];
 };
 
-struct search_res *
-search_res_new(enum search_type type, size_t maxnlocs)
+struct kcn_search_res *
+kcn_search_res_new(enum kcn_search_type type, size_t maxnlocs)
 {
-	struct search_res *sr;
+	struct kcn_search_res *ksr;
 
-	sr = malloc(offsetof(struct search_res, sr_locs[maxnlocs]));
-	if (sr == NULL)
+	ksr = malloc(offsetof(struct kcn_search_res, ksr_locs[maxnlocs]));
+	if (ksr == NULL)
 		return NULL;
-	sr->sr_type = type;
-	sr->sr_maxnlocs = maxnlocs;
-	sr->sr_nlocs = 0;
-	return sr;
+	ksr->ksr_type = type;
+	ksr->ksr_maxnlocs = maxnlocs;
+	ksr->ksr_nlocs = 0;
+	return ksr;
 }
 
 void
-search_res_destroy(struct search_res *sr)
+kcn_search_res_destroy(struct kcn_search_res *ksr)
 {
 	size_t i;
 
-	for (i = 0; i < sr->sr_nlocs; i++)
-		free(sr->sr_locs[i]);
-	free(sr);
+	for (i = 0; i < ksr->ksr_nlocs; i++)
+		free(ksr->ksr_locs[i]);
+	free(ksr);
 }
 
 size_t
-search_res_nlocs(const struct search_res *sr)
+kcn_search_res_nlocs(const struct kcn_search_res *ksr)
 {
 
-	return sr->sr_nlocs;
+	return ksr->ksr_nlocs;
 }
 
 const char *
-search_res_loc(const struct search_res *sr, size_t idx)
+kcn_search_res_loc(const struct kcn_search_res *ksr, size_t idx)
 {
 
-	if (idx >= search_res_nlocs(sr))
+	if (idx >= kcn_search_res_nlocs(ksr))
 		return NULL;
-	return sr->sr_locs[idx];
+	return ksr->ksr_locs[idx];
 }
 
 static size_t
-search_curl_callback(const char *p, size_t size, size_t n, void *b)
+kcn_search_curl_callback(const char *p, size_t size, size_t n, void *kb)
 {
 	size_t totalsize;
 
 	totalsize = size * n;
-	if (! buf_append(b, p, totalsize))
+	if (! kcn_buf_append(kb, p, totalsize))
 		return 0;
 	return totalsize;
 }
 
 static char *
-search_response_get(const char *uri)
+kcn_search_response_get(const char *uri)
 {
-	struct buf b;
+	struct kcn_buf kb;
 	CURL *curl;
 	CURLcode curlrc;
 	char *p;
@@ -86,11 +86,11 @@ search_response_get(const char *uri)
 	if (uri == NULL)
 		return NULL;
 
-	buf_init(&b);
+	kcn_buf_init(&kb);
 	curl = curl_easy_init();
 	curl_easy_setopt(curl, CURLOPT_URL, uri);
-	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, search_curl_callback);
-	curl_easy_setopt(curl, CURLOPT_WRITEDATA, &b);
+	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, kcn_search_curl_callback);
+	curl_easy_setopt(curl, CURLOPT_WRITEDATA, &kb);
 	curlrc = curl_easy_perform(curl);
 
 	curl_easy_cleanup(curl);
@@ -98,39 +98,39 @@ search_response_get(const char *uri)
 		p = NULL;
 	else {
 		/* XXX: ugly!!! */
-		p = b.b_ptr;
-		b.b_ptr = NULL;
+		p = kb.kb_ptr;
+		kb.kb_ptr = NULL;
 	}
-	buf_finish(&b);
+	kcn_buf_finish(&kb);
 
 	return p;
 }
 
 /* XXX: this supports google for now. */
 int
-search(int keyc, char * const keyv[], struct search_res *sr)
+kcn_search(int keyc, char * const keyv[], struct kcn_search_res *ksr)
 {
 	char *uri, *res;
 	json_error_t jerr;
 	json_t *jroot, *jval, *jresdata, *jres, *jloc;
 	const char *jlocstr;
 	const char *jlockey[] = {
-		[SEARCH_TYPE_DOMAINNAME] = "visibleUrl",
-		[SEARCH_TYPE_URI] = "url"
+		[KCN_SEARCH_TYPE_DOMAINNAME] = "visibleUrl",
+		[KCN_SEARCH_TYPE_URI] = "url"
 	};
 	size_t i;
 	int error;
 
-	assert(sr->sr_type == SEARCH_TYPE_DOMAINNAME ||
-	    sr->sr_type == SEARCH_TYPE_URI);
-	assert(sr->sr_maxnlocs > 0);
+	assert(ksr->ksr_type == KCN_SEARCH_TYPE_DOMAINNAME ||
+	    ksr->ksr_type == KCN_SEARCH_TYPE_URI);
+	assert(ksr->ksr_maxnlocs > 0);
 
 	error = 0;
-	uri = uri_build(SEARCH_URI_BASE_GOOGLE, keyc, keyv);
+	uri = kcn_uri_build(KCN_SEARCH_URI_BASE_GOOGLE, keyc, keyv);
 	if (uri == NULL)
 		return ENOMEM;
-	res = search_response_get(uri);
-	uri_free(uri);
+	res = kcn_search_response_get(uri);
+	kcn_uri_free(uri);
 	if (res == NULL)
 		return ENETDOWN;
 
@@ -144,7 +144,7 @@ search(int keyc, char * const keyv[], struct search_res *sr)
 		error = EINVAL;
 		goto out;
 	}
-	if (json_integer_value(jval) != SEARCH_HTTP_OK) {
+	if (json_integer_value(jval) != KCN_SEARCH_HTTP_OK) {
 		error = ENETDOWN; /* XXX */
 		goto out;
 	}
@@ -163,22 +163,22 @@ search(int keyc, char * const keyv[], struct search_res *sr)
 		goto out;
 	}
 	json_array_foreach(jres, i, jval) {
-		if (i == sr->sr_maxnlocs)
+		if (i == ksr->ksr_maxnlocs)
 			break;
-		jloc = json_object_get(jval, jlockey[sr->sr_type]);
+		jloc = json_object_get(jval, jlockey[ksr->ksr_type]);
 		if (jloc == NULL ||
 		    (jlocstr = json_string_value(jloc)) == NULL) {
 			error = EINVAL;
 			goto out;
 		}
-		sr->sr_locs[sr->sr_nlocs] = strdup(jlocstr);
-		if (sr->sr_locs[sr->sr_nlocs] == NULL) {
+		ksr->ksr_locs[ksr->ksr_nlocs] = strdup(jlocstr);
+		if (ksr->ksr_locs[ksr->ksr_nlocs] == NULL) {
 			error = ENOMEM;
 			goto out;
 		}
-		++sr->sr_nlocs;
+		++ksr->ksr_nlocs;
 	}
-	if (sr->sr_nlocs == 0)
+	if (ksr->ksr_nlocs == 0)
 		error = ESRCH;
   out:
 	json_decref(jroot);

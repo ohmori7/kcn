@@ -3,8 +3,10 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include "kcn_uri.h"
+
 char *
-uri_build(const char *base, int argc, char * const argv[])
+kcn_uri_build(const char *base, int argc, char * const argv[])
 {
 	int i;
 	size_t totallen;
@@ -33,7 +35,7 @@ uri_build(const char *base, int argc, char * const argv[])
 }
 
 void
-uri_free(char *uri)
+kcn_uri_free(char *uri)
 {
 
 	free(uri);

@@ -1,8 +1,8 @@
-struct buf {
-	void *b_ptr;
-	size_t b_size;
+struct kcn_buf {
+	void *kb_ptr;
+	size_t kb_size;
 };
 
-void buf_init(struct buf *);
-void buf_finish(struct buf *);
-bool buf_append(struct buf *, const void *, size_t);
+void kcn_buf_init(struct kcn_buf *);
+void kcn_buf_finish(struct kcn_buf *);
+bool kcn_buf_append(struct kcn_buf *, const void *, size_t);

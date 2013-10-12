@@ -1,13 +1,13 @@
-enum search_type {
-	SEARCH_TYPE_DOMAINNAME,
-	SEARCH_TYPE_URI
+enum kcn_search_type {
+	KCN_SEARCH_TYPE_DOMAINNAME,
+	KCN_SEARCH_TYPE_URI
 };
 
-struct search_res;
+struct kcn_search_res;
 
-struct search_res *search_res_new(enum search_type, size_t);
-void search_res_destroy(struct search_res *);
-size_t search_res_nlocs(const struct search_res *);
-const char *search_res_loc(const struct search_res *, size_t);
+struct kcn_search_res *kcn_search_res_new(enum kcn_search_type, size_t);
+void kcn_search_res_destroy(struct kcn_search_res *);
+size_t kcn_search_res_nlocs(const struct kcn_search_res *);
+const char *kcn_search_res_loc(const struct kcn_search_res *, size_t);
 
-int search(int, char * const [], struct search_res *);
+int kcn_search(int, char * const [], struct kcn_search_res *);

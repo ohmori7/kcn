@@ -8,15 +8,15 @@
 #include "kcn_search.h"
 
 #define KCN_LOC_COUNT_MAX_DEFAULT	1
-#define KCN_LOC_TYPE_DEFAULT		SEARCH_TYPE_DOMAINNAME
+#define KCN_LOC_TYPE_DEFAULT		KCN_SEARCH_TYPE_DOMAINNAME
 
 static void usage(const char *, const char *);
-static void doit(enum search_type, size_t, int, char * const []);
+static void doit(enum kcn_search_type, size_t, int, char * const []);
 
 int
 main(int argc, char * const argv[])
 {
-	enum search_type type;
+	enum kcn_search_type type;
 	const char *p, *pname;
 	int n, ch;
 
@@ -31,9 +31,9 @@ main(int argc, char * const argv[])
 			break;
 		case 't':
 			if (strcasecmp(optarg, "domain") == 0)
-				type = SEARCH_TYPE_DOMAINNAME;
+				type = KCN_SEARCH_TYPE_DOMAINNAME;
 			else if (strcasecmp(optarg, "uri") == 0)
-				type = SEARCH_TYPE_URI;
+				type = KCN_SEARCH_TYPE_URI;
 			else if (strcasecmp(optarg, "ip") == 0)
 				usage(pname, "not yet supported locator type");
 				/*NOTREACHED*/
@@ -79,19 +79,19 @@ Options:\n\
 }
 
 static void
-doit(enum search_type type, size_t nmaxlocs, int argc, char * const argv[])
+doit(enum kcn_search_type type, size_t nmaxlocs, int argc, char * const argv[])
 {
-	struct search_res *sr;
+	struct kcn_search_res *ksr;
 	int error;
 	size_t i;
 
-	sr = search_res_new(type, nmaxlocs);
-	if (sr == NULL)
+	ksr = kcn_search_res_new(type, nmaxlocs);
+	if (ksr == NULL)
 		errx(EXIT_FAILURE, "cannot allocate search results");
-	error = search(argc, argv, sr);
+	error = kcn_search(argc, argv, ksr);
 	if (error != 0)
 		errx(EXIT_FAILURE, "search failure");
-	for (i = 0; i < search_res_nlocs(sr); i++)
-		fprintf(stderr, "%s\n", search_res_loc(sr, i));
-	search_res_destroy(sr);
+	for (i = 0; i < kcn_search_res_nlocs(ksr); i++)
+		fprintf(stderr, "%s\n", kcn_search_res_loc(ksr, i));
+	kcn_search_res_destroy(ksr);
 }

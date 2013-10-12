@@ -5,33 +5,33 @@
 #include "kcn_buf.h"
 
 void
-buf_init(struct buf *b)
+kcn_buf_init(struct kcn_buf *kb)
 {
 
-	b->b_ptr = NULL;
-	b->b_size = 0;
+	kb->kb_ptr = NULL;
+	kb->kb_size = 0;
 }
 
 void
-buf_finish(struct buf *b)
+kcn_buf_finish(struct kcn_buf *kb)
 {
 
-	if (b->b_ptr != NULL)
-		free(b->b_ptr);
-	buf_init(b);
+	if (kb->kb_ptr != NULL)
+		free(kb->kb_ptr);
+	kcn_buf_init(kb);
 }
 
 bool
-buf_append(struct buf *b, const void *p, size_t size)
+kcn_buf_append(struct kcn_buf *kb, const void *p, size_t size)
 {
 	void *np;
 
-	np = realloc(b->b_ptr, b->b_size + size);
+	np = realloc(kb->kb_ptr, kb->kb_size + size);
 	if (np == NULL)
 		return false;
-	memcpy(np + b->b_size, p, size);
-	b->b_ptr = np;
-	b->b_size += size;
+	memcpy(np + kb->kb_size, p, size);
+	kb->kb_ptr = np;
+	kb->kb_size += size;
 
 	return true;
 }
