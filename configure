@@ -5779,8 +5779,7 @@ _ACEOF
 
 
 fi
-ac_fn_c_check_member "$LINENO" "struct sockaddr_storage" "ss_len"
-	 "ac_cv_member_struct_sockaddr_storage_ss_len__" "
+ac_fn_c_check_member "$LINENO" "struct sockaddr_storage" "ss_len" "ac_cv_member_struct_sockaddr_storage_ss_len" "
 	#ifdef HAVE_SYS_TYPES_H
 	#include <sys/types.h>
 	#endif /* HAVE_SYS_TYPES_H */
@@ -5800,10 +5799,10 @@ ac_fn_c_check_member "$LINENO" "struct sockaddr_storage" "ss_len"
 	#endif /* HAVE_NETINET6_IN6_H */
 
 "
-if test "x$ac_cv_member_struct_sockaddr_storage_ss_len__" = xyes; then :
+if test "x$ac_cv_member_struct_sockaddr_storage_ss_len" = xyes; then :
 
 cat >>confdefs.h <<_ACEOF
-#define HAVE_STRUCT_SOCKADDR_STORAGE_SS_LEN__ 1
+#define HAVE_STRUCT_SOCKADDR_STORAGE_SS_LEN 1
 _ACEOF
 
 
