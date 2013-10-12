@@ -7,9 +7,9 @@
 #include <curl/curl.h>
 #include <jansson.h>
 
-#include "buf.h"
-#include "uri.h"
-#include "search.h"
+#include "kcn_buf.h"
+#include "kcn_uri.h"
+#include "kcn_search.h"
 
 /* XXX: is there any appropriate library defins HTTP response code? */
 #define SEARCH_HTTP_OK	200

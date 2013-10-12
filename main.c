@@ -5,7 +5,7 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "search.h"
+#include "kcn_search.h"
 
 #define KCN_LOC_COUNT_MAX_DEFAULT	1
 #define KCN_LOC_TYPE_DEFAULT		SEARCH_TYPE_DOMAINNAME

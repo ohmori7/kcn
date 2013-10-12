@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "buf.h"
+#include "kcn_buf.h"
 
 void
 buf_init(struct buf *b)
