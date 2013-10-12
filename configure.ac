@@ -14,7 +14,7 @@ dnl VERSION=`sed -ne 's/.*Version \([0-9]\.[0-9]\.[0-9]\)/\1/p' $file`
 AC_PREREQ([2.69])
 AC_INIT([kcn], [0.0.0], [ohmori@tottori-u.ac.jp])
 AC_CANONICAL_TARGET([])
-AC_CONFIG_SRCDIR(README)
+AC_CONFIG_SRCDIR(lib/kcn_config.h.in)
 AC_CONFIG_HEADERS(lib/kcn_config.h)
 AM_INIT_AUTOMAKE
 
