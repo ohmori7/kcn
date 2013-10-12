@@ -65,12 +65,12 @@ search_res_loc(const struct search_res *sr, size_t idx)
 }
 
 static size_t
-search_curl_callback(const char *p, size_t size, size_t n, void *c)
+search_curl_callback(const char *p, size_t size, size_t n, void *b)
 {
 	size_t totalsize;
 
 	totalsize = size * n;
-	if (! chunk_append(c, p, totalsize))
+	if (! buf_append(b, p, totalsize))
 		return 0;
 	return totalsize;
 }
@@ -78,7 +78,7 @@ search_curl_callback(const char *p, size_t size, size_t n, void *c)
 static char *
 search_response_get(const char *uri)
 {
-	struct chunk c;
+	struct buf b;
 	CURL *curl;
 	CURLcode curlrc;
 	char *p;
@@ -86,11 +86,11 @@ search_response_get(const char *uri)
 	if (uri == NULL)
 		return NULL;
 
-	chunk_init(&c);
+	buf_init(&b);
 	curl = curl_easy_init();
 	curl_easy_setopt(curl, CURLOPT_URL, uri);
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, search_curl_callback);
-	curl_easy_setopt(curl, CURLOPT_WRITEDATA, &c);
+	curl_easy_setopt(curl, CURLOPT_WRITEDATA, &b);
 	curlrc = curl_easy_perform(curl);
 
 	curl_easy_cleanup(curl);
@@ -98,10 +98,10 @@ search_response_get(const char *uri)
 		p = NULL;
 	else {
 		/* XXX: ugly!!! */
-		p = c.c_ptr;
-		c.c_ptr = NULL;
+		p = b.b_ptr;
+		b.b_ptr = NULL;
 	}
-	chunk_finish(&c);
+	buf_finish(&b);
 
 	return p;
 }

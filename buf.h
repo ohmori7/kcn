@@ -1,8 +1,8 @@
-struct chunk {
-	void *c_ptr;
-	size_t c_size;
+struct buf {
+	void *b_ptr;
+	size_t b_size;
 };
 
-void chunk_init(struct chunk *);
-void chunk_finish(struct chunk *);
-bool chunk_append(struct chunk *, const void *, size_t);
+void buf_init(struct buf *);
+void buf_finish(struct buf *);
+bool buf_append(struct buf *, const void *, size_t);

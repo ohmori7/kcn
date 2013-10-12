@@ -5,33 +5,33 @@
 #include "buf.h"
 
 void
-chunk_init(struct chunk *c)
+buf_init(struct buf *b)
 {
 
-	c->c_ptr = NULL;
-	c->c_size = 0;
+	b->b_ptr = NULL;
+	b->b_size = 0;
 }
 
 void
-chunk_finish(struct chunk *c)
+buf_finish(struct buf *b)
 {
 
-	if (c->c_ptr != NULL)
-		free(c->c_ptr);
-	chunk_init(c);
+	if (b->b_ptr != NULL)
+		free(b->b_ptr);
+	buf_init(b);
 }
 
 bool
-chunk_append(struct chunk *c, const void *p, size_t size)
+buf_append(struct buf *b, const void *p, size_t size)
 {
 	void *np;
 
-	np = realloc(c->c_ptr, c->c_size + size);
+	np = realloc(b->b_ptr, b->b_size + size);
 	if (np == NULL)
 		return false;
-	memcpy(np + c->c_size, p, size);
-	c->c_ptr = np;
-	c->c_size += size;
+	memcpy(np + b->b_size, p, size);
+	b->b_ptr = np;
+	b->b_size += size;
 
 	return true;
 }
