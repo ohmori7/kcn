@@ -6799,8 +6799,6 @@ CFLAGS="$CFLAGS $DEBUG -W -Wall -Werror -Wmissing-declarations"
 KCN_LIBS="-L../lib -lkcn"
 
 
-
-
 ac_config_files="$ac_config_files Makefile lib/Makefile key2loc/Makefile"
 
 cat >confcache <<\_ACEOF
