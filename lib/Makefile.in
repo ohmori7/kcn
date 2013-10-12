@@ -99,8 +99,8 @@ am__v_AR_0 = @echo "  AR      " $@;
 am__v_AR_1 = 
 libkcn_a_AR = $(AR) $(ARFLAGS)
 libkcn_a_LIBADD =
-am_libkcn_a_OBJECTS = kcn_buf.$(OBJEXT) kcn_uri.$(OBJEXT) \
-	kcn_search.$(OBJEXT)
+am_libkcn_a_OBJECTS = libkcn_a-kcn_buf.$(OBJEXT) \
+	libkcn_a-kcn_uri.$(OBJEXT) libkcn_a-kcn_search.$(OBJEXT)
 libkcn_a_OBJECTS = $(am_libkcn_a_OBJECTS)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
@@ -118,6 +118,10 @@ DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
 am__mv = mv -f
+AM_V_lt = $(am__v_lt_@AM_V@)
+am__v_lt_ = $(am__v_lt_@AM_DEFAULT_V@)
+am__v_lt_0 = --silent
+am__v_lt_1 = 
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 AM_V_CC = $(am__v_CC_@AM_V@)
@@ -171,6 +175,8 @@ CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
 CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
+CURL_CFLAGS = @CURL_CFLAGS@
+CURL_LIBS = @CURL_LIBS@
 CYGPATH_W = @CYGPATH_W@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
@@ -203,6 +209,9 @@ PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
+PKG_CONFIG = @PKG_CONFIG@
+PKG_CONFIG_LIBDIR = @PKG_CONFIG_LIBDIR@
+PKG_CONFIG_PATH = @PKG_CONFIG_PATH@
 RANLIB = @RANLIB@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
@@ -271,6 +280,7 @@ libkcn_a_SOURCES = \
 noinst_HEADERS = \
 	kcn.h kcn_buf.h kcn_uri.h kcn_search.h
 
+libkcn_a_CFLAGS = $(CURL_CFLAGS)
 all: all-am
 
 .SUFFIXES:
@@ -347,9 +357,9 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/kcn_buf.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/kcn_search.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/kcn_uri.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libkcn_a-kcn_buf.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libkcn_a-kcn_search.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libkcn_a-kcn_uri.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -364,6 +374,48 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(COMPILE) -c `$(CYGPATH_W) '$<'`
+
+libkcn_a-kcn_buf.o: kcn_buf.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libkcn_a_CFLAGS) $(CFLAGS) -MT libkcn_a-kcn_buf.o -MD -MP -MF $(DEPDIR)/libkcn_a-kcn_buf.Tpo -c -o libkcn_a-kcn_buf.o `test -f 'kcn_buf.c' || echo '$(srcdir)/'`kcn_buf.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libkcn_a-kcn_buf.Tpo $(DEPDIR)/libkcn_a-kcn_buf.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='kcn_buf.c' object='libkcn_a-kcn_buf.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libkcn_a_CFLAGS) $(CFLAGS) -c -o libkcn_a-kcn_buf.o `test -f 'kcn_buf.c' || echo '$(srcdir)/'`kcn_buf.c
+
+libkcn_a-kcn_buf.obj: kcn_buf.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libkcn_a_CFLAGS) $(CFLAGS) -MT libkcn_a-kcn_buf.obj -MD -MP -MF $(DEPDIR)/libkcn_a-kcn_buf.Tpo -c -o libkcn_a-kcn_buf.obj `if test -f 'kcn_buf.c'; then $(CYGPATH_W) 'kcn_buf.c'; else $(CYGPATH_W) '$(srcdir)/kcn_buf.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libkcn_a-kcn_buf.Tpo $(DEPDIR)/libkcn_a-kcn_buf.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='kcn_buf.c' object='libkcn_a-kcn_buf.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libkcn_a_CFLAGS) $(CFLAGS) -c -o libkcn_a-kcn_buf.obj `if test -f 'kcn_buf.c'; then $(CYGPATH_W) 'kcn_buf.c'; else $(CYGPATH_W) '$(srcdir)/kcn_buf.c'; fi`
+
+libkcn_a-kcn_uri.o: kcn_uri.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libkcn_a_CFLAGS) $(CFLAGS) -MT libkcn_a-kcn_uri.o -MD -MP -MF $(DEPDIR)/libkcn_a-kcn_uri.Tpo -c -o libkcn_a-kcn_uri.o `test -f 'kcn_uri.c' || echo '$(srcdir)/'`kcn_uri.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libkcn_a-kcn_uri.Tpo $(DEPDIR)/libkcn_a-kcn_uri.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='kcn_uri.c' object='libkcn_a-kcn_uri.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libkcn_a_CFLAGS) $(CFLAGS) -c -o libkcn_a-kcn_uri.o `test -f 'kcn_uri.c' || echo '$(srcdir)/'`kcn_uri.c
+
+libkcn_a-kcn_uri.obj: kcn_uri.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libkcn_a_CFLAGS) $(CFLAGS) -MT libkcn_a-kcn_uri.obj -MD -MP -MF $(DEPDIR)/libkcn_a-kcn_uri.Tpo -c -o libkcn_a-kcn_uri.obj `if test -f 'kcn_uri.c'; then $(CYGPATH_W) 'kcn_uri.c'; else $(CYGPATH_W) '$(srcdir)/kcn_uri.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libkcn_a-kcn_uri.Tpo $(DEPDIR)/libkcn_a-kcn_uri.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='kcn_uri.c' object='libkcn_a-kcn_uri.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libkcn_a_CFLAGS) $(CFLAGS) -c -o libkcn_a-kcn_uri.obj `if test -f 'kcn_uri.c'; then $(CYGPATH_W) 'kcn_uri.c'; else $(CYGPATH_W) '$(srcdir)/kcn_uri.c'; fi`
+
+libkcn_a-kcn_search.o: kcn_search.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libkcn_a_CFLAGS) $(CFLAGS) -MT libkcn_a-kcn_search.o -MD -MP -MF $(DEPDIR)/libkcn_a-kcn_search.Tpo -c -o libkcn_a-kcn_search.o `test -f 'kcn_search.c' || echo '$(srcdir)/'`kcn_search.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libkcn_a-kcn_search.Tpo $(DEPDIR)/libkcn_a-kcn_search.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='kcn_search.c' object='libkcn_a-kcn_search.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libkcn_a_CFLAGS) $(CFLAGS) -c -o libkcn_a-kcn_search.o `test -f 'kcn_search.c' || echo '$(srcdir)/'`kcn_search.c
+
+libkcn_a-kcn_search.obj: kcn_search.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libkcn_a_CFLAGS) $(CFLAGS) -MT libkcn_a-kcn_search.obj -MD -MP -MF $(DEPDIR)/libkcn_a-kcn_search.Tpo -c -o libkcn_a-kcn_search.obj `if test -f 'kcn_search.c'; then $(CYGPATH_W) 'kcn_search.c'; else $(CYGPATH_W) '$(srcdir)/kcn_search.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) $(DEPDIR)/libkcn_a-kcn_search.Tpo $(DEPDIR)/libkcn_a-kcn_search.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='kcn_search.c' object='libkcn_a-kcn_search.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libkcn_a_CFLAGS) $(CFLAGS) -c -o libkcn_a-kcn_search.obj `if test -f 'kcn_search.c'; then $(CYGPATH_W) 'kcn_search.c'; else $(CYGPATH_W) '$(srcdir)/kcn_search.c'; fi`
 
 ID: $(am__tagged_files)
 	$(am__define_uniq_tagged_files); mkid -fID $$unique
