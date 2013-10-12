@@ -4961,6 +4961,21 @@ $as_echo "#define NO_MINUS_C_MINUS_O 1" >>confdefs.h
 
 fi
 
+# FIXME: we rely on the cache variable name because
+# there is no other way.
+set dummy $CC
+am_cc=`echo $2 | sed 's/[^a-zA-Z0-9_]/_/g;s/^[0-9]/_/'`
+eval am_t=\$ac_cv_prog_cc_${am_cc}_c_o
+if test "$am_t" != yes; then
+   # Losing compiler, so override with the script.
+   # FIXME: It is wrong to rewrite CC.
+   # But if we don't then we get into trouble of one sort or another.
+   # A longer-term fix would be to have automake use am__CC in this case,
+   # and then we could set am__CC="\$(top_srcdir)/compile \$(CC)"
+   CC="$am_aux_dir/compile $CC"
+fi
+
+
 
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for grep that handles long lines and -e" >&5
@@ -5921,7 +5936,7 @@ done
 
 
 for ac_header in 							\
-	sys/types.h sys/socket.h					\
+	sys/types.h sys/socket.h sys/un.h 				\
 	netinet/in.h netinet6/in6.h					\
 	stdbool.h							\
 
@@ -6114,35 +6129,6 @@ _ACEOF
 
 fi
 
-ac_fn_c_check_type "$LINENO" "struct sockaddr_dl" "ac_cv_type_struct_sockaddr_dl" "
-	#ifdef HAVE_SYS_TYPES_H
-	#include <sys/types.h>
-	#endif /* HAVE_SYS_TYPES_H */
-	#ifdef HAVE_SYS_SOCKET_H
-	#include <sys/socket.h>
-	#endif /* HAVE_SYS_SOCKET_H */
-	#ifdef HAVE_SYS_UN_H
-	#include <sys/un.h>
-	#endif /* HAVE_SYS_UN_H */
-	#ifdef HAVE_NET_IF_DL_H
-	#include <net/if_dl.h>
-	#endif /* HAVE_NET_IF_DL_H */
-	#ifdef HAVE_NETINET_IN_H
-	#include <netinet/in.h>
-	#endif /* HAVE_NETINET_IN_H */
-	#ifdef HAVE_NETINET6_IN6_H
-	#include <netinet6/in6.h>
-	#endif /* HAVE_NETINET6_IN6_H */
-
-"
-if test "x$ac_cv_type_struct_sockaddr_dl" = xyes; then :
-
-cat >>confdefs.h <<_ACEOF
-#define HAVE_STRUCT_SOCKADDR_DL 1
-_ACEOF
-
-
-fi
 ac_fn_c_check_type "$LINENO" "struct sockaddr_in" "ac_cv_type_struct_sockaddr_in" "
 	#ifdef HAVE_SYS_TYPES_H
 	#include <sys/types.h>
@@ -6153,9 +6139,6 @@ ac_fn_c_check_type "$LINENO" "struct sockaddr_in" "ac_cv_type_struct_sockaddr_in
 	#ifdef HAVE_SYS_UN_H
 	#include <sys/un.h>
 	#endif /* HAVE_SYS_UN_H */
-	#ifdef HAVE_NET_IF_DL_H
-	#include <net/if_dl.h>
-	#endif /* HAVE_NET_IF_DL_H */
 	#ifdef HAVE_NETINET_IN_H
 	#include <netinet/in.h>
 	#endif /* HAVE_NETINET_IN_H */
@@ -6182,9 +6165,6 @@ ac_fn_c_check_type "$LINENO" "struct sockaddr_in6" "ac_cv_type_struct_sockaddr_i
 	#ifdef HAVE_SYS_UN_H
 	#include <sys/un.h>
 	#endif /* HAVE_SYS_UN_H */
-	#ifdef HAVE_NET_IF_DL_H
-	#include <net/if_dl.h>
-	#endif /* HAVE_NET_IF_DL_H */
 	#ifdef HAVE_NETINET_IN_H
 	#include <netinet/in.h>
 	#endif /* HAVE_NETINET_IN_H */
@@ -6211,9 +6191,6 @@ ac_fn_c_check_type "$LINENO" "struct sockaddr_storage" "ac_cv_type_struct_sockad
 	#ifdef HAVE_SYS_UN_H
 	#include <sys/un.h>
 	#endif /* HAVE_SYS_UN_H */
-	#ifdef HAVE_NET_IF_DL_H
-	#include <net/if_dl.h>
-	#endif /* HAVE_NET_IF_DL_H */
 	#ifdef HAVE_NETINET_IN_H
 	#include <netinet/in.h>
 	#endif /* HAVE_NETINET_IN_H */
@@ -6240,9 +6217,6 @@ ac_fn_c_check_type "$LINENO" "struct sockaddr_un" "ac_cv_type_struct_sockaddr_un
 	#ifdef HAVE_SYS_UN_H
 	#include <sys/un.h>
 	#endif /* HAVE_SYS_UN_H */
-	#ifdef HAVE_NET_IF_DL_H
-	#include <net/if_dl.h>
-	#endif /* HAVE_NET_IF_DL_H */
 	#ifdef HAVE_NETINET_IN_H
 	#include <netinet/in.h>
 	#endif /* HAVE_NETINET_IN_H */
