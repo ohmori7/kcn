@@ -169,6 +169,7 @@ else
 fi
 
 #
+CPPFLAGS="$CPPFLAGS -I../lib"
 CFLAGS="$CFLAGS $DEBUG -W -Wall -Werror -Wmissing-declarations"
 
 AC_SUBST(CFLAGS)
