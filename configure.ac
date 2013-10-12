@@ -155,7 +155,7 @@ fi
 
 #
 CPPFLAGS="$CPPFLAGS -I../lib"
-CFLAGS="$CFLAGS $DEBUG -W -Wall -Werror -Wmissing-declarations"
+CFLAGS="$CFLAGS -W -Wall -Werror -Wmissing-declarations"
 KCN_LIBS="-L../lib -lkcn"
 
 AC_SUBST(KCN_LIBS)
