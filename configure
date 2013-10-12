@@ -585,7 +585,7 @@ PACKAGE_STRING='kcn 0.0.0'
 PACKAGE_BUGREPORT='ohmori@tottori-u.ac.jp'
 PACKAGE_URL=''
 
-ac_unique_file="README"
+ac_unique_file="lib/kcn_config.h.in"
 # Factoring default headers for most tests.
 ac_includes_default="\
 #include <stdio.h>
