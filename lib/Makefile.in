@@ -282,7 +282,7 @@ libkcn_a_SOURCES = \
 noinst_HEADERS = \
 	kcn.h kcn_buf.h kcn_uri.h kcn_search.h
 
-libkcn_a_CFLAGS = $(CURL_CFLAGS)
+libkcn_a_CFLAGS = $(CURL_CFLAGS) $(JANSSON_CFLAGS)
 all: all-am
 
 .SUFFIXES:
