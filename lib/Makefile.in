@@ -193,6 +193,7 @@ INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 JANSSON_CFLAGS = @JANSSON_CFLAGS@
 JANSSON_LIBS = @JANSSON_LIBS@
+KCN_LIBS = @KCN_LIBS@
 LDFLAGS = @LDFLAGS@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
@@ -274,7 +275,6 @@ target_vendor = @target_vendor@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-AM_CFLAGS = -I../libkcn # XXX
 lib_LIBRARIES = libkcn.a
 libkcn_a_SOURCES = \
 	kcn_buf.c kcn_uri.c kcn_search.c

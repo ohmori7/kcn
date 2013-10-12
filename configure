@@ -626,6 +626,7 @@ ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
 LTLIBOBJS
 LIBOBJS
+KCN_LIBS
 JANSSON_LIBS
 JANSSON_CFLAGS
 CURL_LIBS
@@ -6815,6 +6816,8 @@ fi
 #
 CPPFLAGS="$CPPFLAGS -I../lib"
 CFLAGS="$CFLAGS $DEBUG -W -Wall -Werror -Wmissing-declarations"
+KCN_LIBS="-L../lib -lkcn"
+
 
 
 

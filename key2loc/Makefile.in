@@ -67,7 +67,8 @@ am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
 am_key2loc_OBJECTS = main.$(OBJEXT)
 key2loc_OBJECTS = $(am_key2loc_OBJECTS)
-key2loc_LDADD = $(LDADD)
+am__DEPENDENCIES_1 =
+key2loc_DEPENDENCIES = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -154,6 +155,7 @@ INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 JANSSON_CFLAGS = @JANSSON_CFLAGS@
 JANSSON_LIBS = @JANSSON_LIBS@
+KCN_LIBS = @KCN_LIBS@
 LDFLAGS = @LDFLAGS@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
@@ -236,6 +238,7 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 key2loc_SOURCES = main.c
+key2loc_LDADD = @KCN_LIBS@ $(CURL_LIBS) $(JANSSON_LIBS)
 all: all-am
 
 .SUFFIXES:
