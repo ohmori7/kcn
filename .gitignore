@@ -1,4 +1,5 @@
 *.o
+*.a
 *~
 .deps
 autom4te.cache
