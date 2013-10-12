@@ -19,8 +19,6 @@ AC_CONFIG_HEADERS([config.h])
 AM_INIT_AUTOMAKE
 
 # Default values of options
-AC_ARG_ENABLE(debug,
-	[  --enable-debug	Produce debug symbols])
 AC_ARG_ENABLE(ipv6,
 	[  --disable-ipv6	Disable IPv6 support])
 
@@ -40,6 +38,7 @@ AC_CHECK_TOOL(RANLIB, ranlib, :)
 AC_HEADER_STDC
 AC_CHECK_HEADERS([							\
 	sys/types.h sys/socket.h sys/un.h 				\
+	net/if_var.h							\
 	netinet/in.h netinet6/in6.h					\
 	stdbool.h							\
 	])
@@ -126,17 +125,6 @@ AC_SUBST(CURL_LIBS)
 PKG_CHECK_MODULES(JANSSON, jansson)
 AC_SUBST(JANSSON_CFLAGS)
 AC_SUBST(JANSSON_LIBS)
-
-#
-# Check for debug
-#
-AC_MSG_CHECKING(debug)
-if test "${enable_debug}" = "yes"; then
-	DEBUG="-g"
-	AC_MSG_RESULT(yes)
-else
-	AC_MSG_RESULT(disabled)
-fi
 
 #
 # Check for IPv6 support
