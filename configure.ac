@@ -93,8 +93,7 @@ AC_CHECK_MEMBERS([
 	struct sockaddr_in6.sin6_len,
 	struct sockaddr_in6.sin6_scope_id,
 	struct sockaddr_un.sun_len,
-	struct sockaddr_storage.ss_len
-	],
+	struct sockaddr_storage.ss_len],
 	[],
 	[],
 	[
