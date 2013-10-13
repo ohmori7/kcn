@@ -6,8 +6,11 @@
 
 #include "kcn_uri.h"
 
+/* one original character is encoded with 3 characters at maximum. */
+#define KCN_URI_ENCODING_FACTOR		3
+
 static char *
-kcn_uri_puts(char *d, const char *s0)
+kcn_uri_encputs(char *d, const char *s0)
 {
 	static const char *hexstr = "0123456789ABCDEF";
 	const unsigned char *s;
@@ -31,7 +34,7 @@ char *
 kcn_uri_build(const char *base, int argc, char * const argv[])
 {
 	int i;
-	size_t baselen, totallen;
+	size_t baselen, querylen, totallen;
 	char *sp, *cp;
 
 	assert(base != NULL);
@@ -41,18 +44,15 @@ kcn_uri_build(const char *base, int argc, char * const argv[])
 	 * XXX: should convert to utf-8 when character encodings
 	 *	of input string is different.
 	 */
-	baselen = strlen(base);
-	totallen = baselen + (argc - 1) /* separator */ + 1 /* terminator */;
+	querylen = argc - 1; /* separator, i.e., space character */
 	for (i = 0; i < argc; i++) {
 		assert(argv[i] != NULL);
-		totallen += strlen(argv[i]);
+		querylen += strlen(argv[i]) * KCN_URI_ENCODING_FACTOR;
 	}
+	baselen = strlen(base);
+	totallen = baselen + querylen + 1 /* terminator */;
 
-	/*
-	 * note that one character is encoded with 3
-	 * characters at maximum. see kcn_uri_puts().
-	 */
-	sp = malloc(totallen * 3);
+	sp = malloc(totallen);
 	if (sp == NULL)
 		return NULL;
 
@@ -60,8 +60,8 @@ kcn_uri_build(const char *base, int argc, char * const argv[])
 	cp = sp + baselen;
 	for (i = 0; i < argc; i++) {
 		if (i > 0)
-			cp = kcn_uri_puts(cp, " ");
-		cp = kcn_uri_puts(cp, argv[i]);
+			cp = kcn_uri_encputs(cp, " ");
+		cp = kcn_uri_encputs(cp, argv[i]);
 	}
 
 	return sp;
