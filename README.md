@@ -18,7 +18,7 @@ URI-like address of information.  On the other hand, a locator of a name of
 information in KCN is URL (or URI) while one in ICN is an IP address.  That is,
 KCN separate a name of information into keywords and URLs.
 
-  This package demonstrates how KCN works and what can be applications of KCN
+    This package demonstrates how KCN works and what can be applications of KCN
 by providing an acutual implementation.  We hope that this package could present
 an actual example of ICN in order to make ICN being in the wild.
 
@@ -26,17 +26,19 @@ Quick start:
 ================================================================================
     First of all, build KCN binaries, and install them as follows.
 
-	1. extract kcn-x.x.x.tar.gz, and move to extracted directry.
+	1. install curl on *BSD* or libcurl on Linux.
+	2. install jansson.
+	3. extract kcn-x.x.x.tar.gz, and move to extracted directry.
 	  % tar xfz kcn-x.x.x.tar.gz
 	  % cd kcn-x.x.x
-	2. If you check out source codes by git, please read
+	4. If you check out source codes by git, please read
 	   ``Tips for build failures due to autoconf tools'' section in this
 	   document.
-	3. run ``configure'' script.
+	5. run ``configure'' script.
 	  % ./configure
-	4. build KCN binaries.
+	6. build KCN binaries.
 	  % make
-	5. install KCN binaries.
+	7. install KCN binaries.
 	  % sudo make install
 
 When you need to specify other options for ``configure'' script, please consult
@@ -127,7 +129,7 @@ Required libraries and tips on build failures:
 ================================================================================
     This KCN implementation depends directly upon following libraries:
 
-	- curl
+	- curl on *BSD* (or libcurl on Linux)
 	- jansson
 
     Please make sure that these and related libraries are properly installed
@@ -147,9 +149,10 @@ If you cannot obtain above output (note that shown libraries depend upon your
 environment), please make sure that curl is properly installed.
 
 When curl is properly installed but still ``configure'' script fails, please
-make sure since ``configure'' script uses ``pkg-config'' to obtain necessary
-information about libraries.  ``pkg-config'' may be properly installed onto your
-system because it is widely used in many cases.
+make sure that pkg-config is properly installed and works well since
+``configure'' script uses ``pkg-config'' to obtain necessary information about
+libraries.  Generally speaking, ``pkg-config'' may be properly installed onto
+your system because it is widely used in many cases.
 
     When pkg-config cannot be installed or cannot work, you can manually specify
 necessary information about curl and jansson to the ``configure'' script as
@@ -182,12 +185,12 @@ NetBSD current 6.99.3
 	jansson:
 		jansson-2.5 obtained from http://www.digip.org/jansson/
 		jansson-2.4 seems to be imported to pkgsrc/textproc/jansson
-		on 2013/7/13, and it may works but has not been tested yet.
+		on 2013/7/13, and it may work but has not been tested yet.
 
 CentOS 6.4 (x86_64)
-	pkg-config:
+	pkg-config (pkgconfig):
 		installed by default as a base tool (0.23)
-	curl:
+	curl (libcurl):
 		installed by default (7.19.7-37.el6_4 or later)
 	jansson:
 		jansson-2.5 obtained from http://www.digip.org/jansson/
