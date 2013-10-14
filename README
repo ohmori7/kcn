@@ -29,11 +29,14 @@ Quick start:
 	1. extract kcn-x.x.x.tar.gz, and move to extracted directry.
 	  % tar xfz kcn-x.x.x.tar.gz
 	  % cd kcn-x.x.x
-	2. run ``configure'' script.
+	2. If you check out source codes by git, please read
+	   ``Tips for build failures due to autoconf tools'' section in this
+	   document.
+	3. run ``configure'' script.
 	  % ./configure
-	3. build KCN binaries.
+	4. build KCN binaries.
 	  % make
-	4. install KCN binaries.
+	5. install KCN binaries.
 	  % sudo make install
 
 When you need to specify other options for ``configure'' script, please consult
@@ -81,6 +84,44 @@ identifier in KCN as follows:
 	    [  <=>                   ] 51,707       146KB/s   in 0.3s   
 
 	      2013-10-13 10:04:42 (146 KB/s) - 'index.html' saved [51707]
+
+Tips for build failures due to autoconf tools
+================================================================================
+    This KCN package uses autoconf tools.  Autoconf tools are very useful from
+the viewpoint of developers.  Autoconf tools may, however, cause build failures
+like below when you check out source codes of KCN by git:
+
+CDPATH="${ZSH_VERSION+.}:" && cd . && /bin/sh /home/kcn/missing aclocal-1.13 
+/home/kcn/missing: line 81: aclocal-1.13: command not found
+WARNING: 'aclocal-1.13' is missing on your system.
+         You should only need it if you modified 'acinclude.m4' or
+         'configure.ac' or m4 files included by 'configure.ac'.
+         The 'aclocal' program is part of the GNU Automake package:
+         <http://www.gnu.org/software/automake>
+         It also requires GNU Autoconf, GNU m4 and Perl in order to run:
+         <http://www.gnu.org/software/autoconf>
+         <http://www.gnu.org/software/m4/>
+         <http://www.perl.org/>
+make: *** [aclocal.m4] Error 127
+
+These errors results from autoconf tools' checks to see if related files need
+to be regenerated or not.  These checks are not necessary on building-only
+environment (i.e., non-developing environment), and should be skipped.  These
+checks may, however, unnecessarily run when you check out source codes of KCN
+by git since git does not consider time stamps of related files.  In order to
+skip these unnecessary checks, you need to change time stamps of related files
+in following order:
+
+	configure.ac	(oldest timestamp)
+	aclocal.m4		^
+	config.h.in		|
+	Makefile.in
+	key2loc/Makefile.in	|
+	lib/Makefile.in		V
+	configure	(newest timestamp)
+
+To this end, you may open (or copy) each file in order, and just overwrite
+(or copy back) with no modifications.
 
 Required libraries and tips on build failures:
 ================================================================================
