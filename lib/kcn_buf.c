@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "kcn.h"
 #include "kcn_buf.h"
 
 void

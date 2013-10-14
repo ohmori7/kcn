@@ -4,6 +4,7 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include "kcn.h"
 #include "kcn_uri.h"
 
 /* one original character is encoded with 3 characters at maximum. */
