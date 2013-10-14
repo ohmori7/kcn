@@ -26,7 +26,7 @@ Quick start:
 ================================================================================
     First of all, build KCN binaries, and install them as follows.
 
-	1. install curl on *BSD* or libcurl on Linux.
+	1. install curl on *BSD* or libcurl-devel on Linux.
 	2. install jansson.
 	3. extract kcn-x.x.x.tar.gz, and move to extracted directry.
 	  % tar xfz kcn-x.x.x.tar.gz
@@ -129,7 +129,7 @@ Required libraries and tips on build failures:
 ================================================================================
     This KCN implementation depends directly upon following libraries:
 
-	- curl on *BSD* (or libcurl on Linux)
+	- curl on *BSD* (or libcurl-devel on Linux)
 	- jansson
 
     Please make sure that these and related libraries are properly installed
@@ -190,7 +190,7 @@ NetBSD current 6.99.3
 CentOS 6.4 (x86_64)
 	pkg-config (pkgconfig):
 		installed by default as a base tool (0.23)
-	curl (libcurl):
+	curl (libcurl-devel):
 		installed by default (7.19.7-37.el6_4 or later)
 	jansson:
 		jansson-2.5 obtained from http://www.digip.org/jansson/
