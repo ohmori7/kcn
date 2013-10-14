@@ -183,3 +183,11 @@ NetBSD current 6.99.3
 		jansson-2.5 obtained from http://www.digip.org/jansson/
 		jansson-2.4 seems to be imported to pkgsrc/textproc/jansson
 		on 2013/7/13, and it may works but has not been tested yet.
+
+CentOS 6.4 (x86_64)
+	pkg-config:
+		installed by default as a base tool (0.23)
+	curl:
+		installed by default (7.19.7-37.el6_4 or later)
+	jansson:
+		jansson-2.5 obtained from http://www.digip.org/jansson/
