@@ -78,8 +78,8 @@ usage(const char *pname, const char *errmsg)
 Usage: %s [-c country] [-i user IP] [-n number] [-t type] <keyword1> [<keyword2>] [<keyword3>] ...\n\
 \n\
 Options:\n\
-	country: the country of locators returned\n\
-	user IP: the IP address of this host (not supported yet)\n\
+	country: a country code of locators in ISO 3166-1 (e.g., us, jp)\n\
+	user IP: the IP address of this host\n\
 	number: the maximum number of locators returned\n\
 	type: a type of locators returned\n\
 		domain: domain name\n\
