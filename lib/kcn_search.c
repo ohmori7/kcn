@@ -77,13 +77,15 @@ kcn_search_curl_callback(const char *p, size_t size, size_t n, void *kb)
 }
 
 static char *
-kcn_search_response_get(const char *uri)
+kcn_search_response_get(const char *uribase, int keyc, char * const keyv[])
 {
 	struct kcn_buf kb;
 	CURL *curl;
 	CURLcode curlrc;
-	char *p;
+	char *uri, *p;
 
+	assert(uribase != NULL);
+	uri = kcn_uri_build(uribase, keyc, keyv);
 	if (uri == NULL)
 		return NULL;
 
@@ -95,6 +97,8 @@ kcn_search_response_get(const char *uri)
 	curlrc = curl_easy_perform(curl);
 
 	curl_easy_cleanup(curl);
+	kcn_uri_free(uri);
+
 	if (curlrc != CURLE_OK)
 		p = NULL;
 	else {
@@ -111,7 +115,7 @@ kcn_search_response_get(const char *uri)
 int
 kcn_search(int keyc, char * const keyv[], struct kcn_search_res *ksr)
 {
-	char *uri, *res;
+	char *res;
 	json_error_t jerr;
 	json_t *jroot, *jval, *jresdata, *jres, *jloc;
 	const char *jlocstr;
@@ -127,13 +131,9 @@ kcn_search(int keyc, char * const keyv[], struct kcn_search_res *ksr)
 	assert(ksr->ksr_maxnlocs > 0);
 
 	error = 0;
-	uri = kcn_uri_build(KCN_SEARCH_URI_BASE_GOOGLE, keyc, keyv);
-	if (uri == NULL)
-		return ENOMEM;
-	res = kcn_search_response_get(uri);
-	kcn_uri_free(uri);
+	res = kcn_search_response_get(KCN_SEARCH_URI_BASE_GOOGLE, keyc, keyv);
 	if (res == NULL)
-		return ENETDOWN;
+		return ENETDOWN; /* XXX */
 
 	jroot = json_loads(res, 0, &jerr);
 	free(res);
