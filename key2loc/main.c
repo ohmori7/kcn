@@ -12,21 +12,30 @@
 #define KCN_LOC_TYPE_DEFAULT		KCN_LOC_TYPE_DOMAINNAME
 
 static void usage(const char *, const char *);
-static void doit(enum kcn_loc_type, size_t, int, char * const []);
+static void doit(enum kcn_loc_type, size_t,
+    const char *, const char *, int, char * const []);
 
 int
 main(int argc, char * const argv[])
 {
 	enum kcn_loc_type type;
-	const char *p, *pname;
+	const char *p, *pname, *country, *userip;
 	int n, ch;
 
 	pname = (p = strrchr(argv[0], '/')) != NULL ? p + 1 : argv[0];
 
 	type = KCN_LOC_TYPE_DEFAULT;
+	country = NULL;
+	userip = NULL;
 	n = KCN_LOC_COUNT_MAX_DEFAULT;
-	while ((ch = getopt(argc, argv, "n:t:")) != -1) {
+	while ((ch = getopt(argc, argv, "c:i:n:t:")) != -1) {
 		switch (ch) {
+		case 'c':
+			country = optarg;
+			break;
+		case 'i':
+			userip = optarg;
+			break;
 		case 'n':
 			n = atoi(optarg);
 			break;
@@ -55,7 +64,7 @@ main(int argc, char * const argv[])
 		usage(pname, "no keywords specified");
 		/*NOTREACHED*/
 
-	doit(type, n, argc, argv);
+	doit(type, n, country, userip, argc, argv);
 	return 0;
 }
 
@@ -66,9 +75,11 @@ usage(const char *pname, const char *errmsg)
 	if (errmsg != NULL)
 		fprintf(stderr, "ERROR: %s\n\n", errmsg);
 	fprintf(stderr, "\
-Usage: %s [-n number] [-t type] <keyword1> [<keyword2>] [<keyword3>] ...\n\
+Usage: %s [-c country] [-i user IP] [-n number] [-t type] <keyword1> [<keyword2>] [<keyword3>] ...\n\
 \n\
 Options:\n\
+	country: the country of locators returned\n\
+	user IP: the IP address of this host (not supported yet)\n\
 	number: the maximum number of locators returned\n\
 	type: a type of locators returned\n\
 		domain: domain name\n\
@@ -80,13 +91,14 @@ Options:\n\
 }
 
 static void
-doit(enum kcn_loc_type type, size_t nmaxlocs, int argc, char * const argv[])
+doit(enum kcn_loc_type type, size_t nmaxlocs,
+    const char *country, const char *userip, int argc, char * const argv[])
 {
 	struct kcn_search_res *ksr;
 	int error;
 	size_t i;
 
-	ksr = kcn_search_res_new(type, nmaxlocs);
+	ksr = kcn_search_res_new(type, nmaxlocs, country, userip);
 	if (ksr == NULL)
 		errx(EXIT_FAILURE, "cannot allocate search results");
 	error = kcn_search(argc, argv, ksr);

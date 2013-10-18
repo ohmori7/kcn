@@ -4,6 +4,8 @@
 #include <stddef.h>
 #include <string.h>
 
+#include <netinet/in.h>
+
 #include <curl/curl.h>
 #include <jansson.h>
 
@@ -23,18 +25,24 @@
  */
 #define	KCN_SEARCH_URI_BASE_GOOGLE					\
 	"http://ajax.googleapis.com/ajax/services/search/web?v=1.0&q="
-#define KCN_SEARCH_GOOGLE_API_RCOUNTOPT	"&rsz=4"
-#define KCN_SEARCH_GOOGLE_API_RCOUNTMAX	(8 + 1)
+#define KCN_SEARCH_GOOGLE_API_RCOUNTOPT		"rsz"
+#define KCN_SEARCH_GOOGLE_API_RCOUNTMAX		(8 + 1)
+#define KCN_SEARCH_GOOGLE_API_COUNTRYOPT	"gl"
+#define KCN_SEARCH_GOOGLE_API_COUNTRYLEN	2		/* ISO 3166-1 */
+#define KCN_SEARCH_GOOGLE_API_USERIPOPT		"userip"
 
 struct kcn_search_res {
 	enum kcn_loc_type ksr_type;
 	size_t ksr_maxnlocs;
+	char ksr_country[KCN_SEARCH_GOOGLE_API_COUNTRYLEN + 1];
+	char ksr_userip[KCN_INET_ADDRSTRLEN];
 	size_t ksr_nlocs;
 	char *ksr_locs[1];
 };
 
 struct kcn_search_res *
-kcn_search_res_new(enum kcn_loc_type type, size_t maxnlocs)
+kcn_search_res_new(enum kcn_loc_type type, size_t maxnlocs, const char *country,
+    const char *userip)
 {
 	struct kcn_search_res *ksr;
 
@@ -43,8 +51,26 @@ kcn_search_res_new(enum kcn_loc_type type, size_t maxnlocs)
 		return NULL;
 	ksr->ksr_type = type;
 	ksr->ksr_maxnlocs = maxnlocs;
+	if (country == NULL)
+		ksr->ksr_country[0] = '\0';
+	else {
+		assert(country[0] != '\0');
+		ksr->ksr_country[0] = country[0];
+		ksr->ksr_country[1] = country[1];
+		ksr->ksr_country[2] = '\0';
+	}
+	if (userip == NULL)
+		ksr->ksr_userip[0] = '\0';
+	else
+		strlcpy(ksr->ksr_userip, userip, sizeof(ksr->ksr_userip));
 	ksr->ksr_nlocs = 0;
+	if ((country != NULL && ksr->ksr_country == NULL) ||
+	    (userip != NULL && ksr->ksr_userip == NULL))
+		goto bad;
 	return ksr;
+  bad:
+	kcn_search_res_destroy(ksr);
+	return NULL;
 }
 
 void
@@ -113,6 +139,28 @@ kcn_search_response_get(const char *uri)
 	return p;
 }
 
+static int
+kcn_search_opt_puts(char **urip, const char *key, const char *val)
+{
+	char *opt;
+	size_t optlen;
+	bool rc;
+
+	optlen = sizeof('&') + strlen(key) + sizeof('=') + strlen(val) +
+	    sizeof('\0');
+	opt = malloc(optlen);
+	if (opt == NULL)
+		return ENOMEM;
+
+	(void)snprintf(opt, optlen, "&%s=%s", key, val);
+	rc = kcn_uri_puts(urip, opt);
+	free(opt);
+	if (rc)
+		return 0;
+	else
+		return ENOMEM;
+}
+
 /* XXX: this supports google for now. */
 int
 kcn_search(int keyc, char * const keyv[], struct kcn_search_res *ksr)
@@ -125,7 +173,8 @@ kcn_search(int keyc, char * const keyv[], struct kcn_search_res *ksr)
 		[KCN_LOC_TYPE_DOMAINNAME] = "visibleUrl",
 		[KCN_LOC_TYPE_URI] = "url"
 	};
-	size_t i, rcountmax, urilen;
+	char rcountmaxstr[2];
+	size_t i, rcountmax;
 	int error;
 
 	assert(ksr->ksr_type == KCN_LOC_TYPE_DOMAINNAME ||
@@ -141,12 +190,26 @@ kcn_search(int keyc, char * const keyv[], struct kcn_search_res *ksr)
 		rcountmax = ksr->ksr_maxnlocs;
 	else
 		rcountmax = KCN_SEARCH_GOOGLE_API_RCOUNTMAX;
-	urilen = kcn_uri_puts(&uri, KCN_SEARCH_GOOGLE_API_RCOUNTOPT);
-	if (urilen == (size_t)-1) {
-		error = ENOMEM;
+	rcountmaxstr[0] = '0' + rcountmax;
+	rcountmaxstr[1] = '\0';
+	error = kcn_search_opt_puts(&uri, KCN_SEARCH_GOOGLE_API_RCOUNTOPT,
+	    rcountmaxstr);
+	if (error != 0)
 		goto bad;
+
+	if (ksr->ksr_country[0] != '\0') {
+		error = kcn_search_opt_puts(&uri,
+		    KCN_SEARCH_GOOGLE_API_COUNTRYOPT, ksr->ksr_country);
+		if (error != 0)
+			goto bad;
 	}
-	uri[urilen - 1] = '0' + rcountmax;
+
+	if (ksr->ksr_userip[0] != '\0') {
+		error = kcn_search_opt_puts(&uri,
+		    KCN_SEARCH_GOOGLE_API_USERIPOPT, ksr->ksr_userip);
+		if (error != 0)
+			goto bad;
+	}
 
 	res = kcn_search_response_get(uri);
 	if (res == NULL) {

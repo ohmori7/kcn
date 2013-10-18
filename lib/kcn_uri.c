@@ -32,7 +32,7 @@ kcn_uri_encputs(char *d, const char *s0)
 	return d;
 }
 
-size_t
+bool
 kcn_uri_puts(char **urip, const char *s)
 {
 	char *uri;
@@ -43,11 +43,11 @@ kcn_uri_puts(char **urip, const char *s)
 	slen = strlen(s);
 	uri = realloc(*urip, olen + slen + 1);
 	if (uri == NULL)
-		return (size_t)-1;
+		return false;
 	memmove(&uri[olen], s, slen);
 	uri[olen + slen] = '\0';
 	*urip = uri;
-	return olen + slen;
+	return true;
 }
 
 char *
