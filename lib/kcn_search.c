@@ -79,7 +79,7 @@ kcn_search_curl_callback(const char *p, size_t size, size_t n, void *kb)
 static char *
 kcn_search_response_get(const char *uribase, int keyc, char * const keyv[])
 {
-	struct kcn_buf kb;
+	struct kcn_buf *kb;
 	CURL *curl;
 	CURLcode curlrc;
 	char *uri, *p;
@@ -89,24 +89,23 @@ kcn_search_response_get(const char *uribase, int keyc, char * const keyv[])
 	if (uri == NULL)
 		return NULL;
 
-	kcn_buf_init(&kb);
+	p = NULL;
+	kb = kcn_buf_new();
+	if (kb == NULL)
+		goto bad;
+
 	curl = curl_easy_init();
 	curl_easy_setopt(curl, CURLOPT_URL, uri);
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, kcn_search_curl_callback);
-	curl_easy_setopt(curl, CURLOPT_WRITEDATA, &kb);
+	curl_easy_setopt(curl, CURLOPT_WRITEDATA, kb);
 	curlrc = curl_easy_perform(curl);
 
 	curl_easy_cleanup(curl);
+	if (curlrc == CURLE_OK)
+		p = kcn_buf_get(kb);
+	kcn_buf_destroy(kb);
+  bad:
 	kcn_uri_free(uri);
-
-	if (curlrc != CURLE_OK)
-		p = NULL;
-	else {
-		/* XXX: ugly!!! */
-		p = kb.kb_ptr;
-		kb.kb_ptr = NULL;
-	}
-	kcn_buf_finish(&kb);
 
 	return p;
 }
