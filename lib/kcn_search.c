@@ -189,7 +189,7 @@ kcn_search(int keyc, char * const keyv[], struct kcn_search_res *ksr)
 	if (ksr->ksr_maxnlocs < KCN_SEARCH_GOOGLE_API_RCOUNTMAX)
 		rcountmax = ksr->ksr_maxnlocs;
 	else
-		rcountmax = KCN_SEARCH_GOOGLE_API_RCOUNTMAX;
+		rcountmax = KCN_SEARCH_GOOGLE_API_RCOUNTMAX - 1;
 	rcountmaxstr[0] = '0' + rcountmax;
 	rcountmaxstr[1] = '\0';
 	error = kcn_search_opt_puts(&uri, KCN_SEARCH_GOOGLE_API_RCOUNTOPT,
