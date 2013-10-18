@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <ctype.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -29,6 +30,24 @@ kcn_uri_encputs(char *d, const char *s0)
 	}
 	*d = '\0';
 	return d;
+}
+
+size_t
+kcn_uri_puts(char **urip, const char *s)
+{
+	char *uri;
+	size_t olen, slen;
+
+	assert(*urip != NULL);
+	olen = strlen(*urip);
+	slen = strlen(s);
+	uri = realloc(*urip, olen + slen + 1);
+	if (uri == NULL)
+		return (size_t)-1;
+	memmove(&uri[olen], s, slen);
+	uri[olen + slen] = '\0';
+	*urip = uri;
+	return olen + slen;
 }
 
 char *

@@ -15,8 +15,16 @@
 /* XXX: is there any appropriate library defins HTTP response code? */
 #define KCN_SEARCH_HTTP_OK	200
 
+/*
+ * Google specific constants.
+ *
+ * You can obtain more information at:
+ *	https://developers.google.com/web-search/docs/reference
+ */
 #define	KCN_SEARCH_URI_BASE_GOOGLE					\
 	"http://ajax.googleapis.com/ajax/services/search/web?v=1.0&q="
+#define KCN_SEARCH_GOOGLE_API_RCOUNTOPT	"&rsz=4"
+#define KCN_SEARCH_GOOGLE_API_RCOUNTMAX	(8 + 1)
 
 struct kcn_search_res {
 	enum kcn_loc_type ksr_type;
@@ -77,18 +85,14 @@ kcn_search_curl_callback(const char *p, size_t size, size_t n, void *kb)
 }
 
 static char *
-kcn_search_response_get(const char *uribase, int keyc, char * const keyv[])
+kcn_search_response_get(const char *uri)
 {
 	struct kcn_buf *kb;
 	CURL *curl;
 	CURLcode curlrc;
-	char *uri, *p;
+	char *p;
 
-	assert(uribase != NULL);
-	uri = kcn_uri_build(uribase, keyc, keyv);
-	if (uri == NULL)
-		return NULL;
-
+	assert(uri != NULL);
 	p = NULL;
 	kb = kcn_buf_new();
 	if (kb == NULL)
@@ -105,7 +109,6 @@ kcn_search_response_get(const char *uribase, int keyc, char * const keyv[])
 		p = kcn_buf_get(kb);
 	kcn_buf_destroy(kb);
   bad:
-	kcn_uri_free(uri);
 
 	return p;
 }
@@ -114,7 +117,7 @@ kcn_search_response_get(const char *uribase, int keyc, char * const keyv[])
 int
 kcn_search(int keyc, char * const keyv[], struct kcn_search_res *ksr)
 {
-	char *res;
+	char *uri, *res;
 	json_error_t jerr;
 	json_t *jroot, *jval, *jresdata, *jres, *jloc;
 	const char *jlocstr;
@@ -122,7 +125,7 @@ kcn_search(int keyc, char * const keyv[], struct kcn_search_res *ksr)
 		[KCN_LOC_TYPE_DOMAINNAME] = "visibleUrl",
 		[KCN_LOC_TYPE_URI] = "url"
 	};
-	size_t i;
+	size_t i, rcountmax, urilen;
 	int error;
 
 	assert(ksr->ksr_type == KCN_LOC_TYPE_DOMAINNAME ||
@@ -130,9 +133,26 @@ kcn_search(int keyc, char * const keyv[], struct kcn_search_res *ksr)
 	assert(ksr->ksr_maxnlocs > 0);
 
 	error = 0;
-	res = kcn_search_response_get(KCN_SEARCH_URI_BASE_GOOGLE, keyc, keyv);
-	if (res == NULL)
-		return ENETDOWN; /* XXX */
+	uri = kcn_uri_build(KCN_SEARCH_URI_BASE_GOOGLE, keyc, keyv);
+	if (uri == NULL)
+		return ENOMEM;
+
+	if (ksr->ksr_maxnlocs < KCN_SEARCH_GOOGLE_API_RCOUNTMAX)
+		rcountmax = ksr->ksr_maxnlocs;
+	else
+		rcountmax = KCN_SEARCH_GOOGLE_API_RCOUNTMAX;
+	urilen = kcn_uri_puts(&uri, KCN_SEARCH_GOOGLE_API_RCOUNTOPT);
+	if (urilen == (size_t)-1) {
+		error = ENOMEM;
+		goto bad;
+	}
+	uri[urilen - 1] = '0' + rcountmax;
+
+	res = kcn_search_response_get(uri);
+	if (res == NULL) {
+		error = ENETDOWN;
+		goto bad;
+	}
 
 	jroot = json_loads(res, 0, &jerr);
 	free(res);
@@ -182,5 +202,7 @@ kcn_search(int keyc, char * const keyv[], struct kcn_search_res *ksr)
 		error = ESRCH;
   out:
 	json_decref(jroot);
+  bad:
+	kcn_uri_free(uri);
 	return error;
 }
