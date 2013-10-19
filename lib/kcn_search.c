@@ -182,10 +182,8 @@ kcn_search_one(const char *uri, struct kcn_search_res *ksr)
 	assert(ksr->ksr_nlocs < ksr->ksr_maxnlocs);
 
 	res = kcn_search_response_get(uri);
-	if (res == NULL) {
-		error = ENETDOWN;
-		goto bad;
-	}
+	if (res == NULL)
+		return ENETDOWN;
 	jroot = json_loads(res, 0, &jerr);
 	free(res);
 	if (jroot == NULL) {
@@ -219,28 +217,25 @@ kcn_search_one(const char *uri, struct kcn_search_res *ksr)
 		error = EINVAL;
 		goto out;
 	}
-	if (json_array_size(jres) == 0) {
-		error = ESRCH;
-		goto out;
-	}
 	json_array_foreach(jres, i, jval) {
 		jloc = json_object_get(jval, jlockey[ksr->ksr_type]);
 		if (jloc == NULL ||
 		    (jlocstr = json_string_value(jloc)) == NULL) {
 			error = EINVAL;
-			goto out;
+			break;
 		}
 		ksr->ksr_locs[ksr->ksr_nlocs] = strdup(jlocstr);
 		if (ksr->ksr_locs[ksr->ksr_nlocs] == NULL) {
 			error = ENOMEM;
-			goto out;
+			break;
 		}
 		if (++ksr->ksr_nlocs == ksr->ksr_maxnlocs)
 			break;
 	}
+	if (json_array_size(jres) == 0)
+		error = ESRCH;
   out:
 	json_decref(jroot);
-  bad:
 	return error;
 }
 
