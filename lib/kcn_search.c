@@ -15,7 +15,8 @@
 #include "kcn_search.h"
 
 /* XXX: is there any appropriate library defins HTTP response code? */
-#define KCN_SEARCH_HTTP_OK	200
+#define KCN_SEARCH_HTTP_OK		200
+#define KCN_SEARCH_HTTP_FORBIDDEN	403
 
 /*
  * Google specific constants.
@@ -196,7 +197,10 @@ kcn_search_one(const char *uri, struct kcn_search_res *ksr)
 		goto out;
 	}
 	if (json_integer_value(jval) != KCN_SEARCH_HTTP_OK) {
-		error = ENETDOWN; /* XXX */
+		if (json_integer_value(jval) == KCN_SEARCH_HTTP_FORBIDDEN)
+			error = EAGAIN; /* XXX */
+		else
+			error = ENETDOWN; /* XXX */
 		goto out;
 	}
 
