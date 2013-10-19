@@ -88,6 +88,14 @@ kcn_uri_build(const char *base, int argc, char * const argv[])
 }
 
 void
+kcn_uri_resize(char *uri, size_t totallen)
+{
+
+	assert(strlen(uri) >= totallen);
+	uri[totallen] = '\0';
+}
+
+void
 kcn_uri_free(char *uri)
 {
 
