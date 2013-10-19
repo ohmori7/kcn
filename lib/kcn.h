@@ -2,11 +2,6 @@
 #include "config.h"
 #endif /* HAVE_CONFIG_H_ */
 
-/* XXX: should detect with autoconf but... */
-#ifdef __linux__
-#include <sys/param.h>
-#endif /* __linux__ */
-
 #ifndef HAVE_STRLCPY
 size_t strlcpy(char *, const char *, size_t);
 #endif /* ! HAVE_STRLCPY */

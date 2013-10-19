@@ -1,3 +1,5 @@
+#include <sys/param.h>	/* just for NBBY. */
+
 #include <assert.h>
 #include <errno.h>
 #include <stdbool.h>
