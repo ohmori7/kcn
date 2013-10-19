@@ -56,7 +56,7 @@ identifier in KCN as follows:
     You can then try some applications using KCN framework as follows:
 
 	Example 1. ping
-	  % ping `key2loc/key2loc 'Kyushu Univ.'`
+	  % ping `key2loc 'Kyushu Univ.'`
 	  PING www.kyushu-u.ac.jp (133.5.5.119): 48 data bytes
 	  64 bytes from 133.5.5.119: icmp_seq=0 ttl=56 time=29.140 ms
 	  64 bytes from 133.5.5.119: icmp_seq=1 ttl=56 time=29.939 ms
@@ -68,14 +68,14 @@ identifier in KCN as follows:
 
 
 	Example 2. traceroute
-	  % traceroute `key2loc/key2loc 'Kyushu Univ.'`
+	  % traceroute `key2loc 'Kyushu Univ.'`
 	  traceroute to www.kyushu-u.ac.jp (133.5.5.119), 64 hops max, 40 byte packets
 	    1  10.15.5.1 (10.15.5.1)  3.463 ms  1.592 ms  0.780 ms
 	    2  *^C
 
 
 	Example 3. wget
-	  % wget `key2loc/key2loc -t uri Curry Tottori`
+	  % wget `key2loc -t uri Curry Tottori`
 	  --2013-10-13 10:04:41--  http://tokyotombaker.wordpress.com/2013/09/07/around-japan-in-47-curries-tottori-nashi-pear/
 	  Resolving tokyotombaker.wordpress.com (tokyotombaker.wordpress.com)... 192.0.80.250, 192.0.81.250, 66.155.9.238, ...
 	  Connecting to tokyotombaker.wordpress.com (tokyotombaker.wordpress.com)|192.0.80.250|:80... connected.
