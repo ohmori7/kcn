@@ -68,13 +68,7 @@ kcn_search_res_new(enum kcn_loc_type type, size_t maxnlocs, const char *country,
 	else
 		strlcpy(ksr->ksr_userip, userip, sizeof(ksr->ksr_userip));
 	ksr->ksr_nlocs = 0;
-	if ((country != NULL && ksr->ksr_country == NULL) ||
-	    (userip != NULL && ksr->ksr_userip == NULL))
-		goto bad;
 	return ksr;
-  bad:
-	kcn_search_res_destroy(ksr);
-	return NULL;
 }
 
 void
