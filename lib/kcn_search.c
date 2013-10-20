@@ -16,7 +16,7 @@
 #include "kcn_uri.h"
 #include "kcn_search.h"
 
-/* XXX: is there any appropriate library defins HTTP response code? */
+/* XXX: is there any appropriate library that defines HTTP response code? */
 #define KCN_SEARCH_HTTP_OK		200
 #define KCN_SEARCH_HTTP_FORBIDDEN	403
 
