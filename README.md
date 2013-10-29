@@ -133,7 +133,18 @@ Required libraries and tips on build failures:
 	- jansson
 
     Please make sure that these and related libraries are properly installed
-onto your environment.  You can examine the installation of curl as follows:
+onto your environment.
+
+    Since jansson is quite new implementation of JSON parser at this moment,
+most of build errors may be brought by jansson installation.  If you manually
+installed jansson into a directory, say /usr/local/, please try to run
+the ``configure'' script as follows:
+
+	Example 1.
+	  % ./configure	PKG_CONFIG_PATH=/usr/local/lib/pkgconfig
+
+    If you still have some errors about others but jansson, you can examine the
+installation of curl as follows:
 
 	  % curl-config --cflags --libs
 
@@ -148,8 +159,8 @@ If curl is properly installed, above command may produce below output:
 If you cannot obtain above output (note that shown libraries depend upon your
 environment), please make sure that curl is properly installed.
 
-When curl is properly installed but still ``configure'' script fails, please
-make sure that pkg-config is properly installed and works well since
+When curl is properly installed but still the ``configure'' script fails, please
+make sure that pkg-config is properly installed and works well since the
 ``configure'' script uses ``pkg-config'' to obtain necessary information about
 libraries.  Generally speaking, ``pkg-config'' may be properly installed onto
 your system because it is widely used in many cases.
@@ -158,14 +169,14 @@ your system because it is widely used in many cases.
 necessary information about curl and jansson to the ``configure'' script as
 follows:
 
-	Example 1.
+	Example 2.
 	  % ./configure							\
 	    CURL_CFLAGS=-I${ABS_CURL_DIR}/include			\
             CURL_LIBS="-L${ABS_CULR_DIR}/lib/ -lcurl"			\
             JANSSON_CFLAGS=-I${ABS_JANSSON_DIR}/include			\
             JANSSON_LIBS="-L${ABS_JANSSON_DIR}/lib/ -ljansson"
 
-	Example 2.
+	Example 3.
 	  % ./configure							\
 	    CURL_CFLAGS=-I${ABS_CURL_DIR}/include			\
             CURL_LIBS="-L${ABS_CULR_DIR}/lib/ -lcurl"			\
