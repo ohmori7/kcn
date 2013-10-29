@@ -175,6 +175,7 @@ kcn_search_one(const char *uri, struct kcn_search_res *ksr)
 
 	assert(ksr->ksr_nlocs < ksr->ksr_maxnlocs);
 
+	error = 0;
 	res = kcn_search_response_get(uri);
 	if (res == NULL)
 		return ENETDOWN;
