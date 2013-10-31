@@ -61,10 +61,10 @@ kcn_search_response_get(const char *uri)
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, kcn_search_curl_callback);
 	curl_easy_setopt(curl, CURLOPT_WRITEDATA, kb);
 	curlrc = curl_easy_perform(curl);
-
 	curl_easy_cleanup(curl);
 	if (curlrc == CURLE_OK && kcn_buf_append(kb, "\0", 1))
 		p = kcn_buf_get(kb);
+
 	kcn_buf_destroy(kb);
   bad:
 
@@ -72,19 +72,19 @@ kcn_search_response_get(const char *uri)
 }
 
 static int
-kcn_search_opt_puts(char **urip, const char *key, const char *val)
+kcn_search_opt_puts(char **urip, const char *param, const char *val)
 {
 	char *opt;
 	size_t optlen;
 	bool rc;
 
-	optlen = sizeof('&') + strlen(key) + sizeof('=') + strlen(val) +
+	optlen = sizeof('&') + strlen(param) + sizeof('=') + strlen(val) +
 	    sizeof('\0');
 	opt = malloc(optlen);
 	if (opt == NULL)
 		return ENOMEM;
 
-	(void)snprintf(opt, optlen, "&%s=%s", key, val);
+	(void)snprintf(opt, optlen, "&%s=%s", param, val);
 	rc = kcn_uri_puts(urip, opt);
 	free(opt);
 	if (rc)
