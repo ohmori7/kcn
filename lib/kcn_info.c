@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <errno.h>
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
@@ -105,14 +106,14 @@ kcn_info_loc(const struct kcn_info *ki, size_t idx)
 	return ki->ki_locs[idx];
 }
 
-int
+bool
 kcn_info_loc_add(struct kcn_info *ki, const char *locstr)
 {
 
 	assert(ki->ki_nlocs < ki->ki_maxnlocs);
 	ki->ki_locs[ki->ki_nlocs] = strdup(locstr);
 	if (ki->ki_locs[ki->ki_nlocs] == NULL)
-		return ENOMEM;
+		return false;
 	++ki->ki_nlocs;
-	return 0;
+	return true;
 }
