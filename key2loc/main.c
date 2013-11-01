@@ -100,9 +100,9 @@ doit(enum kcn_loc_type type, size_t nmaxlocs,
 
 	ki = kcn_info_new(type, nmaxlocs, country, userip);
 	if (ki == NULL)
-		errx(EXIT_FAILURE, "cannot allocate search results");
+		err(EXIT_FAILURE, "cannot allocate KCN information structure");
 	if (! kcn_search(argc, argv, ki))
-		errx(EXIT_FAILURE, "search failure");
+		err(EXIT_FAILURE, "search failure");
 	for (i = 0; i < kcn_info_nlocs(ki); i++)
 		printf("%s\n", kcn_info_loc(ki, i));
 	kcn_info_destroy(ki);
