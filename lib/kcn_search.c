@@ -30,20 +30,14 @@
 static bool
 kcn_search_opt_puts(char **urip, const char *param, const char *val)
 {
-	char *opt;
-	size_t optlen;
-	bool rc;
 
-	optlen = sizeof('&') + strlen(param) + sizeof('=') + strlen(val) +
-	    sizeof('\0');
-	opt = malloc(optlen);
-	if (opt == NULL)
-		return ENOMEM;
-
-	(void)snprintf(opt, optlen, "&%s=%s", param, val);
-	rc = kcn_uri_puts(urip, opt);
-	free(opt);
-	return rc;
+	if (kcn_uri_puts(urip, "&") &&
+	    kcn_uri_puts(urip, param) &&
+	    kcn_uri_puts(urip, "=") &&
+	    kcn_uri_puts(urip, val))
+		return true;
+	else
+		return false;
 }
 
 static bool
