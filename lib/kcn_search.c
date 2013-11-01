@@ -106,7 +106,7 @@ kcn_search_one(const char *uri, struct kcn_info *ki)
 		if (kcn_info_nlocs(ki) == kcn_info_maxnlocs(ki))
 			break;
 	}
-	if (json_array_size(jres) == 0) {
+	if (kcn_info_nlocs(ki) == 0) {
 		errno = ESRCH;
 		goto bad;
 	}
