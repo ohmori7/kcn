@@ -11,6 +11,7 @@
 #include "kcn.h"
 #include "kcn_buf.h"
 #include "kcn_uri.h"
+#include "kcn_info.h"
 #include "kcn_search.h"
 
 /* XXX: is there any appropriate library that defines HTTP response code? */

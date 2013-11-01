@@ -6,6 +6,7 @@
 #include <unistd.h>
 
 #include "kcn.h"
+#include "kcn_info.h"
 #include "kcn_search.h"
 
 #define KCN_LOC_COUNT_MAX_DEFAULT	1
