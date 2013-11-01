@@ -27,7 +27,7 @@
 #define KCN_SEARCH_GOOGLE_API_USERIPOPT		"userip"
 #define KCN_SEARCH_GOOGLE_API_STARTOPT		"start"
 
-static int
+static bool
 kcn_search_opt_puts(char **urip, const char *param, const char *val)
 {
 	char *opt;
@@ -43,13 +43,10 @@ kcn_search_opt_puts(char **urip, const char *param, const char *val)
 	(void)snprintf(opt, optlen, "&%s=%s", param, val);
 	rc = kcn_uri_puts(urip, opt);
 	free(opt);
-	if (rc)
-		return 0;
-	else
-		return ENOMEM;
+	return rc;
 }
 
-static int
+static bool
 kcn_search_one(const char *uri, struct kcn_info *ki)
 {
 	char *res;
@@ -61,69 +58,74 @@ kcn_search_one(const char *uri, struct kcn_info *ki)
 		[KCN_LOC_TYPE_URI] = "url"
 	};
 	size_t i;
-	int error;
 
 	assert(kcn_info_nlocs(ki) < kcn_info_maxnlocs(ki));
 
-	error = 0;
 	res = kcn_http_response_get(uri);
-	if (res == NULL)
-		return ENETDOWN;
+	if (res == NULL) {
+		jroot = NULL;
+		goto bad;
+	}
 	jroot = json_loads(res, 0, &jerr);
 	kcn_http_response_free(res);
 	if (jroot == NULL) {
 		fprintf(stderr, "cannot load root object: %s\n", jerr.text);
-		return EINVAL;
+		errno = EINVAL;
+		goto bad;
 	}
 
 	jval = json_object_get(jroot, "responseStatus");
 	if (jval == NULL || ! json_is_integer(jval)) {
-		error = EINVAL;
-		goto out;
+		errno = EINVAL;
+		goto bad;
 	}
 	if (json_integer_value(jval) != KCN_HTTP_OK) {
 		if (json_integer_value(jval) == KCN_HTTP_FORBIDDEN)
-			error = EAGAIN; /* XXX */
+			errno = EAGAIN; /* XXX */
 		else
-			error = ENETDOWN; /* XXX */
-		goto out;
+			errno = ENETDOWN; /* XXX */
+		goto bad;
 	}
 
 	jresdata = json_object_get(jroot, "responseData");
 	if (jresdata == NULL) {
-		error = EINVAL;
-		goto out;
+		errno = EINVAL;
+		goto bad;
 	}
 
 	jres = json_object_get(jresdata, "results");
 	if (jres == NULL || ! json_is_array(jres)) {
 		fprintf(stderr, "Non-array object (%u) returned",
 		    json_typeof(jresdata));
-		error = EINVAL;
-		goto out;
+		errno = EINVAL;
+		goto bad;
 	}
 	json_array_foreach(jres, i, jval) {
 		jloc = json_object_get(jval, jlockey[kcn_info_type(ki)]);
 		if (jloc == NULL ||
 		    (jlocstr = json_string_value(jloc)) == NULL) {
-			error = EINVAL;
-			break;
+			errno = EINVAL;
+			goto bad;
 		}
-		error = kcn_info_loc_add(ki, jlocstr);
-		if (error != 0)
-			break;
+		if (! kcn_info_loc_add(ki, jlocstr))
+			goto bad;
 		if (kcn_info_nlocs(ki) == kcn_info_maxnlocs(ki))
 			break;
 	}
-	if (json_array_size(jres) == 0)
-		error = ESRCH;
-  out:
+	if (json_array_size(jres) == 0) {
+		errno = ESRCH;
+		goto bad;
+	}
 	json_decref(jroot);
-	return error;
+	return true;
+  bad:
+	if (jroot != NULL)
+		json_decref(jroot);
+	return false;
 }
 
 /* XXX: this supports google for now. */
-int
+bool
 kcn_search(int keyc, char * const keyv[], struct kcn_info *ki)
 {
 	char *uri;
@@ -132,16 +134,16 @@ kcn_search(int keyc, char * const keyv[], struct kcn_info *ki)
 	const char *country;
 	const char *userip;
 	size_t n, uriolen, rcountmax;
-	int error;
+	int oerrno;
 
 	assert(kcn_info_type(ki) == KCN_LOC_TYPE_DOMAINNAME ||
 	    kcn_info_type(ki) == KCN_LOC_TYPE_URI);
 	assert(kcn_info_maxnlocs(ki) > 0);
 
-	error = 0;
+	oerrno = errno;
 	uri = kcn_uri_build(KCN_SEARCH_URI_BASE_GOOGLE, keyc, keyv);
 	if (uri == NULL)
-		return ENOMEM;
+		goto bad;
 
 	if (kcn_info_maxnlocs(ki) < KCN_SEARCH_GOOGLE_API_RCOUNTMAX)
 		rcountmax = kcn_info_maxnlocs(ki);
@@ -149,47 +151,44 @@ kcn_search(int keyc, char * const keyv[], struct kcn_info *ki)
 		rcountmax = KCN_SEARCH_GOOGLE_API_RCOUNTMAX - 1;
 	rcountmaxstr[0] = '0' + rcountmax;
 	rcountmaxstr[1] = '\0';
-	error = kcn_search_opt_puts(&uri, KCN_SEARCH_GOOGLE_API_RCOUNTOPT,
-	    rcountmaxstr);
-	if (error != 0)
-		goto out;
+	if (! kcn_search_opt_puts(&uri, KCN_SEARCH_GOOGLE_API_RCOUNTOPT,
+	    rcountmaxstr))
+		goto bad;
 
 	country = kcn_info_country(ki);
-	if (country != NULL) {
-		error = kcn_search_opt_puts(&uri,
-		    KCN_SEARCH_GOOGLE_API_COUNTRYOPT, country);
-		if (error != 0)
-			goto out;
-	}
+	if (country != NULL &&
+	    ! kcn_search_opt_puts(&uri,
+	    KCN_SEARCH_GOOGLE_API_COUNTRYOPT, country))
+		goto bad;
 
 	userip = kcn_info_userip(ki);
-	if (userip != NULL) {
-		error = kcn_search_opt_puts(&uri,
-		    KCN_SEARCH_GOOGLE_API_USERIPOPT, userip);
-		if (error != 0)
-			goto out;
-	}
+	if (userip != NULL && 
+	    ! kcn_search_opt_puts(&uri,
+	    KCN_SEARCH_GOOGLE_API_USERIPOPT, userip))
+		goto bad;
 
 	uriolen = strlen(uri);
 	for (n = 0; n < kcn_info_maxnlocs(ki); n += rcountmax) {
 		if (n > 0) {
 			snprintf(startopt, sizeof(startopt), "%zu", n);
-			error = kcn_search_opt_puts(&uri,
-			    KCN_SEARCH_GOOGLE_API_STARTOPT, startopt);
-			if (error != 0)
-				goto out;
+			if (! kcn_search_opt_puts(&uri,
+			    KCN_SEARCH_GOOGLE_API_STARTOPT, startopt))
+				goto bad;
 		}
-		error = kcn_search_one(uri, ki);
-		if (error != 0) {
-			if (error == ESRCH && kcn_info_nlocs(ki) != 0)
-				error = 0;
+		if (! kcn_search_one(uri, ki)) {
+			if (errno != ESRCH || kcn_info_nlocs(ki) == 0)
+				goto bad;
+			errno = oerrno;
 			break;
 		}
 		kcn_uri_resize(uri, uriolen);
 		if (kcn_info_nlocs(ki) % rcountmax != 0)
 			break;
 	}
-  out:
 	kcn_uri_free(uri);
-	return error;
+	return true;
+  bad:
+	if (uri != NULL)
+		kcn_uri_free(uri);
+	return false;
 }
