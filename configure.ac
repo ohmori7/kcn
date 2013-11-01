@@ -11,7 +11,7 @@ dnl file="${srcdir}/VERSION"
 dnl VERSION=`sed -ne 's/.*Version \([0-9]\.[0-9]\.[0-9]\)/\1/p' $file`
 
 #
-AC_PREREQ([2.69])
+AC_PREREQ([2.59])
 AC_INIT([kcn], [0.0.0], [ohmori@tottori-u.ac.jp])
 AC_CANONICAL_TARGET([])
 AC_CONFIG_SRCDIR([README])
@@ -28,7 +28,13 @@ AC_PROG_CPP
 AC_PROG_CC
 AM_PROG_CC_C_O
 AC_PROG_GCC_TRADITIONAL
-AC_PROG_OBJC
+dnl
+dnl expand AC_PROG_OBJC for old autoconf tools
+dnl
+AC_CHECK_TOOL([OBJC], [gcc])
+AC_SUBST(OBJC)
+AC_SUBST(OBJCFLAGS)
+dnl AC_PROG_OBJC
 AC_PROG_RANLIB
 AC_PROG_INSTALL
 AC_CHECK_TOOL(AR, ar)
