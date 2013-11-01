@@ -62,7 +62,8 @@ libkcn_a_AR = $(AR) $(ARFLAGS)
 libkcn_a_LIBADD =
 am_libkcn_a_OBJECTS = libkcn_a-kcn.$(OBJEXT) \
 	libkcn_a-kcn_buf.$(OBJEXT) libkcn_a-kcn_uri.$(OBJEXT) \
-	libkcn_a-kcn_info.$(OBJEXT) libkcn_a-kcn_search.$(OBJEXT)
+	libkcn_a-kcn_info.$(OBJEXT) libkcn_a-kcn_http.$(OBJEXT) \
+	libkcn_a-kcn_search.$(OBJEXT)
 libkcn_a_OBJECTS = $(am_libkcn_a_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
@@ -176,10 +177,10 @@ target_os = @target_os@
 target_vendor = @target_vendor@
 lib_LIBRARIES = libkcn.a
 libkcn_a_SOURCES = \
-	kcn.c kcn_buf.c kcn_uri.c kcn_info.c kcn_search.c
+	kcn.c kcn_buf.c kcn_uri.c kcn_info.c kcn_http.c kcn_search.c
 
 noinst_HEADERS = \
-	kcn.h kcn_buf.h kcn_uri.h kcn_info.h kcn_search.h
+	kcn.h kcn_buf.h kcn_uri.h kcn_info.h kcn_http.h kcn_search.h
 
 libkcn_a_CFLAGS = $(CURL_CFLAGS) $(JANSSON_CFLAGS)
 all: all-am
@@ -257,6 +258,7 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libkcn_a-kcn.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libkcn_a-kcn_buf.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libkcn_a-kcn_http.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libkcn_a-kcn_info.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libkcn_a-kcn_search.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libkcn_a-kcn_uri.Po@am__quote@
@@ -330,6 +332,20 @@ libkcn_a-kcn_info.obj: kcn_info.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='kcn_info.c' object='libkcn_a-kcn_info.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libkcn_a_CFLAGS) $(CFLAGS) -c -o libkcn_a-kcn_info.obj `if test -f 'kcn_info.c'; then $(CYGPATH_W) 'kcn_info.c'; else $(CYGPATH_W) '$(srcdir)/kcn_info.c'; fi`
+
+libkcn_a-kcn_http.o: kcn_http.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libkcn_a_CFLAGS) $(CFLAGS) -MT libkcn_a-kcn_http.o -MD -MP -MF "$(DEPDIR)/libkcn_a-kcn_http.Tpo" -c -o libkcn_a-kcn_http.o `test -f 'kcn_http.c' || echo '$(srcdir)/'`kcn_http.c; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/libkcn_a-kcn_http.Tpo" "$(DEPDIR)/libkcn_a-kcn_http.Po"; else rm -f "$(DEPDIR)/libkcn_a-kcn_http.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='kcn_http.c' object='libkcn_a-kcn_http.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libkcn_a_CFLAGS) $(CFLAGS) -c -o libkcn_a-kcn_http.o `test -f 'kcn_http.c' || echo '$(srcdir)/'`kcn_http.c
+
+libkcn_a-kcn_http.obj: kcn_http.c
+@am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libkcn_a_CFLAGS) $(CFLAGS) -MT libkcn_a-kcn_http.obj -MD -MP -MF "$(DEPDIR)/libkcn_a-kcn_http.Tpo" -c -o libkcn_a-kcn_http.obj `if test -f 'kcn_http.c'; then $(CYGPATH_W) 'kcn_http.c'; else $(CYGPATH_W) '$(srcdir)/kcn_http.c'; fi`; \
+@am__fastdepCC_TRUE@	then mv -f "$(DEPDIR)/libkcn_a-kcn_http.Tpo" "$(DEPDIR)/libkcn_a-kcn_http.Po"; else rm -f "$(DEPDIR)/libkcn_a-kcn_http.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='kcn_http.c' object='libkcn_a-kcn_http.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libkcn_a_CFLAGS) $(CFLAGS) -c -o libkcn_a-kcn_http.obj `if test -f 'kcn_http.c'; then $(CYGPATH_W) 'kcn_http.c'; else $(CYGPATH_W) '$(srcdir)/kcn_http.c'; fi`
 
 libkcn_a-kcn_search.o: kcn_search.c
 @am__fastdepCC_TRUE@	if $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libkcn_a_CFLAGS) $(CFLAGS) -MT libkcn_a-kcn_search.o -MD -MP -MF "$(DEPDIR)/libkcn_a-kcn_search.Tpo" -c -o libkcn_a-kcn_search.o `test -f 'kcn_search.c' || echo '$(srcdir)/'`kcn_search.c; \

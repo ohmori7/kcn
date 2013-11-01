@@ -5,18 +5,13 @@
 #include <stdbool.h>
 #include <string.h>
 
-#include <curl/curl.h>
 #include <jansson.h>
 
 #include "kcn.h"
-#include "kcn_buf.h"
 #include "kcn_uri.h"
 #include "kcn_info.h"
+#include "kcn_http.h"
 #include "kcn_search.h"
-
-/* XXX: is there any appropriate library that defines HTTP response code? */
-#define KCN_SEARCH_HTTP_OK		200
-#define KCN_SEARCH_HTTP_FORBIDDEN	403
 
 /*
  * Google specific constants.
@@ -31,46 +26,6 @@
 #define KCN_SEARCH_GOOGLE_API_COUNTRYOPT	"gl"
 #define KCN_SEARCH_GOOGLE_API_USERIPOPT		"userip"
 #define KCN_SEARCH_GOOGLE_API_STARTOPT		"start"
-
-static size_t
-kcn_search_curl_callback(const char *p, size_t size, size_t n, void *kb)
-{
-	size_t totalsize;
-
-	totalsize = size * n;
-	if (! kcn_buf_append(kb, p, totalsize))
-		return 0;
-	return totalsize;
-}
-
-static char *
-kcn_search_response_get(const char *uri)
-{
-	struct kcn_buf *kb;
-	CURL *curl;
-	CURLcode curlrc;
-	char *p;
-
-	assert(uri != NULL);
-	p = NULL;
-	kb = kcn_buf_new();
-	if (kb == NULL)
-		goto bad;
-
-	curl = curl_easy_init();
-	curl_easy_setopt(curl, CURLOPT_URL, uri);
-	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, kcn_search_curl_callback);
-	curl_easy_setopt(curl, CURLOPT_WRITEDATA, kb);
-	curlrc = curl_easy_perform(curl);
-	curl_easy_cleanup(curl);
-	if (curlrc == CURLE_OK && kcn_buf_append(kb, "\0", 1))
-		p = kcn_buf_get(kb);
-
-	kcn_buf_destroy(kb);
-  bad:
-
-	return p;
-}
 
 static int
 kcn_search_opt_puts(char **urip, const char *param, const char *val)
@@ -111,11 +66,11 @@ kcn_search_one(const char *uri, struct kcn_info *ki)
 	assert(kcn_info_nlocs(ki) < kcn_info_maxnlocs(ki));
 
 	error = 0;
-	res = kcn_search_response_get(uri);
+	res = kcn_http_response_get(uri);
 	if (res == NULL)
 		return ENETDOWN;
 	jroot = json_loads(res, 0, &jerr);
-	free(res);
+	kcn_http_response_free(res);
 	if (jroot == NULL) {
 		fprintf(stderr, "cannot load root object: %s\n", jerr.text);
 		return EINVAL;
@@ -126,8 +81,8 @@ kcn_search_one(const char *uri, struct kcn_info *ki)
 		error = EINVAL;
 		goto out;
 	}
-	if (json_integer_value(jval) != KCN_SEARCH_HTTP_OK) {
-		if (json_integer_value(jval) == KCN_SEARCH_HTTP_FORBIDDEN)
+	if (json_integer_value(jval) != KCN_HTTP_OK) {
+		if (json_integer_value(jval) == KCN_HTTP_FORBIDDEN)
 			error = EAGAIN; /* XXX */
 		else
 			error = ENETDOWN; /* XXX */
