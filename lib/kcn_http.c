@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <errno.h>
 #include <stdbool.h>
 #include <stdlib.h>
 
@@ -7,6 +8,17 @@
 #include "kcn.h"
 #include "kcn_buf.h"
 #include "kcn_http.h"
+
+static int
+kcn_http_curl_code2errno(CURLcode cc)
+{
+
+	switch (cc) {
+	case CURLE_OUT_OF_MEMORY:	return ENOMEM;
+	case CURLE_OPERATION_TIMEOUTED:	return ETIMEDOUT;
+	default:			return ENETDOWN;
+	}
+}
 
 static size_t
 kcn_http_curl_callback(const char *p, size_t size, size_t n, void *kb)
@@ -24,7 +36,7 @@ kcn_http_response_get(const char *uri)
 {
 	struct kcn_buf *kb;
 	CURL *curl;
-	CURLcode curlrc;
+	CURLcode cc;
 	char *p;
 
 	assert(uri != NULL);
@@ -37,10 +49,18 @@ kcn_http_response_get(const char *uri)
 	curl_easy_setopt(curl, CURLOPT_URL, uri);
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, kcn_http_curl_callback);
 	curl_easy_setopt(curl, CURLOPT_WRITEDATA, kb);
-	curlrc = curl_easy_perform(curl);
+	cc = curl_easy_perform(curl);
 	curl_easy_cleanup(curl);
-	if (curlrc == CURLE_OK && kcn_buf_append(kb, "\0", 1))
-		p = kcn_buf_get(kb);
+
+	switch (cc) {
+	case CURLE_OK:
+		if (kcn_buf_append(kb, "\0", 1))
+			p = kcn_buf_get(kb);
+		break;
+	default:
+		errno = kcn_http_curl_code2errno(cc);
+		break;
+	}
 
 	kcn_buf_destroy(kb);
   bad:
