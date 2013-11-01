@@ -46,6 +46,8 @@ kcn_http_response_get(const char *uri)
 		goto bad;
 
 	curl = curl_easy_init();
+	if (curl == NULL)
+		goto bad;
 	curl_easy_setopt(curl, CURLOPT_URL, uri);
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, kcn_http_curl_callback);
 	curl_easy_setopt(curl, CURLOPT_WRITEDATA, kb);
@@ -62,9 +64,8 @@ kcn_http_response_get(const char *uri)
 		break;
 	}
 
-	kcn_buf_destroy(kb);
   bad:
-
+	kcn_buf_destroy(kb);
 	return p;
 }
 
