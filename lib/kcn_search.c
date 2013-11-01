@@ -31,6 +31,8 @@ static bool
 kcn_search_opt_puts(char **urip, const char *param, const char *val)
 {
 
+	if (val == NULL)
+		return true;
 	if (kcn_uri_puts(urip, "&") &&
 	    kcn_uri_puts(urip, param) &&
 	    kcn_uri_puts(urip, "=") &&
@@ -150,15 +152,13 @@ kcn_search(int keyc, char * const keyv[], struct kcn_info *ki)
 		goto bad;
 
 	country = kcn_info_country(ki);
-	if (country != NULL &&
-	    ! kcn_search_opt_puts(&uri,
-	    KCN_SEARCH_GOOGLE_API_COUNTRYOPT, country))
+	if (! kcn_search_opt_puts(&uri, KCN_SEARCH_GOOGLE_API_COUNTRYOPT,
+	    country))
 		goto bad;
 
 	userip = kcn_info_userip(ki);
-	if (userip != NULL && 
-	    ! kcn_search_opt_puts(&uri,
-	    KCN_SEARCH_GOOGLE_API_USERIPOPT, userip))
+	if (! kcn_search_opt_puts(&uri, KCN_SEARCH_GOOGLE_API_USERIPOPT,
+	    userip))
 		goto bad;
 
 	uriolen = strlen(uri);
