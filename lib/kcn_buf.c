@@ -27,6 +27,8 @@ void
 kcn_buf_destroy(struct kcn_buf *kb)
 {
 
+	if (kb == NULL)
+		return;
 	if (kb->kb_ptr != NULL)
 		free(kb->kb_ptr);
 	free(kb);
