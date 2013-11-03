@@ -50,6 +50,8 @@ kcn_buf_append(struct kcn_buf *kb, const void *p, size_t size)
 {
 	void *np;
 
+	if (kb->kb_size > kb->kb_size + size)
+		return false;
 	np = realloc(kb->kb_ptr, kb->kb_size + size);
 	if (np == NULL)
 		return false;

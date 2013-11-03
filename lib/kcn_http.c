@@ -26,6 +26,8 @@ kcn_http_curl_callback(const char *p, size_t size, size_t n, void *kb)
 	size_t totalsize;
 
 	totalsize = size * n;
+	if (totalsize < size)
+		return 0;
 	if (! kcn_buf_append(kb, p, totalsize))
 		return 0;
 	return totalsize;
