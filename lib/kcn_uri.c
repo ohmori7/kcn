@@ -133,7 +133,6 @@ kcn_uri_encputs(struct kcn_uri *ku, const char *s0)
 			*d++ = hexstr[(*s     ) & 0xfU];
 		}
 	}
-	*d = '\0';
 	ku->ku_urilen = d - ku->ku_uri;
 	return true;
 }
