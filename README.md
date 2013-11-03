@@ -1,15 +1,16 @@
 Keyword Centric Network (KCN) implementations
+================================================================================
 
 What is KCN?
 ================================================================================
-    Keyword Centric Network (KCN) is a kind of Information Centric Network
-(ICN).  ICN is now well-known among network researchers as a major paradigm
+  Keyword Centric Network (KCN) is a kind of Information Centric Network (ICN).
+ICN is now well-known among network researchers as a major paradigm
 toward Future Internet.  ICN, however, is still just a concept, and has not yet
 been defined what ICN is, and its implementation or applications are not
 unclear.  We are now proposing KCN in order to present an actual implementation
 or applications of ICN.
 
-    One of basic concepts of KCN is naming information, which is similar to (but
+  One of basic concepts of KCN is naming information, which is similar to (but
 not exactly same as) one of an original concenpt of ICN.  KCN separates a name
 of information into an identifier and a locator as same as ICN.  An identifier
 of a name of information in KCN is, however, keywords combined with end users'
@@ -18,33 +19,33 @@ URI-like address of information.  On the other hand, a locator of a name of
 information in KCN is URL (or URI) while one in ICN is an IP address.  That is,
 KCN separate a name of information into keywords and URLs.
 
-    This package demonstrates how KCN works and what can be applications of KCN
+  This package demonstrates how KCN works and what can be applications of KCN
 by providing an acutual implementation.  We hope that this package could present
 an actual example of ICN in order to make ICN being in the wild.
 
-Quick start:
+Quick start
 ================================================================================
-    First of all, build KCN binaries, and install them as follows.
+  First of all, build KCN binaries, and install them as follows.
 
 	1. install curl and jansson.
-	  Please see ``Tested environment and tips'' section in this document.
+	  Please see *Tested environment and tips* section in this document.
 	2. extract kcn-x.x.x.tar.gz, and move to extracted directry.
 	  % tar xfz kcn-x.x.x.tar.gz
 	  % cd kcn-x.x.x
 	3. If you check out source codes by git, please read
-	   ``Tips for build failures due to autoconf tools'' section in this
+	   *Tips for build failures due to autoconf tools* section in this
 	   document.
-	4. run ``configure'' script.
+	4. run *configure* script.
 	  % ./configure
 	5. build KCN binaries.
 	  % make
 	6. install KCN binaries.
 	  % sudo make install
 
-When you need to specify other options for ``configure'' script, please consult
-with ``INSTALL'' file.
+When you need to specify other options for *configure* script, please consult
+with *INSTALL* file.
 
-    After installation succeeds, you can demonstrate to resolve locators from
+  After installation succeeds, you can demonstrate to resolve locators from
 identifier in KCN as follows:
 
 	  % key2loc keyword1 keyword2 keyword3
@@ -53,7 +54,7 @@ identifier in KCN as follows:
 	  result3
 	  ...
 
-    You can then try some applications using KCN framework as follows:
+  You can then try some applications using KCN framework as follows:
 
 	Example 1. ping
 	  % ping `key2loc 'Kyushu Univ.'`
@@ -89,22 +90,22 @@ identifier in KCN as follows:
 
 Tips for build failures due to autoconf tools
 ================================================================================
-    This KCN package uses autoconf tools.  Autoconf tools are very useful from
+  This KCN package uses autoconf tools.  Autoconf tools are very useful from
 the viewpoint of developers.  Autoconf tools may, however, cause build failures
 like below when you check out source codes of KCN by git:
 
-CDPATH="${ZSH_VERSION+.}:" && cd . && /bin/sh /home/kcn/missing aclocal-1.13 
-/home/kcn/missing: line 81: aclocal-1.13: command not found
-WARNING: 'aclocal-1.13' is missing on your system.
-         You should only need it if you modified 'acinclude.m4' or
-         'configure.ac' or m4 files included by 'configure.ac'.
-         The 'aclocal' program is part of the GNU Automake package:
-         <http://www.gnu.org/software/automake>
-         It also requires GNU Autoconf, GNU m4 and Perl in order to run:
-         <http://www.gnu.org/software/autoconf>
-         <http://www.gnu.org/software/m4/>
-         <http://www.perl.org/>
-make: *** [aclocal.m4] Error 127
+	CDPATH="${ZSH_VERSION+.}:" && cd . && /bin/sh /home/kcn/missing aclocal-1.13 
+	/home/kcn/missing: line 81: aclocal-1.13: command not found
+	WARNING: 'aclocal-1.13' is missing on your system.
+	         You should only need it if you modified 'acinclude.m4' or
+	         'configure.ac' or m4 files included by 'configure.ac'.
+	         The 'aclocal' program is part of the GNU Automake package:
+	         <http://www.gnu.org/software/automake>
+	         It also requires GNU Autoconf, GNU m4 and Perl in order to run:
+	         <http://www.gnu.org/software/autoconf>
+	         <http://www.gnu.org/software/m4/>
+	         <http://www.perl.org/>
+	make: *** [aclocal.m4] Error 127
 
 These errors results from autoconf tools' checks to see if related files need
 to be regenerated or not.  These checks are not necessary on building-only
@@ -127,61 +128,61 @@ To this end, you may open (or copy) each file in order, and just overwrite
 
 Required libraries and tips on build failures:
 ================================================================================
-    This KCN implementation depends directly upon following libraries:
+  This KCN implementation depends directly upon following libraries:
 
 	- curl on *BSD* (or libcurl-devel on Linux)
 	- jansson
 
-    Please make sure that these and related libraries are properly installed
+  Please make sure that these and related libraries are properly installed
 onto your environment.
 
-    Since jansson is quite new implementation of JSON parser at this moment,
+  Since jansson is quite new implementation of JSON parser at this moment,
 most of build errors may be brought by jansson installation.  If you manually
 installed jansson into a directory, say /usr/local/, please try to run
-the ``configure'' script as follows:
+the *configure* script as follows:
 
-	Example 1.
-	  % ./configure	PKG_CONFIG_PATH=/usr/local/lib/pkgconfig
+    	Example 1.
+    	  % ./configure	PKG_CONFIG_PATH=/usr/local/lib/pkgconfig
 
-    If you still have some errors about others but jansson, you can examine the
+  If you still have some errors about others but jansson, you can examine the
 installation of curl as follows:
 
-	  % curl-config --cflags --libs
+    	  % curl-config --cflags --libs
 
 If curl is properly installed, above command may produce below output:
 
-	  -I/usr/pkg/include
-	  -L/usr/pkg/lib -L/usr/pkg/lib -Wl,-R/usr/pkg/lib		\
-	  -L/usr/pkg/lib -lcurl -lidn -lssl -lcrypto -lgssapi		\
-	  -lheimntlm -lkrb5 -lhx509 -lcom_err -lcrypto -lasn1 -lwind	\
-	  -lroken -lcrypt -lpthread -lz
+    	  -I/usr/pkg/include
+    	  -L/usr/pkg/lib -L/usr/pkg/lib -Wl,-R/usr/pkg/lib		\
+    	  -L/usr/pkg/lib -lcurl -lidn -lssl -lcrypto -lgssapi		\
+    	  -lheimntlm -lkrb5 -lhx509 -lcom_err -lcrypto -lasn1 -lwind	\
+    	  -lroken -lcrypt -lpthread -lz
 
 If you cannot obtain above output (note that shown libraries depend upon your
 environment), please make sure that curl is properly installed.
 
-When curl is properly installed but still the ``configure'' script fails, please
+When curl is properly installed but still the *configure* script fails, please
 make sure that pkg-config is properly installed and works well since the
-``configure'' script uses ``pkg-config'' to obtain necessary information about
-libraries.  Generally speaking, ``pkg-config'' may be properly installed onto
+*configure* script uses *pkg-config* to obtain necessary information about
+libraries.  Generally speaking, *pkg-config* may be properly installed onto
 your system because it is widely used in many cases.
 
-    When pkg-config cannot be installed or cannot work, you can manually specify
-necessary information about curl and jansson to the ``configure'' script as
+  When pkg-config cannot be installed or cannot work, you can manually specify
+necessary information about curl and jansson to the *configure* script as
 follows:
 
-	Example 2.
-	  % ./configure							\
-	    CURL_CFLAGS=-I${ABS_CURL_DIR}/include			\
-            CURL_LIBS="-L${ABS_CULR_DIR}/lib/ -lcurl"			\
-            JANSSON_CFLAGS=-I${ABS_JANSSON_DIR}/include			\
-            JANSSON_LIBS="-L${ABS_JANSSON_DIR}/lib/ -ljansson"
+    	Example 2.
+    	  % ./configure							\
+    	    CURL_CFLAGS=-I${ABS_CURL_DIR}/include			\
+    	    CURL_LIBS="-L${ABS_CULR_DIR}/lib/ -lcurl"			\
+    	    JANSSON_CFLAGS=-I${ABS_JANSSON_DIR}/include			\
+    	    JANSSON_LIBS="-L${ABS_JANSSON_DIR}/lib/ -ljansson"
 
-	Example 3.
-	  % ./configure							\
-	    CURL_CFLAGS=-I${ABS_CURL_DIR}/include			\
-            CURL_LIBS="-L${ABS_CULR_DIR}/lib/ -lcurl"			\
-            JANSSON_CFLAGS=-I${ABS_JANSSON_DIR}/include			\
-            JANSSON_LIBS=${ABS_JANSSON_DIR}/lib/libjansson.a
+    	Example 3.
+    	  % ./configure							\
+    	    CURL_CFLAGS=-I${ABS_CURL_DIR}/include			\
+    	    CURL_LIBS="-L${ABS_CULR_DIR}/lib/ -lcurl"			\
+    	    JANSSON_CFLAGS=-I${ABS_JANSSON_DIR}/include			\
+    	    JANSSON_LIBS=${ABS_JANSSON_DIR}/lib/libjansson.a
 
 Note that ABS_CURL_DIR and ABS_JANSSON_DIR denote *absolute* paths into which
 curl and jansson are installed, respectively.
@@ -189,6 +190,7 @@ curl and jansson are installed, respectively.
 Tested environment and tips
 ================================================================================
 NetBSD current 6.99.3
+--------------------------------------------------------------------------------
 	pkg-config:
 		pkgsrc/devel/pkg-config
 	curl:
@@ -199,6 +201,7 @@ NetBSD current 6.99.3
 		on 2013/7/13, and it may work but has not been tested yet.
 
 CentOS 6.4 (x86_64)
+--------------------------------------------------------------------------------
 	pkg-config:
 		pkgconfig: installed by default as a base tool (0.23)
 	curl:
