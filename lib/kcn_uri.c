@@ -12,27 +12,45 @@
 #define KCN_URI_ENCODING_FACTOR		3
 
 struct kcn_uri {
-	bool ku_isparamseen;
 	size_t ku_urilen;
 	char *ku_uri;
 };
+
+static bool
+kcn_uri_str_isnormal(char c)
+{
+
+	if (isalnum(c) || c == '.' || c == '-' || c == '_')
+		return true;
+	else
+		return false;
+}
+
+static size_t
+kcn_uri_str_len(const char *s, bool isencoding)
+{
+	const char *cp;
+	size_t len;
+
+	len = 0;
+	for (cp = s; *cp != '\0'; cp++)
+		if (isencoding && ! kcn_uri_str_isnormal(*cp) && *cp != ' ')
+			len += KCN_URI_ENCODING_FACTOR;
+		else
+			++len;
+	return len;
+}
 
 struct kcn_uri *
 kcn_uri_new(const char *base)
 {
 	struct kcn_uri *ku;
-	const char *cp;
 
 	ku = malloc(sizeof(*ku));
 	if (ku == NULL)
 		goto bad;
 
-	ku->ku_isparamseen = false;
-	for (cp = base; *cp != '\0'; cp++)
-		if (*cp == '?')
-			ku->ku_isparamseen = true;
-
-	ku->ku_urilen = cp - base;
+	ku->ku_urilen = kcn_uri_str_len(base, false);
 	ku->ku_uri = malloc(ku->ku_urilen + sizeof('\0'));
 	if (ku->ku_uri == NULL)
 		goto bad;
@@ -88,19 +106,24 @@ void
 kcn_uri_resize(struct kcn_uri *ku, size_t len)
 {
 
-	assert(strlen(ku->ku_uri) >= len);
+	assert(len <= ku->ku_urilen);
 	ku->ku_urilen = len;
 	ku->ku_uri[len] = '\0';
 }
 
-static char *
-kcn_uri_encputs(char *d, const char *s0)
+static bool
+kcn_uri_encputs(struct kcn_uri *ku, const char *s0)
 {
 	static const char *hexstr = "0123456789ABCDEF";
 	const unsigned char *s;
+	char *d;
 
+	if (! kcn_uri_ensure_trailing_space(ku, kcn_uri_str_len(s0, true)))
+		return false;
+
+	d = ku->ku_uri + ku->ku_urilen;
 	for (s = (const unsigned char *)s0; *s != '\0'; s++) {
-		if (isalnum(*s) || *s == '.' || *s == '-' || *s == '_')
+		if (kcn_uri_str_isnormal(*s))
 			*d++ = *s;
 		else if (*s == ' ')
 			*d++ = '+';
@@ -111,7 +134,8 @@ kcn_uri_encputs(char *d, const char *s0)
 		}
 	}
 	*d = '\0';
-	return d;
+	ku->ku_urilen = d - ku->ku_uri;
+	return true;
 }
 
 static bool
@@ -119,7 +143,7 @@ kcn_uri_puts(struct kcn_uri *ku, const char *s)
 {
 	size_t slen;
 
-	slen = strlen(s);
+	slen = kcn_uri_str_len(s, false);
 	if (! kcn_uri_ensure_trailing_space(ku, slen))
 		return false;
 	memmove(ku->ku_uri + ku->ku_urilen, s, slen);
@@ -136,7 +160,7 @@ kcn_uri_param_puts(struct kcn_uri *ku, const char *param, const char *val)
 	if (kcn_uri_puts(ku, "&") && /* XXX */
 	    kcn_uri_puts(ku, param) &&
 	    kcn_uri_puts(ku, "=") &&
-	    kcn_uri_puts(ku, val))
+	    kcn_uri_encputs(ku, val))
 		return true;
 	else
 		return false;
@@ -147,8 +171,6 @@ kcn_uri_param_putv(struct kcn_uri *ku, const char *param,
     int argc, char * const argv[])
 {
 	int i;
-	size_t len;
-	char *cp;
 
 	assert(argc > 0);
 
@@ -161,21 +183,12 @@ kcn_uri_param_putv(struct kcn_uri *ku, const char *param,
 	 * XXX: should convert to utf-8 when character encodings
 	 *	of input string is different.
 	 */
-	len = argc - 1; /* separator, i.e., space character */
 	for (i = 0; i < argc; i++) {
-		assert(argv[i] != NULL);
-		len += strlen(argv[i]) * KCN_URI_ENCODING_FACTOR;
+		if (i > 0 && ! kcn_uri_encputs(ku, " "))
+			return false;
+		if (! kcn_uri_encputs(ku, argv[i]))
+			return false;
 	}
-	if (! kcn_uri_ensure_trailing_space(ku, len))
-		return false;
-
-	cp = ku->ku_uri + ku->ku_urilen;
-	for (i = 0; i < argc; i++) {
-		if (i > 0)
-			cp = kcn_uri_encputs(cp, " ");
-		cp = kcn_uri_encputs(cp, argv[i]);
-	}
-	ku->ku_urilen = cp - ku->ku_uri - sizeof('\0');
 
 	return true;
 }
