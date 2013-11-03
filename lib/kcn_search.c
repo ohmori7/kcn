@@ -126,9 +126,6 @@ kcn_search(int keyc, char * const keyv[], struct kcn_info *ki)
 	ku = kcn_uri_new(KCN_SEARCH_URI_BASE_GOOGLE);
 	if (ku == NULL)
 		goto bad;
-	if (! kcn_uri_param_putv(ku, KCN_SEARCH_GOOGLE_API_QUERYOPT,
-	    keyc, keyv))
-		goto bad;
 
 	if (kcn_info_maxnlocs(ki) < KCN_SEARCH_GOOGLE_API_RCOUNTMAX)
 		rcountmax = kcn_info_maxnlocs(ki);
@@ -148,6 +145,10 @@ kcn_search(int keyc, char * const keyv[], struct kcn_info *ki)
 	userip = kcn_info_userip(ki);
 	if (! kcn_uri_param_puts(ku, KCN_SEARCH_GOOGLE_API_USERIPOPT,
 	    userip))
+		goto bad;
+
+	if (! kcn_uri_param_putv(ku, KCN_SEARCH_GOOGLE_API_QUERYOPT,
+	    keyc, keyv))
 		goto bad;
 
 	uriolen = kcn_uri_len(ku);
