@@ -107,7 +107,7 @@ like below when you check out source codes of KCN by git:
 	         <http://www.perl.org/>
 	make: *** [aclocal.m4] Error 127
 
-These errors results from autoconf tools' checks to see if related files need
+These errors result from checks of autoconf tools to see if related files need
 to be regenerated or not.  These checks are not necessary on building-only
 environment (i.e., non-developing environment), and should be skipped.  These
 checks may, however, unnecessarily run when you check out source codes of KCN
@@ -118,7 +118,7 @@ in following order:
 	configure.ac	(oldest timestamp)
 	aclocal.m4		^
 	config.h.in		|
-	Makefile.in
+	Makefile.in		|
 	key2loc/Makefile.in	|
 	lib/Makefile.in		V
 	configure	(newest timestamp)
