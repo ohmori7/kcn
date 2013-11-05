@@ -20,7 +20,7 @@ static bool
 kcn_uri_str_isnormal(char c)
 {
 
-	if (isalnum(c) || c == '.' || c == '-' || c == '_')
+	if (isalnum((unsigned char)c) || c == '.' || c == '-' || c == '_')
 		return true;
 	else
 		return false;
