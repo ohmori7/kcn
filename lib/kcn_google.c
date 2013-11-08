@@ -29,7 +29,7 @@
 #define KCN_GOOGLE_API_STARTOPT		"start"
 
 static bool
-kcn_google_one(const struct kcn_uri *ku, struct kcn_info *ki)
+kcn_google_search_one(const struct kcn_uri *ku, struct kcn_info *ki)
 {
 	char *res;
 	json_error_t jerr;
@@ -107,7 +107,7 @@ kcn_google_one(const struct kcn_uri *ku, struct kcn_info *ki)
 }
 
 bool
-kcn_google(int keyc, char * const keyv[], struct kcn_info *ki)
+kcn_google_search(int keyc, char * const keyv[], struct kcn_info *ki)
 {
 	struct kcn_uri *ku;
 	char startopt[KCN_INFO_NLOCSTRLEN];
@@ -154,7 +154,7 @@ kcn_google(int keyc, char * const keyv[], struct kcn_info *ki)
 			    startopt))
 				goto bad;
 		}
-		if (! kcn_google_one(ku, ki)) {
+		if (! kcn_google_search_one(ku, ki)) {
 			if (errno != ESRCH || kcn_info_nlocs(ki) == 0)
 				goto bad;
 			errno = oerrno;
