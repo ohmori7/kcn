@@ -164,30 +164,3 @@ kcn_uri_param_puts(struct kcn_uri *ku, const char *param, const char *val)
 	else
 		return false;
 }
-
-bool
-kcn_uri_param_putv(struct kcn_uri *ku, const char *param,
-    int argc, char * const argv[])
-{
-	int i;
-
-	assert(argc > 0);
-
-	if (! kcn_uri_puts(ku, "&") || /* XXX */
-	    ! kcn_uri_puts(ku, param) ||
-	    ! kcn_uri_puts(ku, "="))
-		return false;
-
-	/*
-	 * XXX: should convert to utf-8 when character encodings
-	 *	of input string is different.
-	 */
-	for (i = 0; i < argc; i++) {
-		if (i > 0 && ! kcn_uri_encputs(ku, " "))
-			return false;
-		if (! kcn_uri_encputs(ku, argv[i]))
-			return false;
-	}
-
-	return true;
-}
