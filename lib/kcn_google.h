@@ -1,1 +1,1 @@
-bool kcn_google_search(int, char * const [], struct kcn_info *);
+bool kcn_google_search(struct kcn_info *, const char *);

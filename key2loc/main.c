@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <err.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -14,8 +15,9 @@
 #define KCN_LOC_TYPE_DEFAULT		KCN_LOC_TYPE_DOMAINNAME
 
 static void usage(const char *, const char *);
+static char *concat(int, char * const []);
 static void doit(enum kcn_type, enum kcn_loc_type, size_t,
-    const char *, const char *, int, char * const []);
+    const char *, const char *, const char *);
 
 int
 main(int argc, char * const argv[])
@@ -23,6 +25,7 @@ main(int argc, char * const argv[])
 	enum kcn_type type;
 	enum kcn_loc_type loctype;
 	const char *p, *pname, *country, *userip;
+	char *keys;
 	int n, ch;
 
 	pname = (p = strrchr(argv[0], '/')) != NULL ? p + 1 : argv[0];
@@ -77,7 +80,12 @@ main(int argc, char * const argv[])
 		usage(pname, "no keywords specified");
 		/*NOTREACHED*/
 
-	doit(type, loctype, n, country, userip, argc, argv);
+	keys = concat(argc, argv);
+	if (keys == NULL)
+		err(EXIT_FAILURE, "cannot allocate memory for URI");
+		/*NOTREACHED*/
+	doit(type, loctype, n, country, userip, keys);
+	free(keys);
 	return 0;
 }
 
@@ -106,9 +114,32 @@ Options:\n\
 	exit(EXIT_FAILURE);
 }
 
+static char *
+concat(int keyc, char * const keyv[])
+{
+	char *s;
+	size_t size;
+	int i;
+
+	assert(keyc > 0);
+	size = keyc; /* the number of separators and terminator */
+	for (i = 0; i < keyc; i++)
+		size += strlen(keyv[i]);
+	s = malloc(size);
+	if (s == NULL)
+		return NULL;
+	i = 0;
+	strncpy(s, keyv[i++], size);
+	for (; i < keyc; i++) {
+		(void)strncat(s, " ", size);
+		(void)strncat(s, keyv[i], size);
+	}
+	return s;
+}
+
 static void
 doit(enum kcn_type type, enum kcn_loc_type loctype, size_t nmaxlocs,
-    const char *country, const char *userip, int argc, char * const argv[])
+    const char *country, const char *userip, const char *keys)
 {
 	struct kcn_info *ki;
 	size_t i;
@@ -116,7 +147,7 @@ doit(enum kcn_type type, enum kcn_loc_type loctype, size_t nmaxlocs,
 	ki = kcn_info_new(type, loctype, nmaxlocs, country, userip);
 	if (ki == NULL)
 		err(EXIT_FAILURE, "cannot allocate KCN information structure");
-	if (! kcn_search(argc, argv, ki))
+	if (! kcn_search(ki, keys))
 		err(EXIT_FAILURE, "search failure");
 	for (i = 0; i < kcn_info_nlocs(ki); i++)
 		printf("%s\n", kcn_info_loc(ki, i));

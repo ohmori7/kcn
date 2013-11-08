@@ -7,12 +7,11 @@
 #include "kcn_local.h"
 
 bool
-kcn_local_search(int keyc, char * const keyv[], struct kcn_info *ki)
+kcn_local_search(struct kcn_info *ki, const char *keys)
 {
 
-	(void)keyc;
-	(void)keyv;
 	(void)ki;
+	(void)keys;
 	errno = EPROTONOSUPPORT;
 	return false;
 }

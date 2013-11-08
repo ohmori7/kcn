@@ -107,7 +107,7 @@ kcn_google_search_one(const struct kcn_uri *ku, struct kcn_info *ki)
 }
 
 bool
-kcn_google_search(int keyc, char * const keyv[], struct kcn_info *ki)
+kcn_google_search(struct kcn_info *ki, const char *keys)
 {
 	struct kcn_uri *ku;
 	char startopt[KCN_INFO_NLOCSTRLEN];
@@ -143,7 +143,7 @@ kcn_google_search(int keyc, char * const keyv[], struct kcn_info *ki)
 	if (! kcn_uri_param_puts(ku, KCN_GOOGLE_API_USERIPOPT, userip))
 		goto bad;
 
-	if (! kcn_uri_param_putv(ku, KCN_GOOGLE_API_QUERYOPT, keyc, keyv))
+	if (! kcn_uri_param_puts(ku, KCN_GOOGLE_API_QUERYOPT, keys))
 		goto bad;
 
 	uriolen = kcn_uri_len(ku);

@@ -9,14 +9,14 @@
 #include "kcn_search.h"
 
 bool
-kcn_search(int keyc, char * const keyv[], struct kcn_info *ki)
+kcn_search(struct kcn_info *ki, const char *keys)
 {
 
 	switch (kcn_info_type(ki)) {
 	case KCN_TYPE_GOOGLE:
-		return kcn_google_search(keyc, keyv, ki);
+		return kcn_google_search(ki, keys);
 	case KCN_TYPE_LOCAL:
-		return kcn_local_search(keyc, keyv, ki);
+		return kcn_local_search(ki, keys);
 	default:
 		errno = EPROTONOSUPPORT;
 		return false;
