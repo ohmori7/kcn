@@ -83,7 +83,7 @@ kcn_google_one(const struct kcn_uri *ku, struct kcn_info *ki)
 		goto bad;
 	}
 	json_array_foreach(jres, i, jval) {
-		jloc = json_object_get(jval, jlockey[kcn_info_type(ki)]);
+		jloc = json_object_get(jval, jlockey[kcn_info_loc_type(ki)]);
 		if (jloc == NULL ||
 		    (jlocstr = json_string_value(jloc)) == NULL) {
 			errno = EINVAL;
@@ -117,8 +117,8 @@ kcn_google(int keyc, char * const keyv[], struct kcn_info *ki)
 	size_t n, uriolen, rcountmax;
 	int oerrno;
 
-	assert(kcn_info_type(ki) == KCN_LOC_TYPE_DOMAINNAME ||
-	    kcn_info_type(ki) == KCN_LOC_TYPE_URI);
+	assert(kcn_info_loc_type(ki) == KCN_LOC_TYPE_DOMAINNAME ||
+	    kcn_info_loc_type(ki) == KCN_LOC_TYPE_URI);
 	assert(kcn_info_maxnlocs(ki) > 0);
 
 	oerrno = errno;

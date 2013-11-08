@@ -11,7 +11,8 @@
 #include "kcn_info.h"
 
 struct kcn_info {
-	enum kcn_loc_type ki_type;
+	enum kcn_type ki_type;
+	enum kcn_loc_type ki_loctype;
 	size_t ki_maxnlocs;
 	char ki_country[KCN_INFO_COUNTRYSTRLEN];
 	char ki_userip[KCN_INET_ADDRSTRLEN];
@@ -20,8 +21,8 @@ struct kcn_info {
 };
 
 struct kcn_info *
-kcn_info_new(enum kcn_loc_type type, size_t maxnlocs, const char *country,
-    const char *userip)
+kcn_info_new(enum kcn_type type, enum kcn_loc_type loctype, size_t maxnlocs,
+    const char *country, const char *userip)
 {
 	struct kcn_info *ki;
 
@@ -29,6 +30,7 @@ kcn_info_new(enum kcn_loc_type type, size_t maxnlocs, const char *country,
 	if (ki == NULL)
 		return NULL;
 	ki->ki_type = type;
+	ki->ki_loctype = loctype;
 	ki->ki_maxnlocs = maxnlocs;
 	if (country == NULL)
 		ki->ki_country[0] = '\0';
@@ -56,11 +58,18 @@ kcn_info_destroy(struct kcn_info *ki)
 	free(ki);
 }
 
-enum kcn_loc_type
+enum kcn_type
 kcn_info_type(const struct kcn_info *ki)
 {
 
 	return ki->ki_type;
+}
+
+enum kcn_loc_type
+kcn_info_loc_type(const struct kcn_info *ki)
+{
+
+	return ki->ki_loctype;
 }
 
 size_t 

@@ -10,5 +10,9 @@ bool
 kcn_search(int keyc, char * const keyv[], struct kcn_info *ki)
 {
 
-	return kcn_google(keyc, keyv, ki);
+	switch (kcn_info_type(ki)) {
+	case KCN_TYPE_GOOGLE:	return kcn_google(keyc, keyv, ki);
+	case KCN_TYPE_LOCAL:
+	default:		return false;
+	}
 }
