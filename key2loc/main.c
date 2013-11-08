@@ -1,4 +1,3 @@
-#include <assert.h>
 #include <err.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -15,7 +14,6 @@
 #define KCN_LOC_TYPE_DEFAULT		KCN_LOC_TYPE_DOMAINNAME
 
 static void usage(const char *, const char *);
-static char *concat(int, char * const []);
 static void doit(enum kcn_type, enum kcn_loc_type, size_t,
     const char *, const char *, const char *);
 
@@ -80,7 +78,7 @@ main(int argc, char * const argv[])
 		usage(pname, "no keywords specified");
 		/*NOTREACHED*/
 
-	keys = concat(argc, argv);
+	keys = kcn_key_concat(argc, argv);
 	if (keys == NULL)
 		err(EXIT_FAILURE, "cannot allocate memory for URI");
 		/*NOTREACHED*/
@@ -112,29 +110,6 @@ Options:\n\
 \n",
 	    pname);
 	exit(EXIT_FAILURE);
-}
-
-static char *
-concat(int keyc, char * const keyv[])
-{
-	char *s;
-	size_t size;
-	int i;
-
-	assert(keyc > 0);
-	size = keyc; /* the number of separators and terminator */
-	for (i = 0; i < keyc; i++)
-		size += strlen(keyv[i]);
-	s = malloc(size);
-	if (s == NULL)
-		return NULL;
-	i = 0;
-	strncpy(s, keyv[i++], size);
-	for (; i < keyc; i++) {
-		(void)strncat(s, " ", size);
-		(void)strncat(s, keyv[i], size);
-	}
-	return s;
 }
 
 static void

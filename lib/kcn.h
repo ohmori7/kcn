@@ -11,3 +11,5 @@ size_t strlcpy(char *, const char *, size_t);
 #else /* HAVE_IPV6 */
 #define KCN_INET_ADDRSTRLEN	INET_ADDRSTRLEN
 #endif /* HAVE_IPV6 */
+
+char *kcn_key_concat(int, char * const []);
