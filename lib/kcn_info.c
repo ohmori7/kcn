@@ -21,8 +21,7 @@ struct kcn_info {
 };
 
 struct kcn_info *
-kcn_info_new(enum kcn_type type, enum kcn_loc_type loctype, size_t maxnlocs,
-    const char *country, const char *userip)
+kcn_info_new(enum kcn_type type, enum kcn_loc_type loctype, size_t maxnlocs)
 {
 	struct kcn_info *ki;
 
@@ -32,18 +31,8 @@ kcn_info_new(enum kcn_type type, enum kcn_loc_type loctype, size_t maxnlocs,
 	ki->ki_type = type;
 	ki->ki_loctype = loctype;
 	ki->ki_maxnlocs = maxnlocs;
-	if (country == NULL)
-		ki->ki_country[0] = '\0';
-	else {
-		assert(country[0] != '\0');
-		ki->ki_country[0] = country[0];
-		ki->ki_country[1] = country[1];
-		ki->ki_country[2] = '\0';
-	}
-	if (userip == NULL)
-		ki->ki_userip[0] = '\0';
-	else
-		strlcpy(ki->ki_userip, userip, sizeof(ki->ki_userip));
+	ki->ki_country[0] = '\0';
+	ki->ki_userip[0] = '\0';
 	ki->ki_nlocs = 0;
 	return ki;
 }
@@ -79,6 +68,18 @@ kcn_info_maxnlocs(const struct kcn_info *ki)
 	return ki->ki_maxnlocs;
 }
 
+void
+kcn_info_country_set(struct kcn_info *ki, const char *country)
+{
+
+	if (country == NULL)
+		return;
+	assert(country[0] != '\0');
+	ki->ki_country[0] = country[0];
+	ki->ki_country[1] = country[1];
+	ki->ki_country[2] = '\0';
+}
+
 const char *
 kcn_info_country(const struct kcn_info *ki)
 {
@@ -87,6 +88,15 @@ kcn_info_country(const struct kcn_info *ki)
 		return NULL;
 	else
 		return ki->ki_country;
+}
+
+void
+kcn_info_userip_set(struct kcn_info *ki, const char *userip)
+{
+
+	if (userip == NULL)
+		return;
+	strlcpy(ki->ki_userip, userip, sizeof(ki->ki_userip));
 }
 
 const char *

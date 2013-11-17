@@ -14,13 +14,14 @@ enum kcn_loc_type {
 
 struct kcn_info;
 
-struct kcn_info *kcn_info_new(enum kcn_type, enum kcn_loc_type, size_t,
-    const char *, const char *);
+struct kcn_info *kcn_info_new(enum kcn_type, enum kcn_loc_type, size_t);
 void kcn_info_destroy(struct kcn_info *);
 enum kcn_type kcn_info_type(const struct kcn_info *);
 enum kcn_loc_type kcn_info_loc_type(const struct kcn_info *);
 size_t kcn_info_maxnlocs(const struct kcn_info *);
+void kcn_info_country_set(struct kcn_info *, const char *);
 const char *kcn_info_country(const struct kcn_info *);
+void kcn_info_userip_set(struct kcn_info *, const char *);
 const char *kcn_info_userip(const struct kcn_info *);
 size_t kcn_info_nlocs(const struct kcn_info *);
 const char *kcn_info_loc(const struct kcn_info *, size_t);

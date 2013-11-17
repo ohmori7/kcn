@@ -119,9 +119,11 @@ doit(enum kcn_type type, enum kcn_loc_type loctype, size_t nmaxlocs,
 	struct kcn_info *ki;
 	size_t i;
 
-	ki = kcn_info_new(type, loctype, nmaxlocs, country, userip);
+	ki = kcn_info_new(type, loctype, nmaxlocs);
 	if (ki == NULL)
 		err(EXIT_FAILURE, "cannot allocate KCN information structure");
+	kcn_info_country_set(ki, country);
+	kcn_info_userip_set(ki, userip);
 	if (! kcn_search(ki, keys))
 		err(EXIT_FAILURE, "search failure");
 	for (i = 0; i < kcn_info_nlocs(ki); i++)
