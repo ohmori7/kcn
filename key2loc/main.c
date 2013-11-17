@@ -58,8 +58,8 @@ main(int argc, char * const argv[])
 		case 't':
 			if (strcasecmp(optarg, "google") == 0)
 				type = KCN_TYPE_GOOGLE;
-			else if (strcasecmp(optarg, "local") == 0)
-				type = KCN_TYPE_LOCAL;
+			else if (strcasecmp(optarg, "net") == 0)
+				type = KCN_TYPE_NETSTAT;
 			else
 				usage(pname, "unknown search type");
 				/*NOTREACHED*/
@@ -99,7 +99,7 @@ Options:\n\
 		IP: IP address (not supported yet)\n\
 	type: a type of search\n\
 		google: Google search\n\
-		local: KCN local database search\n\
+		net: network statistics database search\n\
 	number: the maximum number of locators returned\n\
 \n",
 	    pname);
