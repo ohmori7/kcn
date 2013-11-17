@@ -3,8 +3,8 @@
 	(sizeof(size_t /* ki->ki_maxnlocs */ ) * NBBY / 3 /*approximate */)
 
 enum kcn_type {
-	KCN_TYPE_LOCAL,
-	KCN_TYPE_GOOGLE
+	KCN_TYPE_GOOGLE,
+	KCN_TYPE_NETSTAT
 };
 
 enum kcn_loc_type {

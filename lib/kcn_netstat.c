@@ -4,10 +4,10 @@
 
 #include "kcn.h"
 #include "kcn_info.h"
-#include "kcn_local.h"
+#include "kcn_netstat.h"
 
 bool
-kcn_local_search(struct kcn_info *ki, const char *keys)
+kcn_netstat_search(struct kcn_info *ki, const char *keys)
 {
 
 	(void)ki;
