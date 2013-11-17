@@ -15,7 +15,7 @@
 
 static void usage(const char *, const char *);
 static void doit(enum kcn_type, enum kcn_loc_type, size_t,
-    const char *, const char *, const char *);
+    const char *, const char *, int, char * const []);
 
 int
 main(int argc, char * const argv[])
@@ -23,7 +23,6 @@ main(int argc, char * const argv[])
 	enum kcn_type type;
 	enum kcn_loc_type loctype;
 	const char *p, *pname, *country, *userip;
-	char *keys;
 	int n, ch;
 
 	pname = (p = strrchr(argv[0], '/')) != NULL ? p + 1 : argv[0];
@@ -78,12 +77,7 @@ main(int argc, char * const argv[])
 		usage(pname, "no keywords specified");
 		/*NOTREACHED*/
 
-	keys = kcn_key_concat(argc, argv);
-	if (keys == NULL)
-		err(EXIT_FAILURE, "cannot allocate memory for URI");
-		/*NOTREACHED*/
-	doit(type, loctype, n, country, userip, keys);
-	free(keys);
+	doit(type, loctype, n, country, userip, argc, argv);
 	return 0;
 }
 
@@ -114,7 +108,7 @@ Options:\n\
 
 static void
 doit(enum kcn_type type, enum kcn_loc_type loctype, size_t nmaxlocs,
-    const char *country, const char *userip, const char *keys)
+    const char *country, const char *userip, int keyc, char * const keyv[])
 {
 	struct kcn_info *ki;
 	size_t i;
@@ -124,7 +118,7 @@ doit(enum kcn_type type, enum kcn_loc_type loctype, size_t nmaxlocs,
 		err(EXIT_FAILURE, "cannot allocate KCN information structure");
 	kcn_info_country_set(ki, country);
 	kcn_info_userip_set(ki, userip);
-	if (! kcn_search(ki, keys))
+	if (! kcn_searchv(ki, keyc, keyv))
 		err(EXIT_FAILURE, "search failure");
 	for (i = 0; i < kcn_info_nlocs(ki); i++)
 		printf("%s\n", kcn_info_loc(ki, i));
