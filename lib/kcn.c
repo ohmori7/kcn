@@ -37,3 +37,47 @@ kcn_key_concat(int keyc, char * const keyv[])
 	}
 	return s;
 }
+
+char **
+kcn_key_split(const char *keys0, size_t *keycp)
+{
+	char *k, *kp, *keys, **keyv, **tmp;
+	size_t keyc;
+
+	keys = strdup(keys0);
+	if (keys == NULL)
+		return NULL;
+	keyc = 0;
+	keyv = NULL;
+	for (k = strtok_r(keys, " \t", &kp);
+	     k != NULL;
+	     k = strtok_r(NULL, " \t", &kp)) {
+		tmp = realloc(keyv, sizeof(char *) * (keyc + 1));
+		if (tmp == NULL)
+			goto bad;
+		keyv = tmp;
+		keyv[keyc++] = strdup(k);
+		if (keyv[keyc - 1] == NULL)
+			goto bad;
+	}
+	free(keys);
+	*keycp = keyc;
+	return keyv;
+  bad:
+	free(keys);
+	kcn_key_free(keyc, keyv);
+	return NULL;
+}
+
+void
+kcn_key_free(size_t keyc, char *keyv[])
+{
+	size_t i;
+
+	if (keyv == NULL)
+		return;
+	for (i = 0; i < keyc; i++)
+		if (keyv[i] != NULL)
+			free(keyv[i]);
+	free(keyv);
+}

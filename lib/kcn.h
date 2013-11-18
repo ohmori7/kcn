@@ -13,3 +13,5 @@ size_t strlcpy(char *, const char *, size_t);
 #endif /* HAVE_IPV6 */
 
 char *kcn_key_concat(int, char * const []);
+char **kcn_key_split(const char *, size_t *);
+void kcn_key_free(size_t, char **);
