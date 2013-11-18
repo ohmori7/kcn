@@ -9,7 +9,7 @@
 #include "kcn_info.h"
 #include "kcn_search.h"
 
-#define KCN_TYPE_DEFAULT		KCN_TYPE_GOOGLE
+#define KCN_TYPE_DEFAULT		KCN_TYPE_NONE
 #define KCN_LOC_COUNT_MAX_DEFAULT	1
 #define KCN_LOC_TYPE_DEFAULT		KCN_LOC_TYPE_DOMAINNAME
 
@@ -113,9 +113,10 @@ doit(enum kcn_type type, enum kcn_loc_type loctype, size_t nmaxlocs,
 	struct kcn_info *ki;
 	size_t i;
 
-	ki = kcn_info_new(type, loctype, nmaxlocs);
+	ki = kcn_info_new(loctype, nmaxlocs);
 	if (ki == NULL)
 		err(EXIT_FAILURE, "cannot allocate KCN information structure");
+	kcn_info_type_set(ki, type);
 	kcn_info_country_set(ki, country);
 	kcn_info_userip_set(ki, userip);
 	if (! kcn_searchv(ki, keyc, keyv))

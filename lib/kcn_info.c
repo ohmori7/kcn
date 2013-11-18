@@ -21,14 +21,14 @@ struct kcn_info {
 };
 
 struct kcn_info *
-kcn_info_new(enum kcn_type type, enum kcn_loc_type loctype, size_t maxnlocs)
+kcn_info_new(enum kcn_loc_type loctype, size_t maxnlocs)
 {
 	struct kcn_info *ki;
 
 	ki = malloc(offsetof(struct kcn_info, ki_locs[maxnlocs]));
 	if (ki == NULL)
 		return NULL;
-	ki->ki_type = type;
+	ki->ki_type = KCN_TYPE_NONE;
 	ki->ki_loctype = loctype;
 	ki->ki_maxnlocs = maxnlocs;
 	ki->ki_country[0] = '\0';
@@ -45,6 +45,13 @@ kcn_info_destroy(struct kcn_info *ki)
 	for (i = 0; i < ki->ki_nlocs; i++)
 		free(ki->ki_locs[i]);
 	free(ki);
+}
+
+void
+kcn_info_type_set(struct kcn_info *ki, enum kcn_type type)
+{
+
+	ki->ki_type = type;
 }
 
 enum kcn_type

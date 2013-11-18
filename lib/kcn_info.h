@@ -3,6 +3,7 @@
 	(sizeof(size_t /* ki->ki_maxnlocs */ ) * NBBY / 3 /*approximate */)
 
 enum kcn_type {
+	KCN_TYPE_NONE,
 	KCN_TYPE_GOOGLE,
 	KCN_TYPE_NETSTAT
 };
@@ -14,8 +15,9 @@ enum kcn_loc_type {
 
 struct kcn_info;
 
-struct kcn_info *kcn_info_new(enum kcn_type, enum kcn_loc_type, size_t);
+struct kcn_info *kcn_info_new(enum kcn_loc_type, size_t);
 void kcn_info_destroy(struct kcn_info *);
+void kcn_info_type_set(struct kcn_info *, enum kcn_type);
 enum kcn_type kcn_info_type(const struct kcn_info *);
 enum kcn_loc_type kcn_info_loc_type(const struct kcn_info *);
 size_t kcn_info_maxnlocs(const struct kcn_info *);
