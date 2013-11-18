@@ -16,7 +16,7 @@ kcn_search_type_guess(const char *keys)
 	size_t score;
 
 	score = kcn_netstat_match(keys);
-#define KCN_SEARCH_MATCH_THRESHOLD	2 /* XXX */
+#define KCN_SEARCH_MATCH_THRESHOLD	1 /* XXX */
 	if (score > KCN_SEARCH_MATCH_THRESHOLD)
 		return KCN_TYPE_NETSTAT;
 	return KCN_TYPE_GOOGLE;
