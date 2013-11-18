@@ -35,6 +35,9 @@ do {									\
 	MATCH("server");
 	MATCH("network");
 	MATCH("terminal");
+	MATCH("host");
+	MATCH("router");
+	MATCH("switch");
 	MATCH("equipment");
 	MATCH("HDD");
 	MATCH("storage");
