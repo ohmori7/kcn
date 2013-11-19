@@ -38,6 +38,31 @@ struct kcn_netstat_formula {
 	unsigned long long knf_val;
 };
 
+struct kcn_netstat_record {
+	unsigned long long knr_val;
+	const char *knr_uri;
+};
+
+static struct kcn_netstat_record kcn_netstat_storage_db[] = {
+#define BBASE	(1024ULL)
+#define KB	BBASE
+#define MB	(KB * BBASE)
+#define GB	(MB * BBASE)
+#define TB	(GB * BBASE)
+	{ 100ULL * GB,	"mobile-ip.org" },
+	{ 44ULL * GB,	"www.qgpop.net" },
+	{ 10ULL * GB,	"kcn3.mobile-ip.org" },
+	{ 5ULL * GB,	"kcn4.mobile-ip.org" },
+};
+
+static struct kcn_netstat_record kcn_netstat_latency_db[] = {
+	{ 200ULL,	"mobile-ip.org" },
+	{ 3ULL,		"wlan-exhibits-rtr.sc13.org" },
+	{ 175ULL,	"www.sinet.ad.jp" },
+	{ 30ULL,	"64.125.12.86" },
+	{ 67ULL,	"129.250.3.190" }
+};
+
 size_t
 kcn_netstat_match(const char *s)
 {
@@ -166,54 +191,39 @@ kcn_netstat_compile(size_t keyc, char * const keyv[],
 }
 
 static bool
-kcn_netstat_search_storage(struct kcn_info *ki,
-    const struct kcn_netstat_formula *knf)
+kcn_netstat_search_db(struct kcn_info *ki,
+    const struct kcn_netstat_formula *knf,
+    const struct kcn_netstat_record *db, size_t dbcount)
 {
 	size_t i, n;
-	struct {
-		unsigned long long total;
-		unsigned long long free;
-		const char *uri;
-	} storages[] = {
-#define BBASE	(1024ULL)
-#define KB	BBASE
-#define MB	(KB * BBASE)
-#define GB	(MB * BBASE)
-#define TB	(GB * BBASE)
-		{ 10ULL * GB,	100ULL * MB,	"kcn1.mobile-ip.org" },
-		{ 20ULL * GB,	10ULL * MB,	"kcn2.mobile-ip.org" },
-		{ 100ULL * GB,	50ULL * GB,	"kcn3.mobile-ip.org" },
-		{ 1ULL * TB,	500ULL * GB,	"kcn4.mobile-ip.org" },
-	};
-
 	n = 0;
-	for (i = 0; i < sizeof(storages) / sizeof(storages[0]); i++) {
+	for (i = 0; i < dbcount; i++) {
 		switch (knf->knf_op) {
 		case KCN_NETSTAT_OP_LT:
-			if (storages[i].free >= knf->knf_val)
+			if (db[i].knr_val >= knf->knf_val)
 				continue;
 			break;
 		case KCN_NETSTAT_OP_LE:
-			if (storages[i].free > knf->knf_val)
+			if (db[i].knr_val > knf->knf_val)
 				continue;
 			break;
 		case KCN_NETSTAT_OP_EQ:
-			if (storages[i].free != knf->knf_val)
+			if (db[i].knr_val != knf->knf_val)
 				continue;
 			break;
 		case KCN_NETSTAT_OP_GT:
-			if (storages[i].free <= knf->knf_val)
+			if (db[i].knr_val <= knf->knf_val)
 				continue;
 			break;
 		case KCN_NETSTAT_OP_GE:
-			if (storages[i].free < knf->knf_val)
+			if (db[i].knr_val < knf->knf_val)
 				continue;
 			break;
 		default:
 			assert(0);
 			continue;
 		}
-		if (! kcn_info_loc_add(ki, storages[i].uri))
+		if (! kcn_info_loc_add(ki, db[i].knr_uri))
 			return false;
 		if (++n >= kcn_info_maxnlocs(ki))
 			break;
@@ -239,14 +249,20 @@ kcn_netstat_search(struct kcn_info *ki, const char *keys)
 		errno = EINVAL;
 		goto bad;
 	}
+#define SEARCH(db)							\
+	kcn_netstat_search_db(ki, &knf, (db), sizeof(db) / sizeof((db)[0]))
 	switch (knf.knf_type) {
+	case KCN_NETSTAT_TYPE_LATENCY:
+		rc = SEARCH(kcn_netstat_latency_db);
+		break;
 	case KCN_NETSTAT_TYPE_STORAGE:
-		rc = kcn_netstat_search_storage(ki, &knf);
+		rc = SEARCH(kcn_netstat_storage_db);
 		break;
 	default:
 		errno = EOPNOTSUPP;
-		rc = false;
+		goto bad;
 	}
+#undef SEARCH
 	if (rc == false)
 		goto bad;
 	if (kcn_info_nlocs(ki) == 0) {
