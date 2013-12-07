@@ -87,7 +87,7 @@ kcn_key_free(size_t keyc, char *keyv[])
 	free(keyv);
 }
 
-static void
+void
 kcn_init(void)
 {
 	static bool initialized = false;

@@ -1,7 +1,9 @@
 #include <assert.h>
 #include <errno.h>
 #include <stdbool.h>
+#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "kcn.h"
 #include "kcn_log.h"
@@ -17,7 +19,7 @@ kcn_db_register(struct kcn_db *kdn)
 
 	KCN_LOG(INFO, "register \"%s\" database", kdn->kd_desc);
 	TAILQ_FOREACH(kd, &kcn_db_list, kd_chain) {
-		assert(kd->kd_type != kdn->kd_type);
+		assert(kd != kdn);
 		if (kd->kd_prio < kdn->kd_prio) {
 			TAILQ_INSERT_BEFORE(kd, kdn, kd_chain);
 			return;
@@ -63,29 +65,44 @@ kcn_db_lookup(const char *keys)
 }
 
 static const struct kcn_db *
-kcn_db_lookup_by_type(enum kcn_type type)
+kcn_db_lookup_by_name(const char *name)
 {
-	struct kcn_db *kd;
+	const struct kcn_db *kd;
 
 	TAILQ_FOREACH(kd, &kcn_db_list, kd_chain)
-		if (kd->kd_type == type)
+		if (strcasecmp(kd->kd_name, name) == 0)
 			return kd;
-	KCN_LOG(DEBUG, "unknown database type: %u", type);
-	errno = EINVAL;
+	errno = ESRCH;
 	return NULL;
+}
+
+bool
+kcn_db_exists(const char *name)
+{
+
+	return kcn_db_lookup_by_name(name) != NULL;
+}
+
+void
+kcn_db_name_list_puts(const char *prefix)
+{
+	const struct kcn_db *kd;
+
+	TAILQ_FOREACH(kd, &kcn_db_list, kd_chain)
+		fprintf(stderr, "%s%s: %s\n", prefix, kd->kd_name, kd->kd_desc);
 }
 
 bool
 kcn_db_search(struct kcn_info *ki, const char *keys)
 {
-	enum kcn_type type;
+	const char *name;
 	const struct kcn_db *kd;
 
-	type = kcn_info_type(ki);
-	if (type == KCN_TYPE_NONE)
+	name = kcn_info_db(ki);
+	if (name == NULL)
 		kd = kcn_db_lookup(keys);
 	else
-		kd = kcn_db_lookup_by_type(type);
+		kd = kcn_db_lookup_by_name(name);
 	if (kd == NULL)
 		return false;
 	return (*kd->kd_search)(ki, keys);

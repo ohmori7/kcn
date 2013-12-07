@@ -8,26 +8,28 @@
 #include "kcn.h"
 #include "kcn_log.h"
 #include "kcn_info.h"
+#include "kcn_db.h"
 
-#define KCN_TYPE_DEFAULT		KCN_TYPE_NONE
+#define KCN_DB_DEFAULT			NULL
 #define KCN_LOC_COUNT_MAX_DEFAULT	1
 #define KCN_LOC_TYPE_DEFAULT		KCN_LOC_TYPE_DOMAINNAME
 
 static void usage(const char *, const char *);
-static void doit(enum kcn_type, enum kcn_loc_type, size_t,
+static void doit(const char *, enum kcn_loc_type, size_t,
     const char *, const char *, int, char * const []);
 
 int
 main(int argc, char * const argv[])
 {
-	enum kcn_type type;
 	enum kcn_loc_type loctype;
-	const char *p, *pname, *country, *userip;
+	const char *p, *pname, *db, *country, *userip;
 	int n, ch;
 
 	pname = (p = strrchr(argv[0], '/')) != NULL ? p + 1 : argv[0];
 
-	type = KCN_TYPE_DEFAULT;
+	kcn_init();
+
+	db = KCN_DB_DEFAULT;
 	loctype = KCN_LOC_TYPE_DEFAULT;
 	country = NULL;
 	userip = NULL;
@@ -56,13 +58,10 @@ main(int argc, char * const argv[])
 			n = atoi(optarg);
 			break;
 		case 't':
-			if (strcasecmp(optarg, "google") == 0)
-				type = KCN_TYPE_GOOGLE;
-			else if (strcasecmp(optarg, "net") == 0)
-				type = KCN_TYPE_NETSTAT;
-			else
-				usage(pname, "unknown search type");
+			if (! kcn_db_exists(optarg))
+				usage(pname, "unknown database type");
 				/*NOTREACHED*/
+			db = optarg;
 			break;
 		case 'v':
 			kcn_log_priority_increment();
@@ -80,7 +79,7 @@ main(int argc, char * const argv[])
 		usage(pname, "no keywords specified");
 		/*NOTREACHED*/
 
-	doit(type, loctype, n, country, userip, argc, argv);
+	doit(db, loctype, n, country, userip, argc, argv);
 	return 0;
 }
 
@@ -101,17 +100,18 @@ Options:\n\
 		URI: URI\n\
 		IP: IP address (not supported yet)\n\
 	-n number: the maximum number of locators returned\n\
-	-t type: a type of search\n\
-		google: Google search\n\
-		net: network statistics database search\n\
+	-t type: a type of database listed below\n\
 	-v: increment verbosity (can be specified 7 times at maximum)\n\
 \n",
 	    pname);
+	fprintf(stderr, "\
+Supported database types are:\n");
+	kcn_db_name_list_puts("\t");
 	exit(EXIT_FAILURE);
 }
 
 static void
-doit(enum kcn_type type, enum kcn_loc_type loctype, size_t nmaxlocs,
+doit(const char *db, enum kcn_loc_type loctype, size_t nmaxlocs,
     const char *country, const char *userip, int keyc, char * const keyv[])
 {
 	struct kcn_info *ki;
@@ -120,7 +120,7 @@ doit(enum kcn_type type, enum kcn_loc_type loctype, size_t nmaxlocs,
 	ki = kcn_info_new(loctype, nmaxlocs);
 	if (ki == NULL)
 		err(EXIT_FAILURE, "cannot allocate KCN information structure");
-	kcn_info_type_set(ki, type);
+	kcn_info_db_set(ki, db);
 	kcn_info_country_set(ki, country);
 	kcn_info_userip_set(ki, userip);
 	if (! kcn_searchv(ki, keyc, keyv))

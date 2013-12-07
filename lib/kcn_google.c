@@ -33,7 +33,6 @@ static bool kcn_google_match(const char *, size_t *);
 static bool kcn_google_search(struct kcn_info *, const char *);
 
 static struct kcn_db kcn_google = {
-	.kd_type = KCN_TYPE_GOOGLE,
 	.kd_prio = 0,
 	.kd_name = "google",
 	.kd_desc = "Google Web search",

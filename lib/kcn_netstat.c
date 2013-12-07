@@ -68,7 +68,6 @@ static bool kcn_netstat_match(const char *, size_t *);
 static bool kcn_netstat_search(struct kcn_info *, const char *);
 
 static struct kcn_db kcn_netstat = {
-	.kd_type = KCN_TYPE_NETSTAT,
 	.kd_prio = 255,
 	.kd_name = "net",
 	.kd_desc = "Network statistics",

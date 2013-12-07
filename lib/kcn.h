@@ -17,5 +17,6 @@ struct kcn_info; /* XXX */
 char *kcn_key_concat(int, char * const []);
 char **kcn_key_split(const char *, size_t *);
 void kcn_key_free(size_t, char **);
+void kcn_init(void);
 bool kcn_search(struct kcn_info *, const char *);
 bool kcn_searchv(struct kcn_info *, int, char * const []);
