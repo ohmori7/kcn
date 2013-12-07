@@ -1,6 +1,8 @@
 #include <stdarg.h>
+#include <stdbool.h> /* XXX: just for bool in kcn.h */
 #include <stdio.h>
 
+#include "kcn.h"
 #include "kcn_log.h"
 
 static int kcn_log_priority = LOG_EMERG - 1;
