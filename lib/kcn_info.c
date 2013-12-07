@@ -13,12 +13,14 @@
 struct kcn_info {
 	enum kcn_loc_type ki_loctype;
 	size_t ki_maxnlocs;
-	const char *ki_dbname;
+	char *ki_dbname;
 	char ki_country[KCN_INFO_COUNTRYSTRLEN];
 	char ki_userip[KCN_INET_ADDRSTRLEN];
 	size_t ki_nlocs;
 	char *ki_locs[1];
 };
+
+static void kcn_info_db_unset(struct kcn_info *);
 
 struct kcn_info *
 kcn_info_new(enum kcn_loc_type loctype, size_t maxnlocs)
@@ -42,6 +44,7 @@ kcn_info_destroy(struct kcn_info *ki)
 {
 	size_t i;
 
+	kcn_info_db_unset(ki);
 	for (i = 0; i < ki->ki_nlocs; i++)
 		free(ki->ki_locs[i]);
 	free(ki);
@@ -65,7 +68,18 @@ void
 kcn_info_db_set(struct kcn_info *ki, const char *dbname)
 {
 
-	ki->ki_dbname = dbname;
+	kcn_info_db_unset(ki);
+	ki->ki_dbname = strdup(dbname);
+}
+
+static void
+kcn_info_db_unset(struct kcn_info *ki)
+{
+
+	if (ki->ki_dbname == NULL)
+		return;
+	free(ki->ki_dbname);
+	ki->ki_dbname = NULL;
 }
 
 const char *
