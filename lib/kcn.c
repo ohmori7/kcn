@@ -1,8 +1,13 @@
 #include <assert.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 
+#include "kcn_info.h"
 #include "kcn.h"
+#include "kcn_db.h"
+#include "kcn_netstat.h"
+#include "kcn_google.h"
 
 #ifndef HAVE_STRLCPY
 size_t
@@ -80,4 +85,39 @@ kcn_key_free(size_t keyc, char *keyv[])
 		if (keyv[i] != NULL)
 			free(keyv[i]);
 	free(keyv);
+}
+
+static void
+kcn_init(void)
+{
+	static bool initialized = false;
+
+	if (initialized)
+		return;
+	initialized = true;
+	/* XXX: should separate these initializations??? */
+	kcn_netstat_init();
+	kcn_google_init();
+}
+
+bool
+kcn_search(struct kcn_info *ki, const char *keys)
+{
+
+	kcn_init();
+	return kcn_db_search(ki, keys);
+}
+
+bool
+kcn_searchv(struct kcn_info *ki, int keyc, char * const keyv[])
+{
+	bool rc;
+	char *keys;
+
+	keys = kcn_key_concat(keyc, keyv);
+	if (keys == NULL)
+		return false;
+	rc = kcn_search(ki, keys);
+	free(keys);
+	return rc;
 }

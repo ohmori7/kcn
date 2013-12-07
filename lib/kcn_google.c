@@ -10,6 +10,7 @@
 #include "kcn.h"
 #include "kcn_uri.h"
 #include "kcn_info.h"
+#include "kcn_db.h"
 #include "kcn_http.h"
 #include "kcn_google.h"
 
@@ -27,6 +28,39 @@
 #define KCN_GOOGLE_API_COUNTRYOPT	"gl"
 #define KCN_GOOGLE_API_USERIPOPT	"userip"
 #define KCN_GOOGLE_API_STARTOPT		"start"
+
+static bool kcn_google_match(const char *, size_t *);
+static bool kcn_google_search(struct kcn_info *, const char *);
+
+static struct kcn_db kcn_google = {
+	.kd_type = KCN_TYPE_GOOGLE,
+	.kd_prio = 0,
+	.kd_match = kcn_google_match,
+	.kd_search = kcn_google_search
+};
+
+void
+kcn_google_init(void)
+{
+
+	kcn_db_register(&kcn_google);
+}
+
+void
+kcn_google_finish(void)
+{
+
+	kcn_db_deregister(&kcn_google);
+}
+
+static bool
+kcn_google_match(const char *s, size_t *scorep)
+{
+	
+	(void)*s;
+	*scorep = 0;
+	return true;
+}
 
 static bool
 kcn_google_search_one(const struct kcn_uri *ku, struct kcn_info *ki)
@@ -106,7 +140,7 @@ kcn_google_search_one(const struct kcn_uri *ku, struct kcn_info *ki)
 	return false;
 }
 
-bool
+static bool
 kcn_google_search(struct kcn_info *ki, const char *keys)
 {
 	struct kcn_uri *ku;

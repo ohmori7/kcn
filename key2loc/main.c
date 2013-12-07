@@ -7,7 +7,6 @@
 
 #include "kcn.h"
 #include "kcn_info.h"
-#include "kcn_search.h"
 
 #define KCN_TYPE_DEFAULT		KCN_TYPE_NONE
 #define KCN_LOC_COUNT_MAX_DEFAULT	1

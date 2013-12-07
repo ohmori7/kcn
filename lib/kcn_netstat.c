@@ -10,6 +10,7 @@
 
 #include "kcn.h"
 #include "kcn_info.h"
+#include "kcn_db.h"
 #include "kcn_netstat.h"
 
 enum kcn_netstat_type {
@@ -63,8 +64,32 @@ static struct kcn_netstat_record kcn_netstat_latency_db[] = {
 	{ 67ULL,	"129.250.3.190" }
 };
 
-size_t
-kcn_netstat_match(const char *s)
+static bool kcn_netstat_match(const char *, size_t *);
+static bool kcn_netstat_search(struct kcn_info *, const char *);
+
+static struct kcn_db kcn_netstat = {
+	.kd_type = KCN_TYPE_NETSTAT,
+	.kd_prio = 255,
+	.kd_match = kcn_netstat_match,
+	.kd_search = kcn_netstat_search
+};
+
+void
+kcn_netstat_init(void)
+{
+
+	kcn_db_register(&kcn_netstat);
+}
+
+void
+kcn_netstat_finish(void)
+{
+
+	kcn_db_deregister(&kcn_netstat);
+}
+
+static bool
+kcn_netstat_match(const char *s, size_t *scorep)
 {
 	size_t score;
 
@@ -103,7 +128,12 @@ do {									\
 	MATCH("max");
 	MATCH("min");
 #undef MATCH
-	return score;
+	*scorep = score;
+	errno = 0; /* XXX: should cause errors when format is invalid. */
+	if (score == 0)
+		return false;
+	else
+		return true;
 }
 
 static enum kcn_netstat_type
@@ -232,7 +262,7 @@ kcn_netstat_search_db(struct kcn_info *ki,
 	return true;
 }
 
-bool
+static bool
 kcn_netstat_search(struct kcn_info *ki, const char *keys)
 {
 	struct kcn_netstat_formula knf;

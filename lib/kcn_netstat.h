@@ -1,3 +1,2 @@
-size_t kcn_netstat_match(const char *);
-bool kcn_netstat_search(struct kcn_info *, const char *);
-
+void kcn_netstat_init(void);
+void kcn_netstat_finish(void);
