@@ -6,6 +6,7 @@
 #include <unistd.h>
 
 #include "kcn.h"
+#include "kcn_log.h"
 #include "kcn_info.h"
 
 #define KCN_TYPE_DEFAULT		KCN_TYPE_NONE
@@ -31,7 +32,7 @@ main(int argc, char * const argv[])
 	country = NULL;
 	userip = NULL;
 	n = KCN_LOC_COUNT_MAX_DEFAULT;
-	while ((ch = getopt(argc, argv, "c:i:n:l:t:")) != -1) {
+	while ((ch = getopt(argc, argv, "c:i:n:l:t:v")) != -1) {
 		switch (ch) {
 		case 'c':
 			country = optarg;
@@ -63,6 +64,9 @@ main(int argc, char * const argv[])
 				usage(pname, "unknown search type");
 				/*NOTREACHED*/
 			break;
+		case 'v':
+			kcn_log_priority_increment();
+			break;
 		case 'h':
 		case '?':
 		default:
@@ -87,19 +91,20 @@ usage(const char *pname, const char *errmsg)
 	if (errmsg != NULL)
 		fprintf(stderr, "ERROR: %s\n\n", errmsg);
 	fprintf(stderr, "\
-Usage: %s [-c country] [-i user IP] [-l loctype] [-n number] [-t type] <keyword1> [<keyword2>] [<keyword3>] ...\n\
+Usage: %s [-c country] [-i user IP] [-l loctype] [-n number] [-t type] [-v] <keyword1> [<keyword2>] [<keyword3>] ...\n\
 \n\
 Options:\n\
-	country: a country code of locators in ISO 3166-1 (e.g., us, jp)\n\
-	user IP: the IP address of this host\n\
-	loctype: a type of locators returned\n\
+	-c country: a country code of locators in ISO 3166-1 (e.g., us, jp)\n\
+	-i user IP: the IP address of this host\n\
+	-l loctype: a type of locators returned\n\
 		domain: domain name\n\
 		URI: URI\n\
 		IP: IP address (not supported yet)\n\
-	type: a type of search\n\
+	-n number: the maximum number of locators returned\n\
+	-t type: a type of search\n\
 		google: Google search\n\
 		net: network statistics database search\n\
-	number: the maximum number of locators returned\n\
+	-v: increment verbosity (can be specified 7 times at maximum)\n\
 \n",
 	    pname);
 	exit(EXIT_FAILURE);
