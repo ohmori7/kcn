@@ -1,4 +1,3 @@
-#include <sys/queue.h>
 #include <assert.h>
 #include <errno.h>
 #include <stdbool.h>
