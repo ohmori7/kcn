@@ -1,5 +1,11 @@
 /* config.h.in.  Generated from configure.ac by autoheader.  */
 
+/* Define to 1 if you have standard C99 of __VA_ARGS__. */
+#undef HAVE_C99_VA_ARGS
+
+/* Define to 1 if you have gcc extension of __VA_ARGS__. */
+#undef HAVE_GCC_VA_ARGS
+
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
 
