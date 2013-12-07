@@ -5,6 +5,7 @@
 #include <stdlib.h>
 
 #include "kcn.h"
+#include "kcn_log.h"
 #include "kcn_info.h"
 #include "kcn_db.h"
 
@@ -15,6 +16,7 @@ kcn_db_register(struct kcn_db *kdn)
 {
 	struct kcn_db *kd;
 
+	KCN_LOG(INFO, "register \"%s\" database", kdn->kd_desc);
 	TAILQ_FOREACH(kd, &kcn_db_list, kd_chain) {
 		assert(kd->kd_type != kdn->kd_type);
 		if (kd->kd_prio < kdn->kd_prio) {
@@ -29,6 +31,7 @@ void
 kcn_db_deregister(struct kcn_db *kd)
 {
 
+	KCN_LOG(INFO, "deregister \"%s\" database", kd->kd_desc);
 	TAILQ_REMOVE(&kcn_db_list, kd, kd_chain);
 }
 
@@ -44,6 +47,7 @@ kcn_db_lookup(const char *keys)
 	TAILQ_FOREACH(kd, &kcn_db_list, kd_chain) {
 		if (! (*kd->kd_match)(keys, &score)) {
 			if (errno != 0) {
+				KCN_LOG(DEBUG, "invalid syntax");
 				errno = EINVAL;
 				return NULL;
 			}
@@ -67,6 +71,7 @@ kcn_db_lookup_by_type(enum kcn_type type)
 	TAILQ_FOREACH(kd, &kcn_db_list, kd_chain)
 		if (kd->kd_type == type)
 			return kd;
+	KCN_LOG(DEBUG, "unknown database type: %u", type);
 	errno = EINVAL;
 	return NULL;
 }
