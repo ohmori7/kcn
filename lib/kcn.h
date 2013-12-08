@@ -12,6 +12,16 @@ size_t strlcpy(char *, const char *, size_t);
 #define KCN_INET_ADDRSTRLEN	INET_ADDRSTRLEN
 #endif /* HAVE_IPV6 */
 
+#if BYTE_ORDER == LITTLE_ENDIAN
+#define KCN_HTONS(v)							\
+	((((unsigned int)(v) << 8) & 0xff00U) |				\
+	 (((unsigned int)(v) >> 8) & 0xffU))
+#elif BYTE_ORDER == BIG_ENDIAN /* BYTE_ORDER == LITTLE_ENDIAN */
+#define KCN_HTONS(v)	v
+#else /* BYTE_ORDER == BIG_ENDIAN */
+#error unknown endianness
+#endif /* BYTE_ORDER != LITTLE_ENDIAN && BYTE_ORDER != BIG_ENDIAN */
+
 struct kcn_info; /* XXX */
 
 char *kcn_key_concat(int, char * const []);
