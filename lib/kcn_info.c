@@ -69,7 +69,10 @@ kcn_info_db_set(struct kcn_info *ki, const char *dbname)
 {
 
 	kcn_info_db_unset(ki);
+	if (dbname == NULL)
+		return;
 	ki->ki_dbname = strdup(dbname);
+	/* XXX: error handling. */
 }
 
 static void
