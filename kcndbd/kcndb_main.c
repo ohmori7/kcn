@@ -10,6 +10,7 @@
 #include <unistd.h>
 
 #include "kcn.h"
+#include "kcn_str.h"
 #include "kcn_log.h"
 
 #include "kcndb_db.h"
@@ -23,10 +24,9 @@ int
 main(int argc, char * const argv[])
 {
 	const char *p;
-	char *ep;
 	bool fflag;
 	int ch;
-	long lval;
+	unsigned long long llval;
 
 	pname = (p = strrchr(argv[0], '/')) != NULL ? p + 1 : argv[0];
 
@@ -41,19 +41,12 @@ main(int argc, char * const argv[])
 		case 'f':
 			fflag = true;
 			break;
-		case 'p':	
-			errno = 0;
-			lval = strtol(optarg, &ep, 10);
-			if (*ep != '\0')
-				usage("invalid TCP port number");
-				/*NOTREACHED*/
-			if ((errno == ERANGE &&
-			     (lval == LONG_MAX || lval == LONG_MIN)) ||
-			    lval < KCNDB_NET_PORT_MIN ||
-			    lval > KCNDB_NET_PORT_MAX)
+		case 'p':
+			if (! kcn_strtoull(optarg, KCNDB_NET_PORT_MIN,
+			    KCNDB_NET_PORT_MAX, &llval))
 				usage("invalid TCP port number");
 				/*NOTERACHED*/
-			if (! kcndb_net_port_set(lval))
+			if (! kcndb_net_port_set(llval))
 				usage("cannot set TCP port, \"%s\"", optarg);
 				/*NOTREACHED*/
 			break;
