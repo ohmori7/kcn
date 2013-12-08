@@ -5,7 +5,7 @@ AC_DEFUN([AC_KCN_DEFINE], [
 	$1=yes
 	ABOUT_$1="$3"
 	AC_DEFINE($1, 1, [Define to $2 if you have $3.])
-	AC_MSG_RESULT($1)
+	AC_MSG_RESULT(yes)
 ])
 
 dnl
