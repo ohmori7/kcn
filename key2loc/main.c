@@ -34,7 +34,7 @@ main(int argc, char * const argv[])
 	country = NULL;
 	userip = NULL;
 	n = KCN_LOC_COUNT_MAX_DEFAULT;
-	while ((ch = getopt(argc, argv, "c:i:n:l:t:v")) != -1) {
+	while ((ch = getopt(argc, argv, "c:hi:n:l:t:v?")) != -1) {
 		switch (ch) {
 		case 'c':
 			country = optarg;
