@@ -3,12 +3,14 @@
 #endif /* __linux__ */
 #include <assert.h>
 #include <errno.h>
+#include <limits.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "kcn.h"
+#include "kcn_str.h"
 #include "kcn_info.h"
 #include "kcn_db.h"
 #include "kcn_netstat.h"
@@ -187,17 +189,8 @@ kcn_netstat_operator_parse(const char *w)
 static bool
 kcn_netstat_value_parse(const char *w, unsigned long long *valp)
 {
-	int oerrno;
-	char *ep;
 
-	oerrno = errno;
-	errno = 0;
-	*valp = strtoull(w, &ep, 10);
-	/* XXX: other error handling. */
-	if (errno != 0)
-		return false;
-	errno = oerrno;
-	return true;
+	return kcn_strtoull(w, ULLONG_MAX, 0, valp);
 }
 
 static bool
