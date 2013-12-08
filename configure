@@ -8629,7 +8629,7 @@ CFLAGS="$CFLAGS -W -Wall -Werror -Wmissing-declarations"
 KCN_LIBS="-L../lib -lkcn"
 
 
-ac_config_files="$ac_config_files Makefile lib/Makefile key2loc/Makefile"
+ac_config_files="$ac_config_files Makefile lib/Makefile key2loc/Makefile kcndbd/Makefile"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -9270,6 +9270,7 @@ do
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
     "lib/Makefile") CONFIG_FILES="$CONFIG_FILES lib/Makefile" ;;
     "key2loc/Makefile") CONFIG_FILES="$CONFIG_FILES key2loc/Makefile" ;;
+    "kcndbd/Makefile") CONFIG_FILES="$CONFIG_FILES kcndbd/Makefile" ;;
 
   *) { { $as_echo "$as_me:$LINENO: error: invalid argument: $ac_config_target" >&5
 $as_echo "$as_me: error: invalid argument: $ac_config_target" >&2;}

@@ -167,5 +167,5 @@ CFLAGS="$CFLAGS -W -Wall -Werror -Wmissing-declarations"
 KCN_LIBS="-L../lib -lkcn"
 
 AC_SUBST(KCN_LIBS)
-AC_CONFIG_FILES([Makefile lib/Makefile key2loc/Makefile])
+AC_CONFIG_FILES([Makefile lib/Makefile key2loc/Makefile kcndbd/Makefile])
 AC_OUTPUT

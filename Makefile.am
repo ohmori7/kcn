@@ -1,1 +1,1 @@
-SUBDIRS = lib key2loc
+SUBDIRS = lib key2loc kcndbd
