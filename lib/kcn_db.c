@@ -36,9 +36,8 @@ kcn_db_deregister(struct kcn_db *kd)
 	TAILQ_REMOVE(&kcn_db_list, kd, kd_chain);
 }
 
-/* XXX: there might be the case where keywords are ambiguous or inconsistent. */
 static const struct kcn_db *
-kcn_db_lookup(const char *keys)
+kcn_db_match(const char *keys)
 {
 	struct kcn_db *kd, *kdmatch;
 	size_t score, scorematch;
@@ -65,7 +64,7 @@ kcn_db_lookup(const char *keys)
 }
 
 static const struct kcn_db *
-kcn_db_lookup_by_name(const char *name)
+kcn_db_lookup(const char *name)
 {
 	const struct kcn_db *kd;
 
@@ -80,7 +79,7 @@ bool
 kcn_db_exists(const char *name)
 {
 
-	return kcn_db_lookup_by_name(name) != NULL;
+	return kcn_db_lookup(name) != NULL;
 }
 
 void
@@ -100,9 +99,9 @@ kcn_db_search(struct kcn_info *ki, const char *keys)
 
 	name = kcn_info_db(ki);
 	if (name == NULL)
-		kd = kcn_db_lookup(keys);
+		kd = kcn_db_match(keys);
 	else
-		kd = kcn_db_lookup_by_name(name);
+		kd = kcn_db_lookup(name);
 	if (kd == NULL)
 		return false;
 	return (*kd->kd_search)(ki, keys);
