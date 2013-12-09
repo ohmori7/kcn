@@ -193,7 +193,7 @@ static bool
 kcn_netstat_value_parse(const char *w, unsigned long long *valp)
 {
 
-	return kcn_strtoull(w, ULLONG_MAX, 0, valp);
+	return kcn_strtoull(w, 0, ULLONG_MAX, valp);
 }
 
 static bool
