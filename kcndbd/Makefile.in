@@ -50,7 +50,7 @@ CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
 am_kcndbd_OBJECTS = kcndb_main.$(OBJEXT) kcndb_db.$(OBJEXT) \
-	kcndb_net.$(OBJEXT)
+	kcndb_server.$(OBJEXT)
 kcndbd_OBJECTS = $(am_kcndbd_OBJECTS)
 kcndbd_DEPENDENCIES =
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
@@ -173,7 +173,7 @@ target_vendor = @target_vendor@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-kcndbd_SOURCES = kcndb_main.c kcndb_db.c kcndb_net.c
+kcndbd_SOURCES = kcndb_main.c kcndb_db.c kcndb_server.c
 kcndbd_LDADD = @KCN_LIBS@
 all: all-am
 
@@ -258,7 +258,7 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/kcndb_db.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/kcndb_main.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/kcndb_net.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/kcndb_server.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
