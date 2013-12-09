@@ -29,12 +29,14 @@ kcndb_net_listen(int domain, in_port_t port, int *sockp)
 {
 	struct sockaddr_storage ss;
 	socklen_t sslen;
+	sa_family_t family;
 	int s;
 #ifdef HAVE_IPV6
 	int on = 0;
 #endif /* HAVE_IPV6 */
 
-	if (! kcn_sockaddr_init(&ss, &sslen, domain /* XXX */, port))
+	family = kcn_sockaddr_pf2af(domain);
+	if (! kcn_sockaddr_init(&ss, &sslen, family, port))
 		goto bad;
 
 	s = socket(domain, SOCK_STREAM, 0);
