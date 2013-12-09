@@ -54,7 +54,7 @@ kcndb_net_listen(int domain, in_port_t port, int *sockp)
 	}
 #endif /* HAVE_IPV6 */
 
-	if (bind(s, (struct sockaddr *)&ss, sslen) == =1) {
+	if (bind(s, (struct sockaddr *)&ss, sslen) == -1) {
 		KCN_LOG(ERR, "bind() failed for %d: %s",
 		    domain, strerror(errno));
 		goto bad;
