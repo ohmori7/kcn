@@ -158,8 +158,10 @@ kcn_netstat_type_parse(const char *s)
 		return KCN_NETSTAT_TYPE_ASPATHLEN;
 	else if (ISMATCH("assoc"))
 		return KCN_NETSTAT_TYPE_WLANASSOC;
-	else
+	else {
+		errno = ESRCH;
 		return KCN_NETSTAT_TYPE_NONE;
+	}
 #undef ISMATCH
 }
 
@@ -183,6 +185,7 @@ kcn_netstat_operator_parse(const char *w)
 	if (strcasecmp(">=", w) == 0 ||
 	    strcasecmp("ge", w) == 0)
 		return KCN_NETSTAT_OP_GE;
+	errno = ESRCH;
 	return KCN_NETSTAT_OP_NONE;
 }
 
@@ -198,20 +201,18 @@ kcn_netstat_compile(size_t keyc, char * const keyv[],
     struct kcn_netstat_formula *knf)
 {
 
+	errno = 0;
 	if (keyc < 3)
-		goto bad;
+		return false;
 	knf->knf_type = kcn_netstat_type_parse(keyv[0]);
 	if (knf->knf_type == KCN_NETSTAT_TYPE_NONE)
-		goto bad;
+		return false;
 	knf->knf_op = kcn_netstat_operator_parse(keyv[1]);
 	if (knf->knf_op == KCN_NETSTAT_OP_NONE)
-		goto bad;
+		return false;
 	if (! kcn_netstat_value_parse(keyv[2], &knf->knf_val))
-		goto bad;
+		return false;
 	return true;
-  bad:
-	errno = EINVAL; /* XXX */
-	return false;
 }
 
 static bool
@@ -269,10 +270,8 @@ kcn_netstat_search(struct kcn_info *ki, const char *keys)
 		errno = EINVAL;
 		goto bad;
 	}
-	if (! kcn_netstat_compile(keyc, keyv, &knf)) {
-		errno = EINVAL;
+	if (! kcn_netstat_compile(keyc, keyv, &knf))
 		goto bad;
-	}
 #define SEARCH(db)							\
 	kcn_netstat_search_db(ki, &knf, (db), sizeof(db) / sizeof((db)[0]))
 	switch (knf.knf_type) {
