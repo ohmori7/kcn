@@ -77,9 +77,10 @@ libkcn_a_LIBADD =
 am_libkcn_a_OBJECTS = libkcn_a-kcn.$(OBJEXT) \
 	libkcn_a-kcn_str.$(OBJEXT) libkcn_a-kcn_log.$(OBJEXT) \
 	libkcn_a-kcn_buf.$(OBJEXT) libkcn_a-kcn_token.$(OBJEXT) \
-	libkcn_a-kcn_uri.$(OBJEXT) libkcn_a-kcn_info.$(OBJEXT) \
-	libkcn_a-kcn_http.$(OBJEXT) libkcn_a-kcn_google.$(OBJEXT) \
-	libkcn_a-kcn_netstat.$(OBJEXT) libkcn_a-kcn_db.$(OBJEXT)
+	libkcn_a-kcn_uri.$(OBJEXT) libkcn_a-kcn_sockaddr.$(OBJEXT) \
+	libkcn_a-kcn_info.$(OBJEXT) libkcn_a-kcn_http.$(OBJEXT) \
+	libkcn_a-kcn_google.$(OBJEXT) libkcn_a-kcn_netstat.$(OBJEXT) \
+	libkcn_a-kcn_db.$(OBJEXT)
 libkcn_a_OBJECTS = $(am_libkcn_a_OBJECTS)
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
@@ -205,12 +206,12 @@ top_srcdir = @top_srcdir@
 lib_LIBRARIES = libkcn.a
 libkcn_a_SOURCES = \
 	kcn.c kcn_str.c kcn_log.c kcn_buf.c kcn_token.c kcn_uri.c	\
-	kcn_info.c							\
+	kcn_sockaddr.c kcn_info.c					\
 	kcn_http.c kcn_google.c kcn_netstat.c kcn_db.c
 
 noinst_HEADERS = \
 	kcn_str.h kcn_buf.h kcn_token.h kcn_uri.h kcn_http.h		\
-	kcn_google.h kcn_netstat.h kcn_db.h
+	kcn_sockaddr.h kcn_google.h kcn_netstat.h kcn_db.h
 
 include_HEADERS = \
 	kcn.h kcn_log.h kcn_info.h
@@ -301,6 +302,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libkcn_a-kcn_info.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libkcn_a-kcn_log.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libkcn_a-kcn_netstat.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libkcn_a-kcn_sockaddr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libkcn_a-kcn_str.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libkcn_a-kcn_token.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libkcn_a-kcn_uri.Po@am__quote@
@@ -402,6 +404,20 @@ libkcn_a-kcn_uri.obj: kcn_uri.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='kcn_uri.c' object='libkcn_a-kcn_uri.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libkcn_a_CFLAGS) $(CFLAGS) -c -o libkcn_a-kcn_uri.obj `if test -f 'kcn_uri.c'; then $(CYGPATH_W) 'kcn_uri.c'; else $(CYGPATH_W) '$(srcdir)/kcn_uri.c'; fi`
+
+libkcn_a-kcn_sockaddr.o: kcn_sockaddr.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libkcn_a_CFLAGS) $(CFLAGS) -MT libkcn_a-kcn_sockaddr.o -MD -MP -MF $(DEPDIR)/libkcn_a-kcn_sockaddr.Tpo -c -o libkcn_a-kcn_sockaddr.o `test -f 'kcn_sockaddr.c' || echo '$(srcdir)/'`kcn_sockaddr.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libkcn_a-kcn_sockaddr.Tpo $(DEPDIR)/libkcn_a-kcn_sockaddr.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='kcn_sockaddr.c' object='libkcn_a-kcn_sockaddr.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libkcn_a_CFLAGS) $(CFLAGS) -c -o libkcn_a-kcn_sockaddr.o `test -f 'kcn_sockaddr.c' || echo '$(srcdir)/'`kcn_sockaddr.c
+
+libkcn_a-kcn_sockaddr.obj: kcn_sockaddr.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libkcn_a_CFLAGS) $(CFLAGS) -MT libkcn_a-kcn_sockaddr.obj -MD -MP -MF $(DEPDIR)/libkcn_a-kcn_sockaddr.Tpo -c -o libkcn_a-kcn_sockaddr.obj `if test -f 'kcn_sockaddr.c'; then $(CYGPATH_W) 'kcn_sockaddr.c'; else $(CYGPATH_W) '$(srcdir)/kcn_sockaddr.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libkcn_a-kcn_sockaddr.Tpo $(DEPDIR)/libkcn_a-kcn_sockaddr.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='kcn_sockaddr.c' object='libkcn_a-kcn_sockaddr.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libkcn_a_CFLAGS) $(CFLAGS) -c -o libkcn_a-kcn_sockaddr.obj `if test -f 'kcn_sockaddr.c'; then $(CYGPATH_W) 'kcn_sockaddr.c'; else $(CYGPATH_W) '$(srcdir)/kcn_sockaddr.c'; fi`
 
 libkcn_a-kcn_info.o: kcn_info.c
 @am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libkcn_a_CFLAGS) $(CFLAGS) -MT libkcn_a-kcn_info.o -MD -MP -MF $(DEPDIR)/libkcn_a-kcn_info.Tpo -c -o libkcn_a-kcn_info.o `test -f 'kcn_info.c' || echo '$(srcdir)/'`kcn_info.c
