@@ -14,7 +14,7 @@
 #include "kcn_log.h"
 
 #include "kcndb_db.h"
-#include "kcndb_net.h"
+#include "kcndb_server.h"
 
 static void usage(const char *, ...);
 

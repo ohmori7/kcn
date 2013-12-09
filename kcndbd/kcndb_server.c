@@ -7,7 +7,7 @@
 #include "kcn_log.h"
 #include "kcn_socket.h"
 #include "kcn_sockaddr.h"
-#include "kcndb_net.h"
+#include "kcndb_server.h"
 
 static int kcndb_net_socket = -1;
 static in_port_t kcndb_net_port = KCN_HTONS(KCNDB_NET_PORT_DEFAULT);
