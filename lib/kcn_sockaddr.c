@@ -7,6 +7,19 @@
 #include "kcn.h"
 #include "kcn_sockaddr.h"
 
+int
+kcn_sockaddr_pf2af(int domain)
+{
+
+	switch (domain) {
+	case PF_INET:	return AF_INET;
+#ifdef HAVE_IPV6
+	case PF_INET6:	return AF_INET6;
+#endif /* HAVE_IPV6 */
+	default:	errno = EPFNOSUPPORT; return -1;
+	}
+}
+
 bool
 kcn_sockaddr_init(struct sockaddr_storage *ss, socklen_t *sslenp,
     sa_family_t family, in_port_t port)
