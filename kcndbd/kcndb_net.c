@@ -11,10 +11,7 @@
 #include "kcn_sockaddr.h"
 #include "kcndb_net.h"
 
-static int kcndb_net_socket4 = -1;
-#ifdef HAVE_IPV6
-static int kcndb_net_socket6 = -1;
-#endif /* HAVE_IPV6 */
+static int kcndb_net_socket = -1;
 static in_port_t kcndb_net_port = KCN_HTONS(KCNDB_NET_PORT_DEFAULT);
 
 static void kcndb_net_close(int *);
@@ -33,6 +30,9 @@ kcndb_net_listen(int domain, in_port_t port, int *sockp)
 	struct sockaddr_storage ss;
 	socklen_t sslen;
 	int s;
+#ifdef HAVE_IPV6
+	int on = 0;
+#endif /* HAVE_IPV6 */
 
 	if (! kcn_sockaddr_init(&ss, &sslen, domain /* XXX */, port))
 		goto bad;
@@ -43,8 +43,16 @@ kcndb_net_listen(int domain, in_port_t port, int *sockp)
 		    domain, strerror(errno));
 		goto bad;
 	}
+#ifdef HAVE_IPV6
+	if (domain == PF_INET6 &&
+	    setsockopt(s, IPPROTO_IPV6, IPV6_V6ONLY, &on, sizeof(on)) == -1) {
+		KCN_LOG(ERR, "setsockopt() failed %d: %s",
+		    domain, strerror(errno));
+		goto bad;
+	}
+#endif /* HAVE_IPV6 */
 
-	if (bind(s, (struct sockaddr *)&ss, sslen) == -1) {
+	if (bind(s, (struct sockaddr *)&ss, sslen) == =1) {
 		KCN_LOG(ERR, "bind() failed for %d: %s",
 		    domain, strerror(errno));
 		goto bad;
@@ -80,20 +88,18 @@ kcndb_net_close(int *sockp)
 bool
 kcndb_net_start(void)
 {
+	int domain;
 
-	assert(kcndb_net_socket4 == -1);
-#ifdef HAVE_IPV6
-	assert(kcndb_net_socket6 == -1);
-#endif /* HAVE_IPV6 */
+	assert(kcndb_net_socket == -1);
 
-	if (! kcndb_net_listen(PF_INET, kcndb_net_port, &kcndb_net_socket4))
-		goto bad;
-	KCN_LOG(INFO, "server listen on %u for IPv4.", ntohs(kcndb_net_port));
 #ifdef HAVE_IPV6
-	if (! kcndb_net_listen(PF_INET6, kcndb_net_port, &kcndb_net_socket6))
+	domain = PF_INET6;
+#else /* HAVE_IPV6 */
+	domain = PF_INET;
+#endif /* ! HAVE_IPV6 */
+	if (! kcndb_net_listen(domain, kcndb_net_port, &kcndb_net_socket))
 		goto bad;
-	KCN_LOG(INFO, "server listen on %u for IPv6.", ntohs(kcndb_net_port));
-#endif /* HAVE_IPV6 */
+	KCN_LOG(INFO, "server listen on %u.", ntohs(kcndb_net_port));
 	return true;
   bad:
 	kcndb_net_stop();
@@ -104,8 +110,5 @@ void
 kcndb_net_stop(void)
 {
 
-	kcndb_net_close(&kcndb_net_socket4);
-#ifdef HAVE_IPV6
-	kcndb_net_close(&kcndb_net_socket6);
-#endif /* HAVE_IPV6 */
+	kcndb_net_close(&kcndb_net_socket);
 }
