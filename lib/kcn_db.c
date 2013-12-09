@@ -104,5 +104,6 @@ kcn_db_search(struct kcn_info *ki, const char *keys)
 		kd = kcn_db_lookup(name);
 	if (kd == NULL)
 		return false;
+	KCN_LOG(DEBUG, "select a database of \"%s\"", kd->kd_name);
 	return (*kd->kd_search)(ki, keys);
 }
