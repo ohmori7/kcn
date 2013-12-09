@@ -159,7 +159,7 @@ kcn_netstat_type_parse(const char *s)
 	else if (ISMATCH("assoc"))
 		return KCN_NETSTAT_TYPE_WLANASSOC;
 	else {
-		errno = ESRCH;
+		errno = ENOENT;
 		return KCN_NETSTAT_TYPE_NONE;
 	}
 #undef ISMATCH
@@ -185,7 +185,7 @@ kcn_netstat_operator_parse(const char *w)
 	if (strcasecmp(">=", w) == 0 ||
 	    strcasecmp("ge", w) == 0)
 		return KCN_NETSTAT_OP_GE;
-	errno = ESRCH;
+	errno = ENOENT;
 	return KCN_NETSTAT_OP_NONE;
 }
 
