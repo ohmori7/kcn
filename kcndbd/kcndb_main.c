@@ -66,6 +66,11 @@ main(int argc, char * const argv[])
 		usage("cannot daemonize");
 		/*NOTREACHED*/
 
+	if (! kcndb_net_start())
+		usage("cannot launch server");
+
+	sleep(1000);
+
 	return 0;
 }
 
