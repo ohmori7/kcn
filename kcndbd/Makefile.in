@@ -49,10 +49,12 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
-am_kcndbd_OBJECTS = kcndb_main.$(OBJEXT) kcndb_db.$(OBJEXT) \
-	kcndb_server.$(OBJEXT)
+am_kcndbd_OBJECTS = kcndbd-kcndb_main.$(OBJEXT) \
+	kcndbd-kcndb_db.$(OBJEXT) kcndbd-kcndb_server.$(OBJEXT)
 kcndbd_OBJECTS = $(am_kcndbd_OBJECTS)
 kcndbd_DEPENDENCIES =
+kcndbd_LINK = $(CCLD) $(kcndbd_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
+	$(LDFLAGS) -o $@
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -174,7 +176,8 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 kcndbd_SOURCES = kcndb_main.c kcndb_db.c kcndb_server.c
-kcndbd_LDADD = @KCN_LIBS@
+kcndbd_LDADD = @KCN_LIBS@ -levent
+kcndbd_CFLAGS = -pthread
 all: all-am
 
 .SUFFIXES:
@@ -248,7 +251,7 @@ clean-binPROGRAMS:
 	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
 kcndbd$(EXEEXT): $(kcndbd_OBJECTS) $(kcndbd_DEPENDENCIES) 
 	@rm -f kcndbd$(EXEEXT)
-	$(LINK) $(kcndbd_OBJECTS) $(kcndbd_LDADD) $(LIBS)
+	$(kcndbd_LINK) $(kcndbd_OBJECTS) $(kcndbd_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -256,9 +259,9 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/kcndb_db.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/kcndb_main.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/kcndb_server.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/kcndbd-kcndb_db.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/kcndbd-kcndb_main.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/kcndbd-kcndb_server.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -273,6 +276,48 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(COMPILE) -c `$(CYGPATH_W) '$<'`
+
+kcndbd-kcndb_main.o: kcndb_main.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(kcndbd_CFLAGS) $(CFLAGS) -MT kcndbd-kcndb_main.o -MD -MP -MF $(DEPDIR)/kcndbd-kcndb_main.Tpo -c -o kcndbd-kcndb_main.o `test -f 'kcndb_main.c' || echo '$(srcdir)/'`kcndb_main.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/kcndbd-kcndb_main.Tpo $(DEPDIR)/kcndbd-kcndb_main.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='kcndb_main.c' object='kcndbd-kcndb_main.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(kcndbd_CFLAGS) $(CFLAGS) -c -o kcndbd-kcndb_main.o `test -f 'kcndb_main.c' || echo '$(srcdir)/'`kcndb_main.c
+
+kcndbd-kcndb_main.obj: kcndb_main.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(kcndbd_CFLAGS) $(CFLAGS) -MT kcndbd-kcndb_main.obj -MD -MP -MF $(DEPDIR)/kcndbd-kcndb_main.Tpo -c -o kcndbd-kcndb_main.obj `if test -f 'kcndb_main.c'; then $(CYGPATH_W) 'kcndb_main.c'; else $(CYGPATH_W) '$(srcdir)/kcndb_main.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/kcndbd-kcndb_main.Tpo $(DEPDIR)/kcndbd-kcndb_main.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='kcndb_main.c' object='kcndbd-kcndb_main.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(kcndbd_CFLAGS) $(CFLAGS) -c -o kcndbd-kcndb_main.obj `if test -f 'kcndb_main.c'; then $(CYGPATH_W) 'kcndb_main.c'; else $(CYGPATH_W) '$(srcdir)/kcndb_main.c'; fi`
+
+kcndbd-kcndb_db.o: kcndb_db.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(kcndbd_CFLAGS) $(CFLAGS) -MT kcndbd-kcndb_db.o -MD -MP -MF $(DEPDIR)/kcndbd-kcndb_db.Tpo -c -o kcndbd-kcndb_db.o `test -f 'kcndb_db.c' || echo '$(srcdir)/'`kcndb_db.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/kcndbd-kcndb_db.Tpo $(DEPDIR)/kcndbd-kcndb_db.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='kcndb_db.c' object='kcndbd-kcndb_db.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(kcndbd_CFLAGS) $(CFLAGS) -c -o kcndbd-kcndb_db.o `test -f 'kcndb_db.c' || echo '$(srcdir)/'`kcndb_db.c
+
+kcndbd-kcndb_db.obj: kcndb_db.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(kcndbd_CFLAGS) $(CFLAGS) -MT kcndbd-kcndb_db.obj -MD -MP -MF $(DEPDIR)/kcndbd-kcndb_db.Tpo -c -o kcndbd-kcndb_db.obj `if test -f 'kcndb_db.c'; then $(CYGPATH_W) 'kcndb_db.c'; else $(CYGPATH_W) '$(srcdir)/kcndb_db.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/kcndbd-kcndb_db.Tpo $(DEPDIR)/kcndbd-kcndb_db.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='kcndb_db.c' object='kcndbd-kcndb_db.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(kcndbd_CFLAGS) $(CFLAGS) -c -o kcndbd-kcndb_db.obj `if test -f 'kcndb_db.c'; then $(CYGPATH_W) 'kcndb_db.c'; else $(CYGPATH_W) '$(srcdir)/kcndb_db.c'; fi`
+
+kcndbd-kcndb_server.o: kcndb_server.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(kcndbd_CFLAGS) $(CFLAGS) -MT kcndbd-kcndb_server.o -MD -MP -MF $(DEPDIR)/kcndbd-kcndb_server.Tpo -c -o kcndbd-kcndb_server.o `test -f 'kcndb_server.c' || echo '$(srcdir)/'`kcndb_server.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/kcndbd-kcndb_server.Tpo $(DEPDIR)/kcndbd-kcndb_server.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='kcndb_server.c' object='kcndbd-kcndb_server.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(kcndbd_CFLAGS) $(CFLAGS) -c -o kcndbd-kcndb_server.o `test -f 'kcndb_server.c' || echo '$(srcdir)/'`kcndb_server.c
+
+kcndbd-kcndb_server.obj: kcndb_server.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(kcndbd_CFLAGS) $(CFLAGS) -MT kcndbd-kcndb_server.obj -MD -MP -MF $(DEPDIR)/kcndbd-kcndb_server.Tpo -c -o kcndbd-kcndb_server.obj `if test -f 'kcndb_server.c'; then $(CYGPATH_W) 'kcndb_server.c'; else $(CYGPATH_W) '$(srcdir)/kcndb_server.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/kcndbd-kcndb_server.Tpo $(DEPDIR)/kcndbd-kcndb_server.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='kcndb_server.c' object='kcndbd-kcndb_server.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(kcndbd_CFLAGS) $(CFLAGS) -c -o kcndbd-kcndb_server.obj `if test -f 'kcndb_server.c'; then $(CYGPATH_W) 'kcndb_server.c'; else $(CYGPATH_W) '$(srcdir)/kcndb_server.c'; fi`
 
 ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
 	list='$(SOURCES) $(HEADERS) $(LISP) $(TAGS_FILES)'; \

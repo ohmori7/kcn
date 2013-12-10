@@ -46,7 +46,7 @@ main(int argc, char * const argv[])
 			    KCNDB_NET_PORT_MAX, &llval))
 				usage("invalid TCP port number");
 				/*NOTERACHED*/
-			if (! kcndb_net_port_set(llval))
+			if (! kcndb_server_port_set(llval))
 				usage("cannot set TCP port, \"%s\"", optarg);
 				/*NOTREACHED*/
 			break;
@@ -66,10 +66,10 @@ main(int argc, char * const argv[])
 		usage("cannot daemonize");
 		/*NOTREACHED*/
 
-	if (! kcndb_net_start())
+	if (! kcndb_server_start())
 		usage("cannot launch server");
 
-	sleep(1000);
+	kcndb_server_loop();
 
 	return 0;
 }
