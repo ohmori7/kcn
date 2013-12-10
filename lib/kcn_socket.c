@@ -17,9 +17,7 @@ kcn_socket_listen(int domain, in_port_t port)
 	socklen_t sslen;
 	sa_family_t family;
 	int s;
-#ifdef HAVE_IPV6
-	int on = 0;
-#endif /* HAVE_IPV6 */
+	int on;
 
 	family = kcn_sockaddr_pf2af(domain);
 	if (! kcn_sockaddr_init(&ss, &sslen, family, port))
@@ -32,13 +30,22 @@ kcn_socket_listen(int domain, in_port_t port)
 		goto bad;
 	}
 #ifdef HAVE_IPV6
+	on = 0;
 	if (domain == PF_INET6 &&
 	    setsockopt(s, IPPROTO_IPV6, IPV6_V6ONLY, &on, sizeof(on)) == -1) {
-		KCN_LOG(ERR, "setsockopt() failed %d: %s",
+		KCN_LOG(ERR, "setsockopt(IPV6_V6ONLY) failed for %d: %s",
 		    domain, strerror(errno));
 		goto bad;
 	}
 #endif /* HAVE_IPV6 */
+
+	on = 1;
+	if (setsockopt(s, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) == -1)
+		KCN_LOG(WARN, "setsockopt(SO_REUSEADDR) failed for %d: %s",
+		    domain, strerror(errno));
+	if (setsockopt(s, SOL_SOCKET, SO_REUSEPORT, &on, sizeof(on)) == -1)
+		KCN_LOG(WARN, "setsockopt(SO_REUSEPORT) failed for %d: %s",
+		    domain, strerror(errno));
 
 	if (bind(s, (struct sockaddr *)&ss, sslen) == -1) {
 		KCN_LOG(ERR, "bind() failed for %d: %s",
