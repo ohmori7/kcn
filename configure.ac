@@ -135,6 +135,11 @@ AC_SUBST(JANSSON_CFLAGS)
 AC_SUBST(JANSSON_LIBS)
 
 #
+AC_KCN_CHECK_LIB(event, event_init, event.h)
+AC_SUBST(EVENT_CFLAGS)
+AC_SUBST(EVENT_LIBS)
+
+#
 # Check for IPv6 support
 #
 AC_MSG_CHECKING(IPv6 support)
