@@ -1,13 +1,15 @@
 struct kcn_pkt;
 
-STAILQ_HEAD(kcn_pkt_head, kcn_pkt);
+STAILQ_HEAD(kcn_pkt_queue, kcn_pkt);
 
 struct kcn_pkt_handle {
-	struct kcn_pkt_head *kph_head;
+	struct kcn_pkt_queue *kph_q;
 	struct kcn_pkt *kph_kp;
 	size_t kph_cp;
 };
 
+void kcn_pkt_queue_init(struct kcn_pkt_queue *);
+void kcn_pkt_init(struct kcn_pkt_handle *, struct kcn_pkt_queue *);
 bool kcn_pkt_new(struct kcn_pkt_handle *, size_t);
 void kcn_pkt_destroy(struct kcn_pkt_handle *);
 size_t kcn_pkt_len(const struct kcn_pkt_handle *);

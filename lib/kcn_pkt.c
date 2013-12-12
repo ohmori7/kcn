@@ -17,6 +17,23 @@ struct kcn_pkt {
 	uint8_t kp_buf[1];
 };
 
+void
+kcn_pkt_queue_init(struct kcn_pkt_queue *kpq)
+{
+
+	STAILQ_INIT(kpq);
+}
+
+void
+kcn_pkt_init(struct kcn_pkt_handle *kph, struct kcn_pkt_queue *kpq)
+{
+
+	kph->kph_q = kpq;
+	/* these are just for debug purpose. */
+	kph->kph_kp = NULL;
+	kph->kph_cp = 0;
+}
+
 static struct kcn_pkt *
 _kcn_pkt_new(size_t size)
 {
@@ -256,7 +273,7 @@ kcn_pkt_enqueue(struct kcn_pkt_handle *kph)
 	kp = _kcn_pkt_dup(kph);
 	if (kp == NULL)
 		return false;
-	STAILQ_INSERT_TAIL(kph->kph_head, kp, kp_chain);
+	STAILQ_INSERT_TAIL(kph->kph_q, kp, kp_chain);
 	return true;
 }
 
@@ -264,7 +281,7 @@ bool
 kcn_pkt_fetch(struct kcn_pkt_handle *kph)
 {
 
-	kph->kph_kp = STAILQ_FIRST(kph->kph_head);
+	kph->kph_kp = STAILQ_FIRST(kph->kph_q);
 	kph->kph_cp = kph->kph_kp->kp_sp;
 	return kph->kph_kp != NULL;
 }
@@ -274,7 +291,7 @@ kcn_pkt_dequeue(struct kcn_pkt_handle *kph)
 {
 
 	assert(kph->kph_kp != NULL);
-	assert(kph->kph_kp == STAILQ_FIRST(kph->kph_head));
-	STAILQ_REMOVE_HEAD(kph->kph_head, kp_chain);
+	assert(kph->kph_kp == STAILQ_FIRST(kph->kph_q));
+	STAILQ_REMOVE_HEAD(kph->kph_q, kp_chain);
 	kcn_pkt_destroy(kph);
 }
