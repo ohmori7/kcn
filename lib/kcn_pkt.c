@@ -65,7 +65,7 @@ kcn_pkt_data_dup(const struct kcn_pkt *kp)
 	kpd = kcn_pkt_data_new(len);
 	if (kpd == NULL)
 		return NULL;
-	memcpy(kpd->kpd_buf, kcn_pkt_sp(kp), len);
+	memcpy(kpd->kpd_buf, kcn_pkt_head(kp), len);
 	kpd->kpd_ep = len;
 	return kpd;
 }
@@ -133,17 +133,24 @@ kcn_pkt_trim_head(struct kcn_pkt *kp, size_t len)
 }
 
 void *
-kcn_pkt_sp(const struct kcn_pkt *kp)
+kcn_pkt_head(const struct kcn_pkt *kp)
 {
 
 	return kp->kp_buf + kp->kp_sp;
 }
 
 void *
-kcn_pkt_cp(const struct kcn_pkt *kp)
+kcn_pkt_current(const struct kcn_pkt *kp)
 {
 
 	return kp->kp_buf + kp->kp_cp;
+}
+
+void *
+kcn_pkt_tail(const struct kcn_pkt *kp)
+{
+
+	return kp->kp_buf + kp->kp_ep;
 }
 
 static void
@@ -255,7 +262,7 @@ kcn_pkt_put(struct kcn_pkt *kp, void *p, size_t len)
 {
 
 	kcn_pkt_append(kp, len);
-	memcpy(kcn_pkt_cp(kp), p, len);
+	memcpy(kcn_pkt_current(kp), p, len);
 }
 
 bool
