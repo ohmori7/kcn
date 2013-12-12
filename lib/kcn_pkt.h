@@ -31,3 +31,4 @@ void kcn_pkt_put(struct kcn_pkt_handle *, void *, size_t);
 bool kcn_pkt_enqueue(struct kcn_pkt_handle *);
 bool kcn_pkt_fetch(struct kcn_pkt_handle *);
 void kcn_pkt_dequeue(struct kcn_pkt_handle *);
+void kcn_pkt_purge(struct kcn_pkt_handle *);

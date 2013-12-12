@@ -295,3 +295,11 @@ kcn_pkt_dequeue(struct kcn_pkt_handle *kph)
 	STAILQ_REMOVE_HEAD(kph->kph_q, kp_chain);
 	kcn_pkt_destroy(kph);
 }
+
+void
+kcn_pkt_purge(struct kcn_pkt_handle *kph)
+{
+
+	while (kcn_pkt_fetch(kph))
+		kcn_pkt_dequeue(kph);
+}
