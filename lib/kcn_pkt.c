@@ -52,7 +52,7 @@ kcn_pkt_reset(struct kcn_pkt_handle *kph)
 }
 
 size_t
-kcn_pkt_leftlen(struct kcn_pkt_handle *kph)
+kcn_pkt_leftlen(const struct kcn_pkt_handle *kph)
 {
 
 	assert(kph->kph_kp->kp_size >= kph->kph_cp);
@@ -60,7 +60,7 @@ kcn_pkt_leftlen(struct kcn_pkt_handle *kph)
 }
 
 size_t
-kcn_pkt_unreadlen(struct kcn_pkt_handle *kph)
+kcn_pkt_unreadlen(const struct kcn_pkt_handle *kph)
 {
 
 	assert(kph->kph_kp->kp_len >= kph->kph_cp);
@@ -68,7 +68,7 @@ kcn_pkt_unreadlen(struct kcn_pkt_handle *kph)
 }
 
 void *
-kcn_pkt_ptr(struct kcn_pkt_handle *kph)
+kcn_pkt_ptr(const struct kcn_pkt_handle *kph)
 {
 
 	return kph->kph_kp->kp_buf + kph->kph_cp;
