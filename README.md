@@ -116,9 +116,11 @@ skip these unnecessary checks, you need to change time stamps of related files
 in following order:
 
 	configure.ac	(oldest timestamp)
-	aclocal.m4		^
+	acinclude.m4		^
+	aclocal.m4		|
 	config.h.in		|
 	Makefile.in		|
+	kcndbd/Makefile.in	|
 	key2loc/Makefile.in	|
 	lib/Makefile.in		V
 	configure	(newest timestamp)
@@ -130,6 +132,8 @@ Required libraries and tips on build failures:
 ================================================================================
   This KCN implementation depends directly upon following libraries:
 
+	- pthread
+	- libevent
 	- curl on *BSD* (or libcurl-devel on Linux)
 	- jansson
 
@@ -189,8 +193,12 @@ curl and jansson are installed, respectively.
 
 Tested environment and tips
 ================================================================================
-NetBSD current 6.99.3
+NetBSD current 6.99.3 or later
 --------------------------------------------------------------------------------
+	pthread:
+		base system.
+	libevent:
+		1.4.12-stable already merged into base system.
 	pkg-config:
 		pkgsrc/devel/pkg-config
 	curl:
@@ -200,11 +208,15 @@ NetBSD current 6.99.3
 		jansson-2.4 seems to be imported to pkgsrc/textproc/jansson
 		on 2013/7/13, and it may work but has not been tested yet.
 
-CentOS 6.4 (x86_64)
+CentOS 6.4 or later (x86_64)
 --------------------------------------------------------------------------------
+	pthread:
+		base system.
+	libevent:
+		libevent-devel (1.4.13-stable)
 	pkg-config:
-		pkgconfig: installed by default as a base tool (0.23)
+		pkgconfig (1:0.23-9.1.el6): installed by default as a base tool
 	curl:
-		libcurl-devel
+		libcurl-devel (7.19.7-37.el6_4)
 	jansson:
 		jansson-2.5 obtained from http://www.digip.org/jansson/
