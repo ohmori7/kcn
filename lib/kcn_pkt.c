@@ -61,7 +61,7 @@ kcn_pkt_reset(struct kcn_pkt_handle *kph)
 }
 
 size_t
-kcn_pkt_leftlen(const struct kcn_pkt_handle *kph)
+kcn_pkt_trailingspace(const struct kcn_pkt_handle *kph)
 {
 
 	assert(kph->kph_kp->kp_size >= kph->kph_cp);
@@ -69,7 +69,7 @@ kcn_pkt_leftlen(const struct kcn_pkt_handle *kph)
 }
 
 size_t
-kcn_pkt_unreadlen(const struct kcn_pkt_handle *kph)
+kcn_pkt_trailingdata(const struct kcn_pkt_handle *kph)
 {
 
 	assert(kph->kph_kp->kp_ep >= kph->kph_cp);
@@ -98,12 +98,12 @@ static void
 kcn_pkt_append(struct kcn_pkt_handle *kph, size_t len)
 {
 	struct kcn_pkt *kp = kph->kph_kp;
-	size_t leftlen;
+	size_t trailingspace;
 
-	leftlen = kcn_pkt_leftlen(kph);
-	if (leftlen >= len)
+	trailingspace = kcn_pkt_trailingspace(kph);
+	if (trailingspace >= len)
 		return;
-	kp->kp_ep += len - leftlen;
+	kp->kp_ep += len - trailingspace;
 	assert(kp->kp_ep <= kp->kp_size);
 }
 
@@ -112,7 +112,7 @@ kcn_pkt_get8(struct kcn_pkt_handle *kph)
 {
 	struct kcn_pkt *kp = kph->kph_kp;
 
-	assert(kcn_pkt_unreadlen(kph) >= 1);
+	assert(kcn_pkt_trailingdata(kph) >= 1);
 	return kp->kp_buf[kph->kph_cp++];
 }
 
@@ -122,7 +122,7 @@ kcn_pkt_get16(struct kcn_pkt_handle *kph)
 	struct kcn_pkt *kp = kph->kph_kp;
 	uint16_t v;
 
-	assert(kcn_pkt_unreadlen(kph) >= 2);
+	assert(kcn_pkt_trailingdata(kph) >= 2);
 	v =  (uint16_t)kp->kp_buf[kph->kph_cp++] << 8;
 	v |= (uint16_t)kp->kp_buf[kph->kph_cp++];
 	return v;
@@ -134,7 +134,7 @@ kcn_pkt_get32(struct kcn_pkt_handle *kph)
 	struct kcn_pkt *kp = kph->kph_kp;
 	uint32_t v;
 
-	assert(kcn_pkt_unreadlen(kph) >= 4);
+	assert(kcn_pkt_trailingdata(kph) >= 4);
 	v =  (uint32_t)kp->kp_buf[kph->kph_cp++] << 24;
 	v |= (uint32_t)kp->kp_buf[kph->kph_cp++] << 16;
 	v |= (uint32_t)kp->kp_buf[kph->kph_cp++] <<  8;
@@ -148,7 +148,7 @@ kcn_pkt_get64(struct kcn_pkt_handle *kph)
 	struct kcn_pkt *kp = kph->kph_kp;
 	uint64_t v;
 
-	assert(kcn_pkt_unreadlen(kph) >= 8);
+	assert(kcn_pkt_trailingdata(kph) >= 8);
 	v =  (uint64_t)kp->kp_buf[kph->kph_cp++] << 56;
 	v |= (uint64_t)kp->kp_buf[kph->kph_cp++] << 48;
 	v |= (uint64_t)kp->kp_buf[kph->kph_cp++] << 40;
