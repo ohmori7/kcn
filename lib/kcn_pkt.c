@@ -36,6 +36,13 @@ kcn_pkt_destroy(struct kcn_pkt *kp)
 	free(kp);
 }
 
+size_t
+kcn_pkt_len(const struct kcn_pkt_handle *kph)
+{
+
+	return kph->kph_kp->kp_len;
+}
+
 void
 kcn_pkt_reset(struct kcn_pkt_handle *kph)
 {

@@ -10,6 +10,7 @@ struct kcn_pkt_handle {
 
 struct kcn_pkt *kcn_pkt_new(struct kcn_pkt_handle *, size_t);
 void kcn_pkt_destroy(struct kcn_pkt *);
+size_t kcn_pkt_len(const struct kcn_pkt_handle *);
 void kcn_pkt_reset(struct kcn_pkt_handle *);
 size_t kcn_pkt_leftlen(struct kcn_pkt_handle *);
 size_t kcn_pkt_unreadlen(struct kcn_pkt_handle *);
