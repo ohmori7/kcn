@@ -25,7 +25,7 @@ kcn_pkt_queue_init(struct kcn_pkt_queue *kpq)
 }
 
 void
-kcn_pkt_init(struct kcn_pkt_handle *kph, struct kcn_pkt_queue *kpq)
+kcn_pkt_handle_init(struct kcn_pkt_handle *kph, struct kcn_pkt_queue *kpq)
 {
 
 	kph->kph_q = kpq;
