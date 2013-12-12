@@ -15,6 +15,8 @@ size_t kcn_pkt_len(const struct kcn_pkt *);
 void kcn_pkt_reset(struct kcn_pkt *);
 size_t kcn_pkt_trailingspace(const struct kcn_pkt *);
 size_t kcn_pkt_trailingdata(const struct kcn_pkt *);
+void kcn_pkt_start(struct kcn_pkt *);
+void kcn_pkt_end(struct kcn_pkt *);
 void kcn_pkt_trim_head(struct kcn_pkt *, size_t);
 void *kcn_pkt_sp(const struct kcn_pkt *);
 void *kcn_pkt_cp(const struct kcn_pkt *);

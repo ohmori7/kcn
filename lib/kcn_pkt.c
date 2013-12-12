@@ -17,6 +17,11 @@ struct kcn_pkt_data {
 	uint8_t kpd_buf[1];
 };
 
+#define kp_size		kp_kpd->kpd_size
+#define kp_sp		kp_kpd->kpd_sp
+#define kp_ep		kp_kpd->kpd_ep
+#define kp_buf		kp_kpd->kpd_buf
+
 void
 kcn_pkt_queue_init(struct kcn_pkt_queue *kpq)
 {
@@ -30,7 +35,7 @@ kcn_pkt_init(struct kcn_pkt *kp, struct kcn_pkt_data *kpd)
 
 	kp->kp_kpd = kpd;
 	if (kpd != NULL)
-		kp->kp_cp = kpd->kpd_sp;
+		kcn_pkt_start(kp);
 	else
 		kp->kp_cp = 0;
 }
@@ -75,17 +80,15 @@ kcn_pkt_data_destroy(struct kcn_pkt_data *kpd)
 size_t
 kcn_pkt_len(const struct kcn_pkt *kp)
 {
-	struct kcn_pkt_data *kpd = kp->kp_kpd;
 
-	return kpd->kpd_ep - kpd->kpd_sp;
+	return kp->kp_ep - kp->kp_sp;
 }
 
 void
 kcn_pkt_reset(struct kcn_pkt *kp)
 {
-	struct kcn_pkt_data *kpd = kp->kp_kpd;
 
-	kpd->kpd_sp = kpd->kpd_ep = 0;
+	kp->kp_sp = kp->kp_ep = 0;
 	kp->kp_cp = 0;
 }
 
@@ -93,155 +96,158 @@ size_t
 kcn_pkt_trailingspace(const struct kcn_pkt *kp)
 {
 
-	assert(kp->kp_kpd->kpd_size >= kp->kp_cp);
-	return kp->kp_kpd->kpd_size - kp->kp_cp;
+	assert(kp->kp_size >= kp->kp_cp);
+	return kp->kp_size - kp->kp_cp;
 }
 
 size_t
 kcn_pkt_trailingdata(const struct kcn_pkt *kp)
 {
 
-	assert(kp->kp_kpd->kpd_ep >= kp->kp_cp);
-	return kp->kp_kpd->kpd_ep - kp->kp_cp;
+	assert(kp->kp_ep >= kp->kp_cp);
+	return kp->kp_ep - kp->kp_cp;
+}
+
+void
+kcn_pkt_start(struct kcn_pkt *kp)
+{
+
+	kp->kp_cp = kp->kp_sp;
+}
+
+void
+kcn_pkt_end(struct kcn_pkt *kp)
+{
+
+	kp->kp_cp = kp->kp_ep;
 }
 
 void
 kcn_pkt_trim_head(struct kcn_pkt *kp, size_t len)
 {
-	struct kcn_pkt_data *kpd = kp->kp_kpd;
 
 	assert(kcn_pkt_len(kp) >= len);
-	kpd->kpd_sp += len;
-	if (kpd->kpd_sp > kp->kp_cp)
-		kp->kp_cp = kpd->kpd_sp;
+	kp->kp_sp += len;
+	if (kp->kp_sp > kp->kp_cp)
+		kcn_pkt_start(kp);
 }
 
 void *
 kcn_pkt_sp(const struct kcn_pkt *kp)
 {
-	struct kcn_pkt_data *kpd = kp->kp_kpd;
 
-	return kpd->kpd_buf + kpd->kpd_sp;
+	return kp->kp_buf + kp->kp_sp;
 }
 
 void *
 kcn_pkt_cp(const struct kcn_pkt *kp)
 {
 
-	return kp->kp_kpd->kpd_buf + kp->kp_cp;
+	return kp->kp_buf + kp->kp_cp;
 }
 
 static void
 kcn_pkt_append(struct kcn_pkt *kp, size_t len)
 {
-	struct kcn_pkt_data *kpd = kp->kp_kpd;
 	size_t trailingspace;
 
 	trailingspace = kcn_pkt_trailingspace(kp);
 	if (trailingspace >= len)
 		return;
-	kpd->kpd_ep += len - trailingspace;
-	assert(kpd->kpd_ep <= kpd->kpd_size);
+	kp->kp_ep += len - trailingspace;
+	assert(kp->kp_ep <= kp->kp_size);
 }
 
 uint8_t
 kcn_pkt_get8(struct kcn_pkt *kp)
 {
-	struct kcn_pkt_data *kpd = kp->kp_kpd;
 
 	assert(kcn_pkt_trailingdata(kp) >= 1);
-	return kpd->kpd_buf[kp->kp_cp++];
+	return kp->kp_buf[kp->kp_cp++];
 }
 
 uint16_t
 kcn_pkt_get16(struct kcn_pkt *kp)
 {
-	struct kcn_pkt_data *kpd = kp->kp_kpd;
 	uint16_t v;
 
 	assert(kcn_pkt_trailingdata(kp) >= 2);
-	v =  (uint16_t)kpd->kpd_buf[kp->kp_cp++] << 8;
-	v |= (uint16_t)kpd->kpd_buf[kp->kp_cp++];
+	v =  (uint16_t)kp->kp_buf[kp->kp_cp++] << 8;
+	v |= (uint16_t)kp->kp_buf[kp->kp_cp++];
 	return v;
 }
 
 uint32_t
 kcn_pkt_get32(struct kcn_pkt *kp)
 {
-	struct kcn_pkt_data *kpd = kp->kp_kpd;
 	uint32_t v;
 
 	assert(kcn_pkt_trailingdata(kp) >= 4);
-	v =  (uint32_t)kpd->kpd_buf[kp->kp_cp++] << 24;
-	v |= (uint32_t)kpd->kpd_buf[kp->kp_cp++] << 16;
-	v |= (uint32_t)kpd->kpd_buf[kp->kp_cp++] <<  8;
-	v |= (uint32_t)kpd->kpd_buf[kp->kp_cp++];
+	v =  (uint32_t)kp->kp_buf[kp->kp_cp++] << 24;
+	v |= (uint32_t)kp->kp_buf[kp->kp_cp++] << 16;
+	v |= (uint32_t)kp->kp_buf[kp->kp_cp++] <<  8;
+	v |= (uint32_t)kp->kp_buf[kp->kp_cp++];
 	return v;
 }
 
 uint64_t
 kcn_pkt_get64(struct kcn_pkt *kp)
 {
-	struct kcn_pkt_data *kpd = kp->kp_kpd;
 	uint64_t v;
 
 	assert(kcn_pkt_trailingdata(kp) >= 8);
-	v =  (uint64_t)kpd->kpd_buf[kp->kp_cp++] << 56;
-	v |= (uint64_t)kpd->kpd_buf[kp->kp_cp++] << 48;
-	v |= (uint64_t)kpd->kpd_buf[kp->kp_cp++] << 40;
-	v |= (uint64_t)kpd->kpd_buf[kp->kp_cp++] << 32;
-	v |= (uint64_t)kpd->kpd_buf[kp->kp_cp++] << 24;
-	v |= (uint64_t)kpd->kpd_buf[kp->kp_cp++] << 16;
-	v |= (uint64_t)kpd->kpd_buf[kp->kp_cp++] <<  8;
-	v |= (uint64_t)kpd->kpd_buf[kp->kp_cp++];
+	v =  (uint64_t)kp->kp_buf[kp->kp_cp++] << 56;
+	v |= (uint64_t)kp->kp_buf[kp->kp_cp++] << 48;
+	v |= (uint64_t)kp->kp_buf[kp->kp_cp++] << 40;
+	v |= (uint64_t)kp->kp_buf[kp->kp_cp++] << 32;
+	v |= (uint64_t)kp->kp_buf[kp->kp_cp++] << 24;
+	v |= (uint64_t)kp->kp_buf[kp->kp_cp++] << 16;
+	v |= (uint64_t)kp->kp_buf[kp->kp_cp++] <<  8;
+	v |= (uint64_t)kp->kp_buf[kp->kp_cp++];
 	return v;
 }
 
 void
 kcn_pkt_put8(struct kcn_pkt *kp, uint8_t v)
 {
-	struct kcn_pkt_data *kpd = kp->kp_kpd;
 
 	kcn_pkt_append(kp, 1);
-	kpd->kpd_buf[kp->kp_cp++] = v;
+	kp->kp_buf[kp->kp_cp++] = v;
 }
 
 void
 kcn_pkt_put16(struct kcn_pkt *kp, uint16_t v)
 {
-	struct kcn_pkt_data *kpd = kp->kp_kpd;
 
 	kcn_pkt_append(kp, 2);
-	kpd->kpd_buf[kp->kp_cp++] = (v >>  8) & 0xffU;
-	kpd->kpd_buf[kp->kp_cp++] = v         & 0xffU;
+	kp->kp_buf[kp->kp_cp++] = (v >>  8) & 0xffU;
+	kp->kp_buf[kp->kp_cp++] = v         & 0xffU;
 }
 
 void
 kcn_pkt_put32(struct kcn_pkt *kp, uint32_t v)
 {
-	struct kcn_pkt_data *kpd = kp->kp_kpd;
 
 	kcn_pkt_append(kp, 4);
-	kpd->kpd_buf[kp->kp_cp++] = (v >> 24) & 0xffUL;
-	kpd->kpd_buf[kp->kp_cp++] = (v >> 16) & 0xffUL;
-	kpd->kpd_buf[kp->kp_cp++] = (v >>  8) & 0xffUL;
-	kpd->kpd_buf[kp->kp_cp++] = v         & 0xffUL;
+	kp->kp_buf[kp->kp_cp++] = (v >> 24) & 0xffUL;
+	kp->kp_buf[kp->kp_cp++] = (v >> 16) & 0xffUL;
+	kp->kp_buf[kp->kp_cp++] = (v >>  8) & 0xffUL;
+	kp->kp_buf[kp->kp_cp++] = v         & 0xffUL;
 }
 
 void
 kcn_pkt_put64(struct kcn_pkt *kp, uint64_t v)
 {
-	struct kcn_pkt_data *kpd = kp->kp_kpd;
 
 	kcn_pkt_append(kp, 8);
-	kpd->kpd_buf[kp->kp_cp++] = (v >> 56) & 0xffULL;
-	kpd->kpd_buf[kp->kp_cp++] = (v >> 48) & 0xffULL;
-	kpd->kpd_buf[kp->kp_cp++] = (v >> 40) & 0xffULL;
-	kpd->kpd_buf[kp->kp_cp++] = (v >> 32) & 0xffULL;
-	kpd->kpd_buf[kp->kp_cp++] = (v >> 24) & 0xffULL;
-	kpd->kpd_buf[kp->kp_cp++] = (v >> 16) & 0xffULL;
-	kpd->kpd_buf[kp->kp_cp++] = (v >>  8) & 0xffULL;
-	kpd->kpd_buf[kp->kp_cp++] = v         & 0xffULL;
+	kp->kp_buf[kp->kp_cp++] = (v >> 56) & 0xffULL;
+	kp->kp_buf[kp->kp_cp++] = (v >> 48) & 0xffULL;
+	kp->kp_buf[kp->kp_cp++] = (v >> 40) & 0xffULL;
+	kp->kp_buf[kp->kp_cp++] = (v >> 32) & 0xffULL;
+	kp->kp_buf[kp->kp_cp++] = (v >> 24) & 0xffULL;
+	kp->kp_buf[kp->kp_cp++] = (v >> 16) & 0xffULL;
+	kp->kp_buf[kp->kp_cp++] = (v >>  8) & 0xffULL;
+	kp->kp_buf[kp->kp_cp++] = v         & 0xffULL;
 }
 
 void
@@ -275,7 +281,7 @@ kcn_pkt_fetch(struct kcn_pkt *kp, struct kcn_pkt_queue *kpq)
 	if (kpd == NULL)
 		return false;
 	kp->kp_kpd = kpd;
-	kp->kp_cp = kpd->kpd_sp;
+	kcn_pkt_start(kp);
 	return true;
 }
 
