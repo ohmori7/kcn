@@ -18,10 +18,10 @@ struct kcn_pkt_data {
 };
 
 void
-kcn_pkt_queue_init(struct kcn_pkt_queue *kpdq)
+kcn_pkt_queue_init(struct kcn_pkt_queue *kpq)
 {
 
-	STAILQ_INIT(kpdq);
+	STAILQ_INIT(kpq);
 }
 
 void
@@ -253,7 +253,7 @@ kcn_pkt_put(struct kcn_pkt *kp, void *p, size_t len)
 }
 
 bool
-kcn_pkt_enqueue(struct kcn_pkt *kp, struct kcn_pkt_queue *kpdq)
+kcn_pkt_enqueue(struct kcn_pkt *kp, struct kcn_pkt_queue *kpq)
 {
 	struct kcn_pkt_data *kpd;
 
@@ -262,16 +262,16 @@ kcn_pkt_enqueue(struct kcn_pkt *kp, struct kcn_pkt_queue *kpdq)
 	kcn_pkt_reset(kp);
 	if (kpd == NULL)
 		return false;
-	STAILQ_INSERT_TAIL(kpdq, kpd, kpd_chain);
+	STAILQ_INSERT_TAIL(kpq, kpd, kpd_chain);
 	return true;
 }
 
 bool
-kcn_pkt_fetch(struct kcn_pkt *kp, struct kcn_pkt_queue *kpdq)
+kcn_pkt_fetch(struct kcn_pkt *kp, struct kcn_pkt_queue *kpq)
 {
 	struct kcn_pkt_data *kpd;
 
-	kpd = STAILQ_FIRST(kpdq);
+	kpd = STAILQ_FIRST(kpq);
 	if (kpd == NULL)
 		return false;
 	kp->kp_kpd = kpd;
@@ -280,21 +280,21 @@ kcn_pkt_fetch(struct kcn_pkt *kp, struct kcn_pkt_queue *kpdq)
 }
 
 void
-kcn_pkt_drop(struct kcn_pkt *kp, struct kcn_pkt_queue *kpdq)
+kcn_pkt_drop(struct kcn_pkt *kp, struct kcn_pkt_queue *kpq)
 {
 
 	assert(kp->kp_kpd != NULL);
-	assert(kp->kp_kpd == STAILQ_FIRST(kpdq));
-	STAILQ_REMOVE_HEAD(kpdq, kpd_chain);
+	assert(kp->kp_kpd == STAILQ_FIRST(kpq));
+	STAILQ_REMOVE_HEAD(kpq, kpd_chain);
 	kcn_pkt_data_destroy(kp->kp_kpd);
 	kcn_pkt_init(kp, NULL);
 }
 
 void
-kcn_pkt_purge(struct kcn_pkt_queue *kpdq)
+kcn_pkt_purge(struct kcn_pkt_queue *kpq)
 {
 	struct kcn_pkt kp;
 
-	while (kcn_pkt_fetch(&kp, kpdq))
-		kcn_pkt_drop(&kp, kpdq);
+	while (kcn_pkt_fetch(&kp, kpq))
+		kcn_pkt_drop(&kp, kpq);
 }
