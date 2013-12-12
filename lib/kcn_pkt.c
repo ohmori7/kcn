@@ -17,8 +17,8 @@ struct kcn_pkt {
 	uint8_t kp_buf[1];
 };
 
-struct kcn_pkt *
-kcn_pkt_new(struct kcn_pkt_handle *kph, size_t size)
+static struct kcn_pkt *
+_kcn_pkt_new(size_t size)
 {
 	struct kcn_pkt *kp;
 
@@ -27,10 +27,34 @@ kcn_pkt_new(struct kcn_pkt_handle *kph, size_t size)
 	if (kp == NULL)
 		return NULL;
 	kp->kp_size = size;
-	kp->kp_sp = kp->kp_ep = 0;
-	kph->kph_kp = kp;
-	kcn_pkt_reset(kph);
 	return kp;
+}
+
+static struct kcn_pkt *
+_kcn_pkt_dup(const struct kcn_pkt_handle *kph)
+{
+	struct kcn_pkt *kp;
+	size_t len;
+
+	assert(kph->kph_kp != NULL);
+	len = kcn_pkt_len(kph);
+	kp = _kcn_pkt_new(len);
+	if (kp == NULL)
+		return NULL;
+	memcpy(kp->kp_buf, kcn_pkt_sp(kph), len);
+	kp->kp_ep = len;
+	return kp;
+}
+
+bool
+kcn_pkt_new(struct kcn_pkt_handle *kph, size_t size)
+{
+
+	kph->kph_kp = _kcn_pkt_new(size);
+	if (kph->kph_kp == NULL)
+		return false;
+	kcn_pkt_reset(kph);
+	return true;
 }
 
 void
@@ -88,7 +112,15 @@ kcn_pkt_trim_head(struct kcn_pkt_handle *kph, size_t len)
 }
 
 void *
-kcn_pkt_ptr(const struct kcn_pkt_handle *kph)
+kcn_pkt_sp(const struct kcn_pkt_handle *kph)
+{
+	struct kcn_pkt *kp = kph->kph_kp;
+
+	return kp->kp_buf + kp->kp_sp;
+}
+
+void *
+kcn_pkt_cp(const struct kcn_pkt_handle *kph)
 {
 
 	return kph->kph_kp->kp_buf + kph->kph_cp;
@@ -212,16 +244,20 @@ kcn_pkt_put(struct kcn_pkt_handle *kph, void *p, size_t len)
 {
 
 	kcn_pkt_append(kph, len);
-	memcpy(kcn_pkt_ptr(kph), p, len);
+	memcpy(kcn_pkt_cp(kph), p, len);
 }
 
-void
+bool
 kcn_pkt_enqueue(struct kcn_pkt_handle *kph)
 {
+	struct kcn_pkt *kp;
 
 	assert(kph->kph_kp != NULL);
-	STAILQ_INSERT_TAIL(kph->kph_head, kph->kph_kp, kp_chain);
-	kph->kph_kp = NULL;
+	kp = _kcn_pkt_dup(kph);
+	if (kp == NULL)
+		return false;
+	STAILQ_INSERT_TAIL(kph->kph_head, kp, kp_chain);
+	return true;
 }
 
 bool
