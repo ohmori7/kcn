@@ -22,6 +22,7 @@ kcn_pkt_new(struct kcn_pkt_handle *kph, size_t size)
 {
 	struct kcn_pkt *kp;
 
+	/* XXX: should consider real size of allocated space. */
 	kp = malloc(offsetof(struct kcn_pkt, kp_buf[size]));
 	if (kp == NULL)
 		return NULL;
