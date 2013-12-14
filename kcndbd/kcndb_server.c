@@ -1,3 +1,5 @@
+#include <sys/queue.h>
+
 #include <assert.h>
 #include <errno.h>
 #include <stdbool.h>
@@ -14,6 +16,8 @@
 #include "kcn_log.h"
 #include "kcn_socket.h"
 #include "kcn_sockaddr.h"
+#include "kcn_pkt.h"
+#include "kcn_net.h"
 #include "kcndb_server.h"
 
 enum kcndb_thread_status {
@@ -34,7 +38,7 @@ static struct kcndb_thread kcndb_server_threads[KCNDB_SERVER_NWORKERS];
 
 static void *kcndb_server_main(void *);
 static bool kcndb_server_accept_set(struct event_base *, int);
-static bool kcndb_server_read_set(struct event_base *, int);
+static bool kcndb_server_read_set(struct kcn_net *);
 
 bool
 kcndb_server_port_set(uint16_t port)
@@ -93,79 +97,90 @@ kcndb_server_loop(void)
 }
 
 static void
+kcndb_server_disconnect(struct kcn_net *kn)
+{
+
+	kcn_net_destroy(kn);
+	KCN_LOG(DEBUG, "disconnected from (host name: notyet)");
+}
+
+static void
 kcndb_server_accept(int ls, short event, void *arg)
 {
 	struct sockaddr_storage ss;
 	socklen_t sslen;
 	struct event_base *evb;
+	struct kcn_net *kn;
 	int s;
 
 	evb = arg;
+	kcndb_server_accept_set(evb, ls);
 	if ((event & EV_READ) == 0)
-		goto out;
+		return;
 	s = accept(ls, (struct sockaddr *)&ss, &sslen);
 	if (s == -1) {
 		KCN_LOG(WARN, "accept() failed: %s", strerror(errno));
-		goto out;
+		return;
 	}
 	KCN_LOG(DEBUG, "connected from (host name: notyet)");
-	if (! kcndb_server_read_set(evb, s))
+
+#define KCNDB_MSGSIZ	4096
+	kn = kcn_net_new(s, KCNDB_MSGSIZ, evb);
+	if (kn == NULL) {
+		KCN_LOG(ERR, "cannot allocate net structure");
+		goto bad;
+	}
+
+	if (! kcndb_server_read_set(kn))
+		goto bad;
+	return;
+  bad:
+	if (kn != NULL)
+		kcn_net_destroy(kn);
+	else
 		kcn_socket_close(&s);
-  out:
-	kcndb_server_accept_set(evb, ls);
 }
 
 static void
 kcndb_server_read(int s, short event, void *arg)
 {
-#define KCNDB_BUFSIZ	1024 /* XXX */
-	unsigned char buf[KCNDB_BUFSIZ];
-	ssize_t len;
+	struct kcn_net *kn;
+	struct kcn_pkt kp;
 
+	(void)s;
+	kn = arg;
 	if (event & EV_TIMEOUT && (event & EV_READ) == 0) {
 		KCN_LOG(WARN, "connection timed out");
+		goto bad;
+	}
+	if ((event & EV_READ) == 0) {
+		KCN_LOG(WARN, "no read event but called. libevent bug???");
 		goto out;
 	}
-	if ((event & EV_READ) == 0)
-		goto again;
-
-	len = read(s, buf, sizeof(buf));
-	if (len == 0)
-		KCN_LOG(WARN, "disconnected");
-	else if (len == -1) {
-		KCN_LOG(WARN, "read() failed: %s", strerror(errno));
-		if (errno == EINTR ||
-#if EWOULDBLOCK != EAGAIN
-		    errno == EWOULDBLOCK ||
-#endif /* EWOULDBLOCK != EAGAIN */
-		    errno == EAGAIN)
-			goto again;
-	} else {
-		size_t i;
-
-		KCN_LOG(DEBUG, "read %zu bytes", (size_t)len);
-		for (i = 0; i < (size_t)len; i++)
-			KCN_LOG(DEBUG, "%02x ", buf[i]);
-		goto again;
-	}
+	if (! kcn_net_read(kn))
+		goto bad;
+	kcn_net_ipkt(kn, &kp);
+	while (kcn_pkt_trailingdata(&kp) > 0)
+		KCN_LOG(DEBUG, "%02x\n", kcn_pkt_get8(&kp));
+	kcn_pkt_reset(&kp);
   out:
-	kcn_socket_close(&s);
-	KCN_LOG(DEBUG, "disconnected from (host name: notyet)");
+	kcndb_server_read_set(kn);
 	return;
-  again:
-	kcndb_server_read_set(arg, s);
+  bad:
+	kcndb_server_disconnect(kn);
 }
 
 static bool
 kcndb_server_event_set(struct event_base *evb, int s,
-    void (*cb)(int, short, void *), struct timeval *tv, const char *name)
+    void (*cb)(int, short, void *), void *arg, struct timeval *tv,
+    const char *name)
 {
 	short event;
 
 	event = EV_READ;
 	if (tv != NULL)
 		event |= EV_TIMEOUT;
-	if (event_base_once(evb, s, event, cb, evb, tv) == -1) {
+	if (event_base_once(evb, s, event, cb, arg, tv) == -1) {
 		KCN_LOG(ERR, "cannot set %s event", name);
 		return false;
 	}
@@ -177,12 +192,12 @@ static bool
 kcndb_server_accept_set(struct event_base *evb, int ls)
 {
 
-	return kcndb_server_event_set(evb, ls, kcndb_server_accept, NULL,
+	return kcndb_server_event_set(evb, ls, kcndb_server_accept, evb, NULL,
 	    "accept");
 }
 
 static bool
-kcndb_server_read_set(struct event_base *evb, int s)
+kcndb_server_read_set(struct kcn_net *kn)
 {
 #define KCNDB_SERVER_READ_TIMEOUT	5
 	struct timeval tv = {
@@ -190,7 +205,8 @@ kcndb_server_read_set(struct event_base *evb, int s)
 		.tv_usec = 0
 	};
 
-	return kcndb_server_event_set(evb, s, kcndb_server_read, &tv, "read");
+	return kcndb_server_event_set(kcn_net_data(kn), kcn_net_fd(kn),
+	    kcndb_server_read, kn, &tv, "read");
 }
 
 static void *
