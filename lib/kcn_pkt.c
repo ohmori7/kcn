@@ -322,12 +322,10 @@ kcn_pkt_error(ssize_t len, int error)
 		return ESHUTDOWN;
 	if (len != -1)
 		return 0;
-	if (error == EINTR
 #if EWOULDBLOCK != EAGAIN
-	    || error == EWOULDBLOCK
-#endif /* EWOULDBLOCK != EAGAIN */
-	    )
+	if (error == EWOULDBLOCK)
 		error = EAGAIN;
+#endif /* EWOULDBLOCK != EAGAIN */
 	return error;
 }
 
@@ -340,7 +338,7 @@ kcn_pkt_read(int fd, struct kcn_pkt *kp)
 	for (;;) {
 		len = read(fd, kcn_pkt_tail(kp), kcn_pkt_trailingspace(kp));
 		error = kcn_pkt_error(len, errno);
-		if (error != EAGAIN)
+		if (error != EINTR)
 			break;
 	}
 	if (error == 0)
@@ -357,7 +355,7 @@ kcn_pkt_write(int fd, struct kcn_pkt *kp)
 	for (;;) {
 		len = write(fd, kcn_pkt_head(kp), kcn_pkt_trailingdata(kp));
 		error = kcn_pkt_error(len, errno);
-		if (error != EAGAIN)
+		if (error != EINTR)
 			break;
 	}
 	if (error == 0)
