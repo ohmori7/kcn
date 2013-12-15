@@ -4,7 +4,6 @@
 #include <errno.h>
 #include <stdbool.h>
 #include <string.h>
-#include <unistd.h>
 
 #include <pthread.h>
 
@@ -97,8 +96,6 @@ kcndb_server_loop(void)
 static void
 kcndb_server_accept(int ls, short event, void *arg)
 {
-	struct sockaddr_storage ss;
-	socklen_t sslen;
 	struct event_base *evb;
 	struct kcn_net *kn;
 	int s;
@@ -109,7 +106,7 @@ kcndb_server_accept(int ls, short event, void *arg)
 	}
 
 	evb = arg;
-	s = accept(ls, (struct sockaddr *)&ss, &sslen);
+	s = kcn_socket_accept(ls);
 	if (s == -1) {
 		KCN_LOG(WARN, "accept() failed: %s", strerror(errno));
 		return;

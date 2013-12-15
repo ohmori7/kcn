@@ -1,6 +1,6 @@
 #include <errno.h>
 #include <fcntl.h>
-#include <stdbool.h>	/* just for kcn.h */
+#include <stdbool.h>
 #include <string.h>
 #include <unistd.h>
 
@@ -11,6 +11,26 @@
 #include "kcn_socket.h"
 #include "kcn_sockaddr.h"
 
+static bool
+kcn_socket_nonblock(int s)
+{
+	int flags;
+
+	flags = fcntl(s, F_GETFL);
+	if (flags == -1) {
+		KCN_LOG(ERR, "fcntl(F_GETFL) failed for %d: %s",
+		    s, strerror(errno));
+		return false;
+	}
+	flags |= O_NONBLOCK;
+	if (fcntl(s, F_SETFL, flags) == -1) {
+		KCN_LOG(ERR, "fcntl(F_SETFL) failed for %d: %s",
+		    s, strerror(errno));
+		return false;
+	}
+	return true;
+}
+
 int
 kcn_socket_listen(int domain, in_port_t port)
 {
@@ -18,7 +38,6 @@ kcn_socket_listen(int domain, in_port_t port)
 	socklen_t sslen;
 	sa_family_t family;
 	int s, on;
-	long flags;
 
 	family = kcn_sockaddr_pf2af(domain);
 	if (! kcn_sockaddr_init(&ss, &sslen, family, port))
@@ -61,19 +80,29 @@ kcn_socket_listen(int domain, in_port_t port)
 		goto bad;
 	}
 
-	flags = fcntl(s, F_GETFL);
-	if (flags == -1) {
-		KCN_LOG(ERR, "fcntl(F_GETFL) failed for %d: %s",
-		    domain, strerror(errno));
+	if (! kcn_socket_nonblock(s))
 		goto bad;
-	}
-	flags |= O_NONBLOCK;
-	if (fcntl(s, F_SETFL, flags) == -1) {
-		KCN_LOG(ERR, "fcntl(F_SETFL) failed for %d: %s",
-		    domain, strerror(errno));
-		goto bad;
-	}
 
+	return s;
+  bad:
+	kcn_socket_close(&s);
+	return -1;
+}
+
+int
+kcn_socket_accept(int ls)
+{
+	struct sockaddr_storage ss;
+	socklen_t sslen;
+	int s;
+
+	s = accept(ls, (struct sockaddr *)&ss, &sslen);
+	if (s == -1) {
+		KCN_LOG(WARN, "accept() failed: %s", strerror(errno));
+		goto bad;
+	}
+	if (! kcn_socket_nonblock(s))
+		goto bad;
 	return s;
   bad:
 	kcn_socket_close(&s);
