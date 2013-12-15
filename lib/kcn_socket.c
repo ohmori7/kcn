@@ -1,4 +1,5 @@
 #include <errno.h>
+#include <fcntl.h>
 #include <stdbool.h>	/* just for kcn.h */
 #include <string.h>
 #include <unistd.h>
@@ -16,8 +17,8 @@ kcn_socket_listen(int domain, in_port_t port)
 	struct sockaddr_storage ss;
 	socklen_t sslen;
 	sa_family_t family;
-	int s;
-	int on;
+	int s, on;
+	long flags;
 
 	family = kcn_sockaddr_pf2af(domain);
 	if (! kcn_sockaddr_init(&ss, &sslen, family, port))
@@ -56,6 +57,19 @@ kcn_socket_listen(int domain, in_port_t port)
 #define KCN_SOCKET_LISTEN_BACKLOG	5
 	if (listen(s, KCN_SOCKET_LISTEN_BACKLOG) == -1) {
 		KCN_LOG(ERR, "listen() failed for %d: %s",
+		    domain, strerror(errno));
+		goto bad;
+	}
+
+	flags = fcntl(s, F_GETFL);
+	if (flags == -1) {
+		KCN_LOG(ERR, "fcntl(F_GETFL) failed for %d: %s",
+		    domain, strerror(errno));
+		goto bad;
+	}
+	flags |= O_NONBLOCK;
+	if (fcntl(s, F_SETFL, flags) == -1) {
+		KCN_LOG(ERR, "fcntl(F_SETFL) failed for %d: %s",
 		    domain, strerror(errno));
 		goto bad;
 	}
