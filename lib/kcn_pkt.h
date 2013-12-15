@@ -21,6 +21,7 @@ void kcn_pkt_trim_head(struct kcn_pkt *, size_t);
 void *kcn_pkt_head(const struct kcn_pkt *);
 void *kcn_pkt_current(const struct kcn_pkt *);
 void *kcn_pkt_tail(const struct kcn_pkt *);
+void kcn_pkt_append(struct kcn_pkt *, size_t);
 uint8_t kcn_pkt_get8(struct kcn_pkt *);
 uint16_t kcn_pkt_get16(struct kcn_pkt *);
 uint32_t kcn_pkt_get32(struct kcn_pkt *);

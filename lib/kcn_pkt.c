@@ -153,7 +153,7 @@ kcn_pkt_tail(const struct kcn_pkt *kp)
 	return kp->kp_buf + kp->kp_ep;
 }
 
-static void
+void
 kcn_pkt_append(struct kcn_pkt *kp, size_t len)
 {
 	size_t trailingspace;
