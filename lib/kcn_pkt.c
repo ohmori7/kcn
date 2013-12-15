@@ -156,12 +156,12 @@ kcn_pkt_tail(const struct kcn_pkt *kp)
 void
 kcn_pkt_append(struct kcn_pkt *kp, size_t len)
 {
-	size_t trailingspace;
+	size_t trailingdata;
 
-	trailingspace = kcn_pkt_trailingspace(kp);
-	if (trailingspace >= len)
+	trailingdata = kcn_pkt_trailingdata(kp);
+	if (trailingdata >= len)
 		return;
-	kp->kp_ep += len - trailingspace;
+	kp->kp_ep += len - trailingdata;
 	assert(kp->kp_ep <= kp->kp_size);
 }
 
