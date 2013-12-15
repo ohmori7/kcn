@@ -96,11 +96,11 @@ kcn_socket_accept(int ls)
 	socklen_t sslen;
 	int s;
 
-	s = accept(ls, (struct sockaddr *)&ss, &sslen);
-	if (s == -1) {
-		KCN_LOG(WARN, "accept() failed: %s", strerror(errno));
-		goto bad;
-	}
+	while ((s = accept(ls, (struct sockaddr *)&ss, &sslen)) == -1)
+		if (errno != EINTR) {
+			KCN_LOG(WARN, "accept() failed: %s", strerror(errno));
+			goto bad;
+		}
 	if (! kcn_socket_nonblock(s))
 		goto bad;
 	return s;
