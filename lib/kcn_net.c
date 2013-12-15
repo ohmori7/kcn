@@ -6,7 +6,6 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 
 #include <netinet/in.h>
 
@@ -99,33 +98,23 @@ static bool
 kcn_net_read_cb(struct kcn_net *kn)
 {
 	struct kcn_pkt kp;
-	ssize_t len;
+	int error;
 
 	kcn_pkt_init(&kp, kn->kn_ipktdata);
 	kcn_pkt_end(&kp);
 
-	len = read(kn->kn_fd, kcn_pkt_tail(&kp), kcn_pkt_trailingspace(&kp));
-	if (len == 0) {
-		KCN_LOG(WARN, "disconnected");
-		return false;
-	}
-	if (len == -1) {
-		if (errno == EINTR ||
-#if EWOULDBLOCK != EAGAIN
-		    errno == EWOULDBLOCK ||
-#endif /* EWOULDBLOCK != EAGAIN */
-		    errno == EAGAIN)
-			goto out;
+	error = kcn_pkt_read(kn->kn_fd, &kp);
+	if (error == EAGAIN)
+		goto out;
+	if (error != 0) {
 		KCN_LOG(WARN, "read() failed: %s", strerror(errno));
 		return false;
 	}
-	kcn_pkt_append(&kp, len);
 #if 1
 	while (kcn_pkt_trailingdata(&kp) > 0)
 		KCN_LOG(DEBUG, "%02x", kcn_pkt_get8(&kp));
 	kcn_pkt_reset(&kp);
 #endif /* 1 */
-	KCN_LOG(DEBUG, "read %zu bytes", len);
   out:
 
 	return true;
@@ -144,17 +133,15 @@ static bool
 kcn_net_write_cb(struct kcn_net *kn)
 {
 	struct kcn_pkt kp;
-	ssize_t len;
+	int error;
 
 	if (! kcn_pkt_fetch(&kp, &kn->kn_opktq))
 		return false;
-	len = write(kn->kn_fd, kcn_pkt_head(&kp), kcn_pkt_len(&kp));
-	if (len == -1) {
+	error = kcn_pkt_write(kn->kn_fd, &kp);
+	if (error != 0) {
 		KCN_LOG(WARN, "write() failed: %s", strerror(errno));
 		return false;
 	}
-	KCN_LOG(DEBUG, "write %zu bytes", len);
-	kcn_pkt_trim_head(&kp, len);
 	if (kcn_pkt_trailingdata(&kp) == 0)
 		kcn_pkt_drop(&kp, &kn->kn_opktq);
 	return true;

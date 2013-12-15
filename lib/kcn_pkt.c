@@ -1,11 +1,13 @@
 #include <sys/queue.h>
 
 #include <assert.h>
+#include <errno.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "kcn_pkt.h"
 
@@ -92,12 +94,12 @@ kcn_pkt_reset(struct kcn_pkt *kp)
 	kp->kp_cp = 0;
 }
 
-size_t
+static size_t
 kcn_pkt_trailingspace(const struct kcn_pkt *kp)
 {
 
-	assert(kp->kp_size >= kp->kp_cp);
-	return kp->kp_size - kp->kp_cp;
+	assert(kp->kp_size >= kp->kp_ep);
+	return kp->kp_size - kp->kp_ep;
 }
 
 size_t
@@ -122,7 +124,7 @@ kcn_pkt_end(struct kcn_pkt *kp)
 	kp->kp_cp = kp->kp_ep;
 }
 
-void
+static void
 kcn_pkt_trim_head(struct kcn_pkt *kp, size_t len)
 {
 
@@ -153,7 +155,7 @@ kcn_pkt_tail(const struct kcn_pkt *kp)
 	return kp->kp_buf + kp->kp_ep;
 }
 
-void
+static void
 kcn_pkt_append(struct kcn_pkt *kp, size_t len)
 {
 	size_t trailingdata;
@@ -310,4 +312,55 @@ kcn_pkt_purge(struct kcn_pkt_queue *kpq)
 
 	while (kcn_pkt_fetch(&kp, kpq))
 		kcn_pkt_drop(&kp, kpq);
+}
+
+static int
+kcn_pkt_error(ssize_t len, int error)
+{
+
+	if (len == 0)
+		return ESHUTDOWN;
+	if (len != -1)
+		return 0;
+	if (error == EINTR
+#if EWOULDBLOCK != EAGAIN
+	    || error == EWOULDBLOCK
+#endif /* EWOULDBLOCK != EAGAIN */
+	    )
+		error = EAGAIN;
+	return error;
+}
+
+int
+kcn_pkt_read(int fd, struct kcn_pkt *kp)
+{
+	ssize_t len;
+	int error;
+
+	for (;;) {
+		len = read(fd, kcn_pkt_tail(kp), kcn_pkt_trailingspace(kp));
+		error = kcn_pkt_error(len, errno);
+		if (error != EAGAIN)
+			break;
+	}
+	if (error == 0)
+		kcn_pkt_append(kp, len);
+	return error;
+}
+
+int
+kcn_pkt_write(int fd, struct kcn_pkt *kp)
+{
+	ssize_t len;
+	int error;
+
+	for (;;) {
+		len = write(fd, kcn_pkt_head(kp), kcn_pkt_trailingdata(kp));
+		error = kcn_pkt_error(len, errno);
+		if (error != EAGAIN)
+			break;
+	}
+	if (error == 0)
+		kcn_pkt_trim_head(kp, len);
+	return error;
 }
