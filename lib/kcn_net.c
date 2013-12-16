@@ -116,7 +116,6 @@ kcn_net_read_cb(struct kcn_net *kn)
 	kcn_pkt_reset(&kp);
 #endif /* 1 */
   out:
-
 	return true;
 }
 
