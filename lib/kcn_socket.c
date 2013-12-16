@@ -85,7 +85,7 @@ kcn_socket_listen(int domain, in_port_t port)
 		goto bad;
 #endif /* 0 */
 
-	KCN_LOG(DEBUG, "listen on port %hu on fd %d", ntohs(port), s);
+	KCN_LOG(DEBUG, "listen on port %hu with fd %d", ntohs(port), s);
 
 	return s;
   bad:
