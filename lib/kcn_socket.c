@@ -85,6 +85,8 @@ kcn_socket_listen(int domain, in_port_t port)
 		goto bad;
 #endif /* 0 */
 
+	KCN_LOG(DEBUG, "listen on port %hu on fd %d", ntohs(port), s);
+
 	return s;
   bad:
 	kcn_socket_close(&s);
@@ -101,7 +103,8 @@ kcn_socket_accept(int ls)
 	sslen = sizeof(ss);
 	while ((s = accept(ls, (struct sockaddr *)&ss, &sslen)) == -1)
 		if (errno != EINTR) {
-			KCN_LOG(WARN, "accept() failed on %s", strerror(errno));
+			KCN_LOG(WARN, "accept() failed on %d: %s",
+			    ls, strerror(errno));
 			goto bad;
 		}
 	if (! kcn_socket_nonblock(s))
