@@ -93,6 +93,15 @@ kcn_pkt_reset(struct kcn_pkt *kp, size_t headingspace)
 	kp->kp_cp = kp->kp_sp = kp->kp_ep = headingspace;
 }
 
+#ifndef NDEBUG
+static size_t
+kcn_pkt_headingspace(const struct kcn_pkt *kp)
+{
+
+	return kp->kp_sp;
+}
+#endif /* ! NDEBUG */
+
 static size_t
 kcn_pkt_trailingspace(const struct kcn_pkt *kp)
 {
@@ -152,6 +161,15 @@ kcn_pkt_tail(const struct kcn_pkt *kp)
 {
 
 	return kp->kp_buf + kp->kp_ep;
+}
+
+void
+kcn_pkt_prepend(struct kcn_pkt *kp, size_t len)
+{
+
+	assert(kcn_pkt_headingspace(kp) >= len);
+	kp->kp_sp -= len;
+	kp->kp_cp = kp->kp_sp;
 }
 
 static void
