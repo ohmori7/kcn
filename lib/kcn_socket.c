@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <stdbool.h>
@@ -86,6 +87,35 @@ kcn_socket_listen(int domain, in_port_t port)
 #endif /* 0 */
 
 	KCN_LOG(DEBUG, "listen on port %hu with fd %d", ntohs(port), s);
+
+	return s;
+  bad:
+	kcn_socket_close(&s);
+	return -1;
+}
+
+int
+kcn_socket_connect(struct sockaddr_storage *ss)
+{
+	int s, domain;
+	socklen_t sslen;
+
+	domain = kcn_sockaddr_af2pf(ss->ss_family);
+	if (domain == -1)
+		return -1;
+	s = socket(domain, SOCK_STREAM, 0);
+	if (s == -1) {
+		KCN_LOG(ERR, "socket() failed: %s", strerror(errno));
+		goto bad;
+	}
+	if (! kcn_socket_nonblock(s))
+		goto bad;
+	sslen = kcn_sockaddr_len(ss);
+	assert(sslen != (socklen_t)-1);
+	if (connect(s, (struct sockaddr *)ss, sslen) == -1) {
+		KCN_LOG(ERR, "connect() failed: %s", strerror(errno));
+		goto bad;
+	}
 
 	return s;
   bad:
