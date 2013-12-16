@@ -20,6 +20,19 @@ kcn_sockaddr_pf2af(int domain)
 	}
 }
 
+int
+kcn_sockaddr_af2pf(int af)
+{
+
+	switch (af) {
+	case AF_INET:	return PF_INET;
+#ifdef HAVE_IPV6
+	case AF_INET6:	return PF_INET6;
+#endif /* HAVE_IPV6 */
+	default:	errno = EAFNOSUPPORT; return -1;
+	}
+}
+
 bool
 kcn_sockaddr_init(struct sockaddr_storage *ss, socklen_t *sslenp,
     sa_family_t family, in_port_t port)
