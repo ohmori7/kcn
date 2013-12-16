@@ -12,7 +12,7 @@ void kcn_pkt_init(struct kcn_pkt *, struct kcn_pkt_data *);
 struct kcn_pkt_data *kcn_pkt_data_new(size_t);
 void kcn_pkt_data_destroy(struct kcn_pkt_data *);
 size_t kcn_pkt_len(const struct kcn_pkt *);
-void kcn_pkt_reset(struct kcn_pkt *);
+void kcn_pkt_reset(struct kcn_pkt *, size_t);
 size_t kcn_pkt_trailingdata(const struct kcn_pkt *);
 void kcn_pkt_start(struct kcn_pkt *);
 void kcn_pkt_end(struct kcn_pkt *);

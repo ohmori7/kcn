@@ -87,11 +87,10 @@ kcn_pkt_len(const struct kcn_pkt *kp)
 }
 
 void
-kcn_pkt_reset(struct kcn_pkt *kp)
+kcn_pkt_reset(struct kcn_pkt *kp, size_t headingspace)
 {
 
-	kp->kp_sp = kp->kp_ep = 0;
-	kp->kp_cp = 0;
+	kp->kp_cp = kp->kp_sp = kp->kp_ep = headingspace;
 }
 
 static size_t
@@ -274,7 +273,6 @@ kcn_pkt_enqueue(struct kcn_pkt *kp, struct kcn_pkt_queue *kpq)
 
 	assert(kp->kp_kpd != NULL);
 	kpd = kcn_pkt_data_dup(kp);
-	kcn_pkt_reset(kp);
 	if (kpd == NULL)
 		return false;
 	STAILQ_INSERT_TAIL(kpq, kpd, kpd_chain);
