@@ -80,8 +80,10 @@ kcn_socket_listen(int domain, in_port_t port)
 		goto bad;
 	}
 
+#if 0 /* XXX */
 	if (! kcn_socket_nonblock(s))
 		goto bad;
+#endif /* 0 */
 
 	return s;
   bad:
