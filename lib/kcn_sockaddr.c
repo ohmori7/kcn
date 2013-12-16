@@ -33,6 +33,22 @@ kcn_sockaddr_af2pf(int af)
 	}
 }
 
+socklen_t
+kcn_sockaddr_len(const struct sockaddr_storage *ss)
+{
+#ifdef HAVE_STRUCT_SOCKADDR_STORAGE_SS_LEN
+	return ss->ss_len;
+#else /* HAVE_STRUCT_SOCKADDR_STORAGE_SS_LEN */
+	switch (ss->ss_family) {
+	case AF_INET:	return sizeof(struct sockaddr_in);
+#ifdef HAVE_IPV6
+	case AF_INET6:	return sizeof(struct sockaddr_in6);
+#endif /* HAVE_IPV6 */
+	default:	errno = EAFNOSUPPORT; return -1;
+	}
+#endif /* ! HAVE_STRUCT_SOCKADDR_STORAGE_SS_LEN */
+}
+
 bool
 kcn_sockaddr_init(struct sockaddr_storage *ss, socklen_t *sslenp,
     sa_family_t family, in_port_t port)
