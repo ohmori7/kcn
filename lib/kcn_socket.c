@@ -113,8 +113,12 @@ kcn_socket_connect(struct sockaddr_storage *ss)
 	sslen = kcn_sockaddr_len(ss);
 	assert(sslen != (socklen_t)-1);
 	if (connect(s, (struct sockaddr *)ss, sslen) == -1) {
-		KCN_LOG(ERR, "connect() failed: %s", strerror(errno));
-		goto bad;
+		if (errno == EINPROGRESS)
+			KCN_LOG(DEBUG, "connect() is now in progress");
+		else {
+			KCN_LOG(ERR, "connect() failed: %s", strerror(errno));
+			goto bad;
+		}
 	}
 
 	return s;
