@@ -124,7 +124,7 @@ kcn_google_search_one(const struct kcn_uri *ku, struct kcn_info *ki)
 			errno = EINVAL;
 			goto bad;
 		}
-		if (! kcn_info_loc_add(ki, jlocstr))
+		if (! kcn_info_loc_add(ki, jlocstr, strlen(jlocstr)))
 			goto bad;
 		if (kcn_info_nlocs(ki) == kcn_info_maxnlocs(ki))
 			break;

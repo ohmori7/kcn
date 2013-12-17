@@ -8,6 +8,7 @@
 #include <netinet/in.h>
 
 #include "kcn.h"
+#include "kcn_str.h"
 #include "kcn_info.h"
 
 struct kcn_info {
@@ -150,11 +151,11 @@ kcn_info_loc(const struct kcn_info *ki, size_t idx)
 }
 
 bool
-kcn_info_loc_add(struct kcn_info *ki, const char *locstr)
+kcn_info_loc_add(struct kcn_info *ki, const char *locstr, size_t locstrlen)
 {
 
 	assert(ki->ki_nlocs < ki->ki_maxnlocs);
-	ki->ki_locs[ki->ki_nlocs] = strdup(locstr);
+	ki->ki_locs[ki->ki_nlocs] = kcn_str_dup(locstr, locstrlen);
 	if (ki->ki_locs[ki->ki_nlocs] == NULL)
 		return false;
 	++ki->ki_nlocs;
