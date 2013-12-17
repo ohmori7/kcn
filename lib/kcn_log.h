@@ -9,9 +9,9 @@ do {									\
 } while (0/*CONSTCOND*/)
 
 #if HAVE_GCC_VA_ARGS
-#define KCN_LOG(p, fmt, ...)	_KCN_LOG(p, fmt, ## __VA_ARGS__)
+#define KCN_LOG(p, fmt, ...)	_KCN_LOG(p, "%s: " fmt, #p, ## __VA_ARGS__)
 #elif HAVE_C99_VA_ARGS /* HAVE_GCC_VA_ARGS */
-#define __KCN_LOG(p, fmt, ...)	_KCN_LOG(p, fmt "%s", __VA_ARGS__)
+#define __KCN_LOG(p, fmt, ...)	_KCN_LOG(p, "%s: " fmt "%s", #p, __VA_ARGS__)
 #define KCN_LOG(...)		__KCN_LOG(__VA_ARGS__, "")
 #else /* HAVE_C99_VA_ARGS */
 #error cpp does not support __VA_ARGS__ or kcn.h is not properly included.
