@@ -275,5 +275,6 @@ kcn_net_loop(struct kcn_net *kn)
 		KCN_LOG(ERR, "event dispatch failed: %s", strerror(errno));
 		return false;
 	}
+	KCN_LOG(DEBUG, "event dispatch finishes");
 	return true;
 }
