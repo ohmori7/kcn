@@ -133,7 +133,8 @@ static bool
 kcn_net_event_enable(struct event *ev, const char *name)
 {
 
-	event_del(ev);
+	if (event_pending(ev, EV_TIMEOUT, NULL))
+		return true;
 	if (event_add(ev, &kcn_net_timeouttv) == -1) {
 		KCN_LOG(WARN, "cannot enable %s event", name);
 		return false;
