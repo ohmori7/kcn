@@ -69,6 +69,7 @@ main(int argc, char * const argv[])
 
 	if (! kcndb_server_start())
 		usage("cannot launch server");
+		/*NOTREACHED*/
 
 	kcndb_server_loop();
 
