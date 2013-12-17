@@ -28,6 +28,7 @@ kcn_info_new(enum kcn_loc_type loctype, size_t maxnlocs)
 {
 	struct kcn_info *ki;
 
+	assert(maxnlocs > 0);
 	ki = malloc(offsetof(struct kcn_info, ki_locs[maxnlocs]));
 	if (ki == NULL)
 		return NULL;
