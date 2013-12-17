@@ -204,9 +204,8 @@ NetBSD current 6.99.3 or later
 	curl:
 		pkgsrc/www/curl
 	jansson:
+		pkgsrc/textproc/jansson (pkgsrc current on 2013/7/13 or later)
 		jansson-2.5 obtained from http://www.digip.org/jansson/
-		jansson-2.4 seems to be imported to pkgsrc/textproc/jansson
-		on 2013/7/13, and it may work but has not been tested yet.
 
 CentOS 6.4 or later (x86_64)
 --------------------------------------------------------------------------------
