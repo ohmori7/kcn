@@ -206,7 +206,7 @@ kcn_net_read_cb(int fd, short events, void *arg)
 	if (error == EAGAIN)
 		goto out;
 	if (error != 0) {
-		KCN_LOG(WARN, "read() failed: %s", strerror(errno));
+		KCN_LOG(WARN, "read() failed: %s", strerror(error));
 		goto out;
 	}
 	error = (*kn->kn_readcb)(kn, &kp, kn->kn_data);
