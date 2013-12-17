@@ -1,6 +1,5 @@
 #include <err.h>
 #include <errno.h>
-#include <limits.h>	/* LONG_{MIN,MAX} */
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdint.h>
