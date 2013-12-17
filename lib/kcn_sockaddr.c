@@ -1,7 +1,11 @@
+#include <assert.h>
 #include <errno.h>
 #include <stdbool.h>
 #include <string.h>
 
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netdb.h>
 #include <netinet/in.h>
 
 #include "kcn.h"
@@ -83,4 +87,31 @@ kcn_sockaddr_init(struct sockaddr_storage *ss, socklen_t *sslenp,
 		return false;
 	}
 	return true;
+}
+
+bool
+kcn_sockaddr_aton(struct sockaddr_storage *ss,
+    const char *nodename, const char *servname)
+{
+	struct addrinfo hai, *rai;
+	int error;
+
+	memset(&hai, 0, sizeof(hai));
+#ifdef HAVE_IPV6
+	hai.ai_family = AF_UNSPEC;
+#else /* HAVE_IPV6 */
+	hai.ai_family = AF_INET;
+#endif /* ! HAVE_IPV6 */
+	hai.ai_socktype = SOCK_STREAM;
+	hai.ai_flags = 0;
+	hai.ai_protocol = 0;
+	error = getaddrinfo(nodename, servname, &hai, &rai);
+	if (error != 0)
+		goto out;
+	assert(rai != NULL);
+	assert(sizeof(*ss) >= rai->ai_addrlen);
+	memcpy(ss, rai->ai_addr, rai->ai_addrlen);
+	freeaddrinfo(rai);
+  out:
+	return error == 0 ? true : false;
 }
