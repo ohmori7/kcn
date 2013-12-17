@@ -174,7 +174,7 @@ kcndb_server_recv(struct kcn_net *kn, struct kcn_pkt *kp, void *arg)
 	if (! rc)
 		goto bad;
 
-	return 0;
+	return EAGAIN;
   bad:
 	if (errno != EAGAIN)
 		KCN_LOG(ERR, "recv invalid message: %s", strerror(errno));
