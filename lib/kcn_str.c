@@ -2,6 +2,7 @@
 #include <limits.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "kcn_str.h"
 
@@ -29,4 +30,17 @@ kcn_strtoull(const char *s, unsigned long long min, unsigned long long max,
 	errno = oerrno;
 	*p = llval;
 	return true;
+}
+
+char *
+kcn_str_dup(const char *s0, size_t len)
+{
+	char *s;
+
+	s = malloc(len + 1);
+	if (s == NULL)
+		return NULL;
+	memcpy(s, s0, len);
+	s[len] = '\0';
+	return s;
 }
