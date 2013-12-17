@@ -5,7 +5,7 @@
 #include "kcn.h"
 #include "kcn_log.h"
 
-static int kcn_log_priority = LOG_EMERG - 1;
+int kcn_log_priority = LOG_EMERG - 1;
 
 void
 kcn_log_priority_increment(void)
@@ -16,12 +16,10 @@ kcn_log_priority_increment(void)
 }
 
 void
-kcn_log(int priority, const char *fmt, ...)
+kcn_log(const char *fmt, ...)
 {
 	va_list ap;
 
-	if (kcn_log_priority < priority)
-		return;
 	va_start(ap, fmt);
 	vfprintf(stderr, fmt, ap);
 	va_end(ap);
