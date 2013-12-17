@@ -30,24 +30,28 @@ enum kcndb_thread_status {
 };
 
 struct kcndb_thread {
-	enum kcndb_thread_status kt_status;
 	pthread_t kt_id;
+	enum kcndb_thread_status kt_status;
+	unsigned short kt_number;
 	int kt_listenfd;
 	struct event_base *kt_evb;
 };
 
+#define KCNDB_THREAD_NUMBER_MAIN	0
+
 static int kcndb_server_socket = -1;
 static in_port_t kcndb_server_port = KCN_HTONS(KCN_NETSTAT_PORT_DEFAULT);
 
-#define KCNDB_SERVER_NWORKERS	8
+#define KCNDB_SERVER_NWORKERS		8
 static struct kcndb_thread kcndb_server_threads[KCNDB_SERVER_NWORKERS];
 
 static void *kcndb_server_main(void *);
 
 static void
-kcndb_thread_init(struct kcndb_thread *kt)
+kcndb_thread_init(struct kcndb_thread *kt, unsigned short n)
 {
 
+	kt->kt_number = n;
 	kt->kt_listenfd = kcndb_server_socket;
 }
 
@@ -77,8 +81,8 @@ kcndb_server_start(void)
 	KCN_LOG(INFO, "server listen on %u with fd %d.",
 	    ntohs(kcndb_server_port), kcndb_server_socket);
 
-	for (i = 0; i < KCNDB_SERVER_NWORKERS; i++) {
-		kcndb_thread_init(&kcndb_server_threads[i]);
+	for (i = KCNDB_THREAD_NUMBER_MAIN + 1; i < KCNDB_SERVER_NWORKERS; i++) {
+		kcndb_thread_init(&kcndb_server_threads[i], i);
 		error = pthread_create(&kcndb_server_threads[i].kt_id, NULL,
 		    kcndb_server_main, &kcndb_server_threads[i]);
 		if (error != 0) {
@@ -106,12 +110,13 @@ kcndb_server_stop(void)
 void
 kcndb_server_loop(void)
 {
-	struct kcndb_thread kt;
-
-	kcndb_thread_init(&kt);
-	kt.kt_id = pthread_self();
-	kt.kt_status = KCNDB_THREAD_STATUS_RUN;
-	kcndb_server_main(&kt);
+	struct kcndb_thread *kt;
+	
+	kt = &kcndb_server_threads[KCNDB_THREAD_NUMBER_MAIN];
+	kcndb_thread_init(kt, KCNDB_THREAD_NUMBER_MAIN);
+	kt->kt_id = pthread_self();
+	kt->kt_status = KCNDB_THREAD_STATUS_RUN;
+	kcndb_server_main(kt);
 }
 
 static bool
