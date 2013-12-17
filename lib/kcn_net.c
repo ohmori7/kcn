@@ -20,7 +20,8 @@
 enum kcn_net_state {
 	KCN_NET_STATE_INIT,
 	KCN_NET_STATE_READPENDING,
-	KCN_NET_STATE_ESTABLISHED
+	KCN_NET_STATE_ESTABLISHED,
+	KCN_NET_STATE_DISCONNECTED
 };
 
 struct kcn_net {
@@ -43,6 +44,7 @@ struct timeval kcn_net_timeouttv = {
 };
 
 static bool kcn_net_write_enable(struct kcn_net *);
+static void kcn_net_disconnect(struct kcn_net *);
 static void kcn_net_read_cb(int, short, void *);
 static void kcn_net_write_cb(int, short, void *);
 
@@ -85,9 +87,7 @@ kcn_net_destroy(struct kcn_net *kn)
 
 	if (kn == NULL)
 		return;
-	event_del(&kn->kn_evread);
-	event_del(&kn->kn_evwrite);
-	kcn_socket_close(&kn->kn_fd);
+	kcn_net_disconnect(kn);
 	kcn_pkt_data_destroy(kn->kn_ipktdata);
 	kcn_pkt_data_destroy(kn->kn_opktdata);
 	kcn_pkt_purge(&kn->kn_opktq);
@@ -99,9 +99,10 @@ kcn_net_state_ntoa(enum kcn_net_state state)
 {
 
 	switch (state) {
-	case KCN_NET_STATE_INIT:	return "Init";
-	case KCN_NET_STATE_READPENDING:	return "ReadPending";
-	case KCN_NET_STATE_ESTABLISHED:	return "Established";
+	case KCN_NET_STATE_INIT:		return "Init";
+	case KCN_NET_STATE_READPENDING:		return "ReadPending";
+	case KCN_NET_STATE_ESTABLISHED:		return "Established";
+	case KCN_NET_STATE_DISCONNECTED:	return "Disconnected";
 	}
 	return NULL; /* just in case. */
 }
@@ -166,9 +167,12 @@ static void
 kcn_net_disconnect(struct kcn_net *kn)
 {
 
+	if (kn->kn_state == KCN_NET_STATE_DISCONNECTED)
+		return;
 	event_del(&kn->kn_evread);
 	event_del(&kn->kn_evwrite);
-	KCN_LOG(DEBUG, "disconnected");
+	kcn_socket_close(&kn->kn_fd);
+	kcn_net_state_change(kn, KCN_NET_STATE_DISCONNECTED);
 }
 
 static void
