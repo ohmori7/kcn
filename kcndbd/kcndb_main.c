@@ -11,6 +11,7 @@
 #include "kcn.h"
 #include "kcn_str.h"
 #include "kcn_log.h"
+#include "kcn_netstat.h"
 
 #include "kcndb_db.h"
 #include "kcndb_server.h"
@@ -97,6 +98,6 @@ Options:\n\
 	-p: TCP listen port number (default %d)\n\
 	-v: increment verbosity (can be specified 7 times at maximum)\n\
 \n",
-	    pname, KCNDB_DB_PATH_DEFAULT, KCNDB_NET_PORT_DEFAULT);
+	    pname, KCNDB_DB_PATH_DEFAULT, KCN_NETSTAT_PORT_DEFAULT);
 	exit(EXIT_FAILURE);
 }
