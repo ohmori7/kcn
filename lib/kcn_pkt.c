@@ -277,7 +277,7 @@ kcn_pkt_put64(struct kcn_pkt *kp, uint64_t v)
 }
 
 void
-kcn_pkt_put(struct kcn_pkt *kp, void *p, size_t len)
+kcn_pkt_put(struct kcn_pkt *kp, const void *p, size_t len)
 {
 
 	kcn_pkt_append(kp, len);
