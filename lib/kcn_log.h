@@ -4,7 +4,9 @@
 #define _KCN_LOG(p, ...)						\
 do {									\
 	if (KCN_LOG_ISLOGGING(p)) {					\
+		int __kcn_log_oerrno = errno;				\
 		kcn_log(__VA_ARGS__);					\
+		errno = __kcn_log_oerrno;				\
 	}								\
 } while (0/*CONSTCOND*/)
 
