@@ -17,41 +17,61 @@
 #include "kcn_pkt.h"
 #include "kcn_net.h"
 
+enum kcn_net_state {
+	KCN_NET_STATE_INIT,
+	KCN_NET_STATE_READPENDING,
+	KCN_NET_STATE_ESTABLISHED
+};
+
 struct kcn_net {
-	struct event kn_ev;
+	enum kcn_net_state kn_state;
+	struct event kn_evread;
+	struct event kn_evwrite;
 	struct kcn_pkt_data *kn_ipktdata;
 	struct kcn_pkt_data *kn_opktdata;
 	struct kcn_pkt_queue kn_opktq;
+	int (*kn_readcb)(struct kcn_net *, struct kcn_pkt *, void *);
 	void *kn_data;
 };
-#define kn_base	kn_ev.ev_base
-#define kn_fd	kn_ev.ev_fd
+#define kn_evb	kn_evread.ev_base
+#define kn_fd	kn_evread.ev_fd
 
-static void kcn_net_event(int, short, void *);
+#define KCN_NET_TIMEOUT	5
+struct timeval kcn_net_timeouttv = {
+	.tv_sec = KCN_NET_TIMEOUT,
+	.tv_usec = 0
+};
+
+static bool kcn_net_write_enable(struct kcn_net *);
+static void kcn_net_read_cb(int, short, void *);
+static void kcn_net_write_cb(int, short, void *);
 
 struct kcn_net *
-kcn_net_new(struct event_base *evb, int fd, size_t size, void *data)
+kcn_net_new(struct event_base *evb, int fd, size_t size,
+    int (*readcb)(struct kcn_net *, struct kcn_pkt *, void *), void *data)
 {
 	struct kcn_net *kn;
-#define KCN_NET_TIMEOUT	5
-	struct timeval tv = {
-		.tv_sec = KCN_NET_TIMEOUT,
-		.tv_usec = 0
-	};
 
 	kn = malloc(sizeof(*kn));
 	if (kn == NULL)
 		goto bad;
-	event_set(&kn->kn_ev, fd, EV_READ | EV_TIMEOUT, kcn_net_event, kn);
+	kn->kn_state = KCN_NET_STATE_INIT;
+	event_set(&kn->kn_evread, fd, EV_READ | EV_TIMEOUT,
+	    kcn_net_read_cb, kn);
+	event_set(&kn->kn_evwrite, fd, EV_WRITE | EV_TIMEOUT,
+	    kcn_net_write_cb, kn);
 	kn->kn_ipktdata = kcn_pkt_data_new(size);
 	kn->kn_opktdata = kcn_pkt_data_new(size);
 	kcn_pkt_queue_init(&kn->kn_opktq);
+	kn->kn_readcb = readcb;
 	kn->kn_data = data;
-	if (event_base_set(evb, &kn->kn_ev) == -1)
+	if (event_base_set(evb, &kn->kn_evread) == -1)
 		goto bad;
-	if (event_add(&kn->kn_ev, &tv) == -1)
+	if (event_base_set(evb, &kn->kn_evwrite) == -1)
 		goto bad;
 	if (kn->kn_ipktdata == NULL || kn->kn_opktdata == NULL)
+		goto bad;
+	if (! kcn_net_write_enable(kn))
 		goto bad;
 	return kn;
   bad:
@@ -65,7 +85,8 @@ kcn_net_destroy(struct kcn_net *kn)
 
 	if (kn == NULL)
 		return;
-	event_del(&kn->kn_ev);
+	event_del(&kn->kn_evread);
+	event_del(&kn->kn_evwrite);
 	kcn_socket_close(&kn->kn_fd);
 	kcn_pkt_data_destroy(kn->kn_ipktdata);
 	kcn_pkt_data_destroy(kn->kn_opktdata);
@@ -73,11 +94,32 @@ kcn_net_destroy(struct kcn_net *kn)
 	free(kn);
 }
 
-void
-kcn_net_ipkt(struct kcn_net *kn, struct kcn_pkt *kp)
+static const char *
+kcn_net_state_ntoa(enum kcn_net_state state)
 {
 
-	kcn_pkt_init(kp, kn->kn_ipktdata);
+	switch (state) {
+	case KCN_NET_STATE_INIT:	return "Init";
+	case KCN_NET_STATE_READPENDING:	return "ReadPending";
+	case KCN_NET_STATE_ESTABLISHED:	return "Established";
+	}
+	return NULL; /* just in case. */
+}
+
+static void
+kcn_net_state_change(struct kcn_net *kn, enum kcn_net_state nstate)
+{
+	enum kcn_net_state ostate;
+
+	if (kn->kn_state == nstate)
+		return;
+	ostate = kn->kn_state;
+	kn->kn_state = nstate;
+	KCN_LOG(DEBUG, "state change from %s to %s",
+	    kcn_net_state_ntoa(ostate), kcn_net_state_ntoa(nstate));
+	if (ostate == KCN_NET_STATE_READPENDING &&
+	    nstate == KCN_NET_STATE_ESTABLISHED)
+		kcn_net_read_enable(kn);
 }
 
 void
@@ -87,84 +129,144 @@ kcn_net_opkt(struct kcn_net *kn, struct kcn_pkt *kp)
 	kcn_pkt_init(kp, kn->kn_opktdata);
 }
 
-void *
-kcn_net_data(const struct kcn_net *kn)
+static bool
+kcn_net_event_enable(struct event *ev, const char *name)
 {
 
-	return kn->kn_data;
+	event_del(ev);
+	if (event_add(ev, &kcn_net_timeouttv) == -1) {
+		KCN_LOG(WARN, "cannot enable %s event", name);
+		return false;
+	}
+	return true;
+}
+
+bool
+kcn_net_read_enable(struct kcn_net *kn)
+{
+
+	if (kn->kn_state != KCN_NET_STATE_ESTABLISHED) {
+		kcn_net_state_change(kn, KCN_NET_STATE_READPENDING);
+		return true;
+	}
+	return kcn_net_event_enable(&kn->kn_evread, "read");
 }
 
 static bool
-kcn_net_read_cb(struct kcn_net *kn)
+kcn_net_write_enable(struct kcn_net *kn)
 {
+
+	return kcn_net_event_enable(&kn->kn_evwrite, "write");
+}
+
+static void
+kcn_net_disconnect(struct kcn_net *kn)
+{
+
+	event_del(&kn->kn_evread);
+	event_del(&kn->kn_evwrite);
+	KCN_LOG(DEBUG, "disconnected");
+}
+
+static void
+kcn_net_timeout(struct kcn_net *kn, short event)
+{
+
+	KCN_LOG(DEBUG, "%s timeout", event & EV_READ ? "read" : "write");
+	kcn_net_disconnect(kn);
+}
+
+static bool
+kcn_net_event_check(struct kcn_net *kn, short events, short event)
+{
+
+	if ((events & event) == 0) {
+		if (events & EV_TIMEOUT)
+			kcn_net_timeout(kn, event);
+		return false;
+	}
+	return true;
+}
+
+static void
+kcn_net_read_cb(int fd, short events, void *arg)
+{
+	struct kcn_net *kn = arg;
 	struct kcn_pkt kp;
 	int error;
 
+	assert(kn->kn_fd == fd);
+	(void)fd;
+	if (! kcn_net_event_check(kn, events, EV_READ))
+		return;
+
 	kcn_pkt_init(&kp, kn->kn_ipktdata);
-	kcn_pkt_end(&kp);
 
 	error = kcn_pkt_read(kn->kn_fd, &kp);
 	if (error == EAGAIN)
 		goto out;
 	if (error != 0) {
 		KCN_LOG(WARN, "read() failed: %s", strerror(errno));
-		return false;
+		goto out;
 	}
-#if 1
-	while (kcn_pkt_trailingdata(&kp) > 0)
-		KCN_LOG(DEBUG, "%02x", kcn_pkt_get8(&kp));
-	kcn_pkt_reset(&kp);
-#endif /* 1 */
+	error = (*kn->kn_readcb)(kn, &kp, kn->kn_data);
   out:
-	return true;
+	if (error == EAGAIN)
+		kcn_net_read_enable(kn);
+	else if (error != 0)
+		kcn_net_disconnect(kn);
 }
 
 bool
-kcn_net_write(struct kcn_net *kn)
+kcn_net_write(struct kcn_net *kn, struct kcn_pkt *kp)
 {
 
-	/* XXX */
-	(void)kn;
+	if (! kcn_pkt_enqueue(kp, &kn->kn_opktq)) {
+		KCN_LOG(ERR, "cannot enqueue packet");
+		return false;
+	}
+	if (! kcn_net_write_enable(kn))
+		return false;
 	return true;
 }
 
-static bool
-kcn_net_write_cb(struct kcn_net *kn)
+static void
+kcn_net_write_cb(int fd, short events, void *arg)
 {
+	struct kcn_net *kn = arg;
 	struct kcn_pkt kp;
 	int error;
 
-	if (! kcn_pkt_fetch(&kp, &kn->kn_opktq))
-		return false;
-	error = kcn_pkt_write(kn->kn_fd, &kp);
-	if (error != 0) {
-		KCN_LOG(WARN, "write() failed: %s", strerror(errno));
+	assert(kn->kn_fd == fd);
+	(void)fd;
+	if (! kcn_net_event_check(kn, events, EV_WRITE))
+		return;
+
+	kcn_net_state_change(kn, KCN_NET_STATE_ESTABLISHED);
+
+	while (kcn_pkt_fetch(&kp, &kn->kn_opktq)) {
+		error = kcn_pkt_write(kn->kn_fd, &kp);
+		if (error == EAGAIN) {
+			kcn_net_write_enable(kn);
+			return;
+		}
+		if (error != 0) {
+			KCN_LOG(WARN, "write() failed: %s", strerror(errno));
+			kcn_net_disconnect(kn);
+			return;
+		}
+		if (kcn_pkt_trailingdata(&kp) == 0)
+			kcn_pkt_drop(&kp, &kn->kn_opktq);
+	}
+}
+
+bool
+kcn_net_loop(struct kcn_net *kn)
+{
+
+	if (event_base_dispatch(kn->kn_evb) == -1) {
+		KCN_LOG(ERR, "event dispatch failed: %s", strerror(errno));
 		return false;
 	}
-	if (kcn_pkt_trailingdata(&kp) == 0)
-		kcn_pkt_drop(&kp, &kn->kn_opktq);
 	return true;
-}
-
-static void
-kcn_net_timeout(struct kcn_net *kn)
-{
-
-	KCN_LOG(DEBUG, "disconnected");
-	kcn_net_destroy(kn);
-}
-
-static void
-kcn_net_event(int fd, short event, void *arg)
-{
-	struct kcn_net *kn = arg;
-
-	(void)fd;
-	if (event & EV_READ)
-		kcn_net_read_cb(kn);
-	if (event & EV_WRITE)
-		while (kcn_net_write_cb(kn))
-			;
-	if (event & EV_TIMEOUT)
-		kcn_net_timeout(kn);
 }

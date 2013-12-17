@@ -9,6 +9,7 @@
 #include <unistd.h>
 
 #include "kcn.h"
+#include "kcn_formula.h"
 #include "kcn_str.h"
 #include "kcn_log.h"
 #include "kcn_netstat.h"
