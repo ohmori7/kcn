@@ -138,6 +138,8 @@ kcn_net_event_enable(struct event *ev, const char *name)
 		KCN_LOG(WARN, "cannot enable %s event", name);
 		return false;
 	}
+	KCN_LOG(DEBUG, "enable %s event with %lld sec timeout",
+	    name, (long long)kcn_net_timeouttv.tv_sec);
 	return true;
 }
 
