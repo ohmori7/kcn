@@ -56,6 +56,15 @@ kcndb_thread_init(struct kcndb_thread *kt, unsigned short n)
 
 	kt->kt_number = n;
 	kt->kt_listenfd = kcndb_server_socket;
+	kt->kt_evb = NULL;
+}
+
+static void
+kcndb_thread_finish(struct kcndb_thread *kt)
+{
+
+	if (kt->kt_evb != NULL)
+		event_base_free(kt->kt_evb);
 }
 
 bool
@@ -234,8 +243,7 @@ kcndb_server_main(void *arg)
 		kcndb_server_session(kt, fd, name);
 	}
   out:
-	if (kt->kt_evb != NULL)
-		event_base_free(kt->kt_evb);
+	kcndb_thread_finish(kt);
 	LOG(DEBUG, "finish%s", "");
 	return NULL;
 }
