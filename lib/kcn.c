@@ -20,6 +20,17 @@ strlcpy(char *dst, const char *src, size_t size)
 }
 #endif /* ! HAVE_STRLCPY */
 
+#ifndef HAVE_STRLCAT
+size_t
+strlcat(char *dst, const char *src, size_t size)
+{
+
+	strncat(dst, src, size);
+	dst[size - 1] = '\0';
+	return strlen(dst);
+}
+#endif /* ! HAVE_STRLCAT */
+
 char *
 kcn_key_concat(int keyc, char * const keyv[])
 {
