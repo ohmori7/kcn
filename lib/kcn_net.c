@@ -38,6 +38,9 @@ struct kcn_net {
 #define kn_evb	kn_evread.ev_base
 #define kn_fd	kn_evread.ev_fd
 
+#define LOG(p, fmt, ...)						\
+	KCN_LOG(p, "%s: " fmt, kn->kn_name, __VA_ARGS__)
+
 #define KCN_NET_TIMEOUT	5
 struct timeval kcn_net_timeouttv = {
 	.tv_sec = KCN_NET_TIMEOUT,
@@ -118,7 +121,7 @@ kcn_net_state_change(struct kcn_net *kn, enum kcn_net_state nstate)
 		return;
 	ostate = kn->kn_state;
 	kn->kn_state = nstate;
-	KCN_LOG(DEBUG, "state change from %s to %s",
+	LOG(DEBUG, "state change from %s to %s",
 	    kcn_net_state_ntoa(ostate), kcn_net_state_ntoa(nstate));
 	if (ostate == KCN_NET_STATE_PENDING &&
 	    nstate == KCN_NET_STATE_ESTABLISHED)
@@ -133,16 +136,16 @@ kcn_net_opkt(struct kcn_net *kn, struct kcn_pkt *kp)
 }
 
 static bool
-kcn_net_event_enable(struct event *ev, const char *name)
+kcn_net_event_enable(struct kcn_net *kn, struct event *ev, const char *name)
 {
 
 	if (event_pending(ev, EV_TIMEOUT, NULL))
 		return true;
 	if (event_add(ev, &kcn_net_timeouttv) == -1) {
-		KCN_LOG(WARN, "cannot enable %s event", name);
+		LOG(WARN, "cannot enable %s event", name);
 		return false;
 	}
-	KCN_LOG(DEBUG, "enable %s event with %lld sec timeout",
+	LOG(DEBUG, "enable %s event with %lld sec timeout",
 	    name, (long long)kcn_net_timeouttv.tv_sec);
 	return true;
 }
@@ -155,14 +158,14 @@ kcn_net_read_enable(struct kcn_net *kn)
 		kcn_net_state_change(kn, KCN_NET_STATE_PENDING);
 		return true;
 	}
-	return kcn_net_event_enable(&kn->kn_evread, "read");
+	return kcn_net_event_enable(kn, &kn->kn_evread, "read");
 }
 
 static bool
 kcn_net_write_enable(struct kcn_net *kn)
 {
 
-	return kcn_net_event_enable(&kn->kn_evwrite, "write");
+	return kcn_net_event_enable(kn, &kn->kn_evwrite, "write");
 }
 
 static void
@@ -181,7 +184,7 @@ static void
 kcn_net_timeout(struct kcn_net *kn, short event)
 {
 
-	KCN_LOG(DEBUG, "%s timeout", event & EV_READ ? "read" : "write");
+	LOG(DEBUG, "%s timeout", event & EV_READ ? "read" : "write");
 	kcn_net_disconnect(kn);
 }
 
@@ -215,7 +218,7 @@ kcn_net_read_cb(int fd, short events, void *arg)
 	if (error == EAGAIN)
 		goto out;
 	if (error != 0) {
-		KCN_LOG(DEBUG, "read() failed: %s", strerror(error));
+		LOG(DEBUG, "read() failed: %s", strerror(error));
 		goto out;
 	}
 	error = (*kn->kn_readcb)(kn, &kp, kn->kn_data);
@@ -231,7 +234,7 @@ kcn_net_write(struct kcn_net *kn, struct kcn_pkt *kp)
 {
 
 	if (! kcn_pkt_enqueue(kp, &kn->kn_opktq)) {
-		KCN_LOG(ERR, "cannot enqueue packet");
+		LOG(ERR, "cannot enqueue packet: %s", strerror(errno));
 		return false;
 	}
 	if (! kcn_net_write_enable(kn))
@@ -260,7 +263,7 @@ kcn_net_write_cb(int fd, short events, void *arg)
 			return;
 		}
 		if (error != 0) {
-			KCN_LOG(WARN, "write() failed: %s", strerror(errno));
+			LOG(WARN, "write() failed: %s", strerror(errno));
 			kcn_net_disconnect(kn);
 			return;
 		}
@@ -274,9 +277,9 @@ kcn_net_loop(struct kcn_net *kn)
 {
 
 	if (event_base_dispatch(kn->kn_evb) == -1) {
-		KCN_LOG(ERR, "event dispatch failed: %s", strerror(errno));
+		LOG(ERR, "event dispatch failed: %s", strerror(errno));
 		return false;
 	}
-	KCN_LOG(DEBUG, "event dispatch finishes");
+	LOG(DEBUG, "event dispatch finishes", "");
 	return true;
 }
