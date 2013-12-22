@@ -128,7 +128,7 @@ kcn_socket_connect(struct sockaddr_storage *ss)
 }
 
 int
-kcn_socket_accept(int ls)
+kcn_socket_accept(int ls, char *name, size_t namelen)
 {
 	struct sockaddr_storage ss;
 	socklen_t sslen;
@@ -143,6 +143,8 @@ kcn_socket_accept(int ls)
 		}
 	if (! kcn_socket_nonblock(s))
 		goto bad;
+	if (name != NULL)
+		kcn_sockaddr_ntoa(name, namelen, &ss);
 	return s;
   bad:
 	kcn_socket_close(&s);
