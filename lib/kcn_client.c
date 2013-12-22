@@ -49,6 +49,7 @@ kcn_client_search(struct kcn_info *ki, const struct kcn_msg_query *kmq)
 	struct event_base *evb;
 	struct kcn_net *kn;
 	struct kcn_pkt okp;
+	char name[KCN_SOCKNAMELEN];
 	int fd;
 
 	evb = event_init();
@@ -67,8 +68,9 @@ kcn_client_search(struct kcn_info *ki, const struct kcn_msg_query *kmq)
 	if (fd == -1)
 		goto bad1;
 
+	kcn_sockaddr_ntoa(name, sizeof(name), &ss);
 	kcn_msg_response_init(&kmr, ki);
-	kn = kcn_net_new(evb, fd, KCN_MSG_MAXSIZ, kcn_client_read, &kmr);
+	kn = kcn_net_new(evb, fd, KCN_MSG_MAXSIZ, name, kcn_client_read, &kmr);
 	if (kn == NULL) {
 		KCN_LOG(ERR, "cannot allocate networking structure");
 		goto bad2;

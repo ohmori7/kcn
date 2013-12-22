@@ -26,6 +26,7 @@ enum kcn_net_state {
 
 struct kcn_net {
 	enum kcn_net_state kn_state;
+	char kn_name[KCN_SOCKNAMELEN];
 	struct event kn_evread;
 	struct event kn_evwrite;
 	struct kcn_pkt_data *kn_ipktdata;
@@ -49,7 +50,7 @@ static void kcn_net_read_cb(int, short, void *);
 static void kcn_net_write_cb(int, short, void *);
 
 struct kcn_net *
-kcn_net_new(struct event_base *evb, int fd, size_t size,
+kcn_net_new(struct event_base *evb, int fd, size_t size, const char *name,
     int (*readcb)(struct kcn_net *, struct kcn_pkt *, void *), void *data)
 {
 	struct kcn_net *kn;
@@ -58,6 +59,7 @@ kcn_net_new(struct event_base *evb, int fd, size_t size,
 	if (kn == NULL)
 		goto bad;
 	kn->kn_state = KCN_NET_STATE_INIT;
+	strlcpy(kn->kn_name, name, sizeof(kn->kn_name));
 	event_set(&kn->kn_evread, fd, EV_READ | EV_TIMEOUT,
 	    kcn_net_read_cb, kn);
 	event_set(&kn->kn_evwrite, fd, EV_WRITE | EV_TIMEOUT,

@@ -195,7 +195,8 @@ kcndb_server_session(struct kcndb_thread *kt, int fd, const char *name)
 
 	LOG(INFO, "[%s] connected", name);
 
-	kn = kcn_net_new(kt->kt_evb, fd, KCN_MSG_MAXSIZ, kcndb_server_recv, kt);
+	kn = kcn_net_new(kt->kt_evb, fd, KCN_MSG_MAXSIZ, name,
+	    kcndb_server_recv, kt);
 	if (kn == NULL) {
 		kcn_socket_close(&fd);
 		LOG(ERR, "[%s] cannot allocate network structure: %s",
