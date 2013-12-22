@@ -15,6 +15,8 @@ size_t strlcat(char *, const char *, size_t);
 #define KCN_INET_ADDRSTRLEN	INET_ADDRSTRLEN
 #endif /* HAVE_IPV6 */
 
+#define KCN_SOCKNAMELEN		(KCN_INET_ADDRSTRLEN + sizeof("/65535") - 1)
+
 /* for JANSSON 2.4 */
 #ifndef json_array_foreach
 #define json_array_foreach(a, i, v)					\
