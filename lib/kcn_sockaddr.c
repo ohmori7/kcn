@@ -115,3 +115,17 @@ kcn_sockaddr_aton(struct sockaddr_storage *ss,
   out:
 	return error == 0 ? true : false;
 }
+
+bool
+kcn_sockaddr_ntoa(char *name, size_t namelen, const struct sockaddr_storage *ss)
+{
+	char sbuf[NI_MAXSERV + 1] = { '/', 0 };
+	int error;
+
+	error = getnameinfo((struct sockaddr *)ss, sizeof(*ss), name, namelen,
+	    sbuf + 1, sizeof(sbuf - 1), NI_NUMERICHOST | NI_NUMERICSERV);
+	if (error == -1)
+		return false;
+	strlcat(name, sbuf, namelen);
+	return true;
+}
