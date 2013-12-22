@@ -121,9 +121,7 @@ AC_CHECK_MEMBERS([
 	])
 
 # Checks for library functions.
-AC_CHECK_FUNCS([							\
-	strlcpy								\
-	])
+AC_CHECK_FUNCS([strlcpy strlcat])
 
 #
 PKG_CHECK_MODULES(CURL, libcurl)
