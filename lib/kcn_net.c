@@ -19,7 +19,7 @@
 
 enum kcn_net_state {
 	KCN_NET_STATE_INIT,
-	KCN_NET_STATE_READPENDING,
+	KCN_NET_STATE_PENDING,
 	KCN_NET_STATE_ESTABLISHED,
 	KCN_NET_STATE_DISCONNECTED
 };
@@ -100,7 +100,7 @@ kcn_net_state_ntoa(enum kcn_net_state state)
 
 	switch (state) {
 	case KCN_NET_STATE_INIT:		return "Init";
-	case KCN_NET_STATE_READPENDING:		return "ReadPending";
+	case KCN_NET_STATE_PENDING:		return "Pending";
 	case KCN_NET_STATE_ESTABLISHED:		return "Established";
 	case KCN_NET_STATE_DISCONNECTED:	return "Disconnected";
 	}
@@ -118,7 +118,7 @@ kcn_net_state_change(struct kcn_net *kn, enum kcn_net_state nstate)
 	kn->kn_state = nstate;
 	KCN_LOG(DEBUG, "state change from %s to %s",
 	    kcn_net_state_ntoa(ostate), kcn_net_state_ntoa(nstate));
-	if (ostate == KCN_NET_STATE_READPENDING &&
+	if (ostate == KCN_NET_STATE_PENDING &&
 	    nstate == KCN_NET_STATE_ESTABLISHED)
 		kcn_net_read_enable(kn);
 }
@@ -150,7 +150,7 @@ kcn_net_read_enable(struct kcn_net *kn)
 {
 
 	if (kn->kn_state != KCN_NET_STATE_ESTABLISHED) {
-		kcn_net_state_change(kn, KCN_NET_STATE_READPENDING);
+		kcn_net_state_change(kn, KCN_NET_STATE_PENDING);
 		return true;
 	}
 	return kcn_net_event_enable(&kn->kn_evread, "read");
@@ -213,7 +213,7 @@ kcn_net_read_cb(int fd, short events, void *arg)
 	if (error == EAGAIN)
 		goto out;
 	if (error != 0) {
-		KCN_LOG(WARN, "read() failed: %s", strerror(error));
+		KCN_LOG(DEBUG, "read() failed: %s", strerror(error));
 		goto out;
 	}
 	error = (*kn->kn_readcb)(kn, &kp, kn->kn_data);

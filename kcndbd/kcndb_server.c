@@ -24,6 +24,9 @@
 #include "kcndb_db.h"
 #include "kcndb_server.h"
 
+#define LOG(p, fmt, ...)						\
+	KCN_LOG(p, "thread[%hu]: " fmt, kt->kt_number, __VA_ARGS__)
+
 enum kcndb_thread_status {
 	KCNDB_THREAD_STATUS_DEAD,
 	KCNDB_THREAD_STATUS_RUN
@@ -160,8 +163,7 @@ kcndb_server_recv(struct kcn_net *kn, struct kcn_pkt *kp, void *arg)
 	struct kcn_msg_header kmh;
 	bool rc;
 
-	KCN_LOG(DEBUG, "%u: recv %u bytes", kt->kt_id,
-	    kcn_pkt_trailingdata(kp));
+	LOG(DEBUG, "recv %u bytes", kcn_pkt_trailingdata(kp));
 
 	if (! kcn_msg_header_decode(kp, &kmh))
 		goto bad;
@@ -182,7 +184,7 @@ kcndb_server_recv(struct kcn_net *kn, struct kcn_pkt *kp, void *arg)
 	return EAGAIN;
   bad:
 	if (errno != EAGAIN)
-		KCN_LOG(ERR, "recv invalid message: %s", strerror(errno));
+		LOG(ERR, "recv invalid message: %s", strerror(errno));
 	return errno;
 }
 
@@ -193,36 +195,43 @@ kcndb_server_session(struct kcndb_thread *kt, int fd)
 
 	kn = kcn_net_new(kt->kt_evb, fd, KCN_MSG_MAXSIZ, kcndb_server_recv, kt);
 	if (kn == NULL) {
-		KCN_LOG(ERR, "cannot allocate network structure");
 		kcn_socket_close(&fd);
+		LOG(ERR, "cannot allocate network structure: %s",
+		    strerror(errno));
 		return;
 	}
 	kcn_net_read_enable(kn);
 	kcn_net_loop(kn);
+	LOG(DEBUG, "disconnected from %s", "not implemented yet");
 	kcn_net_destroy(kn);
 }
 
 static void *
 kcndb_server_main(void *arg)
 {
-	struct kcndb_thread *kt;
+	struct kcndb_thread *kt = arg;
 	int fd;
 
-	kt = arg;
+	LOG(DEBUG, "start%s", "");
+
 	kt->kt_evb = event_init();
 	if (kt->kt_evb == NULL) {
-		KCN_LOG(ERR, "event_init() failed: %s", strerror(errno));
+		LOG(ERR, "event_init() failed: %s", strerror(errno));
 		goto out;
 	}
 
 	for (;;) {
 		fd = kcn_socket_accept(kt->kt_listenfd);
-		if (fd == -1)
+		if (fd == -1) {
+			LOG(ERR, "accept() failed: %s", strerror(errno));
 			continue;
+		}
+		LOG(DEBUG, "connected from %s", "not implemented yet");
 		kcndb_server_session(kt, fd);
 	}
   out:
 	if (kt->kt_evb != NULL)
 		event_base_free(kt->kt_evb);
+	LOG(DEBUG, "finish%s", "");
 	return NULL;
 }
