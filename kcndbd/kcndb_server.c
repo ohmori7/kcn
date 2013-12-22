@@ -189,27 +189,31 @@ kcndb_server_recv(struct kcn_net *kn, struct kcn_pkt *kp, void *arg)
 }
 
 static void
-kcndb_server_session(struct kcndb_thread *kt, int fd)
+kcndb_server_session(struct kcndb_thread *kt, int fd, const char *name)
 {
 	struct kcn_net *kn;
+
+	LOG(INFO, "[%s] connected", name);
 
 	kn = kcn_net_new(kt->kt_evb, fd, KCN_MSG_MAXSIZ, kcndb_server_recv, kt);
 	if (kn == NULL) {
 		kcn_socket_close(&fd);
-		LOG(ERR, "cannot allocate network structure: %s",
-		    strerror(errno));
-		return;
+		LOG(ERR, "[%s] cannot allocate network structure: %s",
+		    name, strerror(errno));
+		goto out;
 	}
 	kcn_net_read_enable(kn);
 	kcn_net_loop(kn);
-	LOG(DEBUG, "disconnected from %s", "not implemented yet");
 	kcn_net_destroy(kn);
+  out:
+	LOG(INFO, "[%s] disconnected", name);
 }
 
 static void *
 kcndb_server_main(void *arg)
 {
 	struct kcndb_thread *kt = arg;
+	char name[KCN_SOCKNAMELEN];
 	int fd;
 
 	LOG(DEBUG, "start%s", "");
@@ -221,13 +225,12 @@ kcndb_server_main(void *arg)
 	}
 
 	for (;;) {
-		fd = kcn_socket_accept(kt->kt_listenfd);
+		fd = kcn_socket_accept(kt->kt_listenfd, name, sizeof(name));
 		if (fd == -1) {
 			LOG(ERR, "accept() failed: %s", strerror(errno));
 			continue;
 		}
-		LOG(DEBUG, "connected from %s", "not implemented yet");
-		kcndb_server_session(kt, fd);
+		kcndb_server_session(kt, fd, name);
 	}
   out:
 	if (kt->kt_evb != NULL)
