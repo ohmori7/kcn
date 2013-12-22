@@ -12,6 +12,15 @@ size_t strlcpy(char *, const char *, size_t);
 #define KCN_INET_ADDRSTRLEN	INET_ADDRSTRLEN
 #endif /* HAVE_IPV6 */
 
+/* for JANSSON 2.4 */
+#ifndef json_array_foreach
+#define json_array_foreach(a, i, v)					\
+	for ((i) = 0;							\
+	     (i) < json_array_size(a) &&				\
+	     ((v) = json_array_get((a), (i))) != NULL;			\
+	     (i)++)
+#endif /* ! json_array_foreach */
+
 #if BYTE_ORDER == LITTLE_ENDIAN
 #define KCN_HTONS(v)							\
 	((((unsigned int)(v) << 8) & 0xff00U) |				\
