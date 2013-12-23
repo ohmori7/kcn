@@ -17,9 +17,16 @@
 #include "kcn_pkt.h"
 #include "kcn_net.h"
 
+/* hack for libevent 1.4.13-4.el6 on CentOS 6.x. */
+#ifdef __linux__
+#define HAVE_LIBEVENT_RAISE_EV_READ_WITH_EINPROGRESS
+#endif /* __Linux__ */
+
 enum kcn_net_state {
 	KCN_NET_STATE_INIT,
+#ifdef HAVE_LIBEVENT_RAISE_EV_READ_WITH_EINPROGRESS
 	KCN_NET_STATE_PENDING,
+#endif /* HAVE_LIBEVENT_RAISE_EV_READ_WITH_EINPROGRESS */
 	KCN_NET_STATE_ESTABLISHED,
 	KCN_NET_STATE_DISCONNECTED
 };
@@ -78,8 +85,10 @@ kcn_net_new(struct event_base *evb, int fd, size_t size, const char *name,
 		goto bad;
 	if (kn->kn_ipktdata == NULL || kn->kn_opktdata == NULL)
 		goto bad;
+#ifdef HAVE_LIBEVENT_RAISE_EV_READ_WITH_EINPROGRESS
 	if (! kcn_net_write_enable(kn))
 		goto bad;
+#endif /* HAVE_LIBEVENT_RAISE_EV_READ_WITH_EINPROGRESS */
 	return kn;
   bad:
 	kcn_net_destroy(kn);
@@ -105,7 +114,9 @@ kcn_net_state_ntoa(enum kcn_net_state state)
 
 	switch (state) {
 	case KCN_NET_STATE_INIT:		return "Init";
+#ifdef HAVE_LIBEVENT_RAISE_EV_READ_WITH_EINPROGRESS
 	case KCN_NET_STATE_PENDING:		return "Pending";
+#endif /* HAVE_LIBEVENT_RAISE_EV_READ_WITH_EINPROGRESS */
 	case KCN_NET_STATE_ESTABLISHED:		return "Established";
 	case KCN_NET_STATE_DISCONNECTED:	return "Disconnected";
 	}
@@ -123,9 +134,11 @@ kcn_net_state_change(struct kcn_net *kn, enum kcn_net_state nstate)
 	kn->kn_state = nstate;
 	LOG(DEBUG, "state change from %s to %s",
 	    kcn_net_state_ntoa(ostate), kcn_net_state_ntoa(nstate));
+#ifdef HAVE_LIBEVENT_RAISE_EV_READ_WITH_EINPROGRESS
 	if (ostate == KCN_NET_STATE_PENDING &&
 	    nstate == KCN_NET_STATE_ESTABLISHED)
 		kcn_net_read_enable(kn);
+#endif /* HAVE_LIBEVENT_RAISE_EV_READ_WITH_EINPROGRESS */
 }
 
 void
@@ -155,10 +168,12 @@ kcn_net_read_enable(struct kcn_net *kn)
 {
 
 	assert(kn->kn_state != KCN_NET_STATE_DISCONNECTED);
+#ifdef HAVE_LIBEVENT_RAISE_EV_READ_WITH_EINPROGRESS
 	if (kn->kn_state != KCN_NET_STATE_ESTABLISHED) {
 		kcn_net_state_change(kn, KCN_NET_STATE_PENDING);
 		return true;
 	}
+#endif /* HAVE_LIBEVENT_RAISE_EV_READ_WITH_EINPROGRESS */
 	return kcn_net_event_enable(kn, &kn->kn_evread, "read");
 }
 
