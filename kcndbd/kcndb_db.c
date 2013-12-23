@@ -13,8 +13,6 @@
 #include "kcn_info.h"
 #include "kcn_formula.h"
 #include "kcn_log.h"
-#include "kcn_pkt.h"
-#include "kcn_msg.h"
 
 #include "kcndb_db.h"
 
