@@ -154,6 +154,7 @@ bool
 kcn_net_read_enable(struct kcn_net *kn)
 {
 
+	assert(kn->kn_state != KCN_NET_STATE_DISCONNECTED);
 	if (kn->kn_state != KCN_NET_STATE_ESTABLISHED) {
 		kcn_net_state_change(kn, KCN_NET_STATE_PENDING);
 		return true;
