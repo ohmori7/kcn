@@ -213,6 +213,7 @@ kcn_net_event_check(struct kcn_net *kn, short events, short event)
 			kcn_net_timeout(kn, event);
 		return false;
 	}
+	kcn_net_state_change(kn, KCN_NET_STATE_ESTABLISHED);
 	return true;
 }
 
@@ -269,8 +270,6 @@ kcn_net_write_cb(int fd, short events, void *arg)
 	(void)fd;
 	if (! kcn_net_event_check(kn, events, EV_WRITE))
 		return;
-
-	kcn_net_state_change(kn, KCN_NET_STATE_ESTABLISHED);
 
 	while (kcn_pkt_fetch(&kp, &kn->kn_opktq)) {
 		error = kcn_pkt_write(kn->kn_fd, &kp);
