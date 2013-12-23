@@ -20,6 +20,7 @@
 /* hack for libevent 1.4.13-4.el6 on CentOS 6.x. */
 #ifdef __linux__
 #define HAVE_LIBEVENT_RAISE_EV_READ_WITH_EINPROGRESS
+#define HAVE_LIBEVENT_RAISE_EV_TIMEOUT_BEFORE_TIMEOUT
 #endif /* __Linux__ */
 
 enum kcn_net_state {
@@ -268,6 +269,14 @@ kcn_net_write_cb(int fd, short events, void *arg)
 
 	assert(kn->kn_fd == fd);
 	(void)fd;
+#ifdef HAVE_LIBEVENT_RAISE_EV_TIMEOUT_BEFORE_TIMEOUT
+	if (kn->kn_state == KCN_NET_STATE_PENDING &&
+	    (events & (EV_WRITE | EV_TIMEOUT)) == EV_TIMEOUT) {
+		LOG(DEBUG, "fix wrong timeout event without write event", "");
+		kcn_net_state_change(kn, KCN_NET_STATE_ESTABLISHED);
+		return;
+	}
+#endif /* HAVE_LIBEVENT_RAISE_EV_TIMEOUT_BEFORE_TIMEOUT */
 	if (! kcn_net_event_check(kn, events, EV_WRITE))
 		return;
 
