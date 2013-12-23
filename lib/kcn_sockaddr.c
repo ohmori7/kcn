@@ -124,7 +124,7 @@ kcn_sockaddr_ntoa(char *name, size_t namelen, const struct sockaddr_storage *ss)
 
 	error = getnameinfo((struct sockaddr *)ss, sizeof(*ss), name, namelen,
 	    sbuf + 1, sizeof(sbuf - 1), NI_NUMERICHOST | NI_NUMERICSERV);
-	if (error == -1)
+	if (error != 0)
 		goto bad;
 	strlcat(name, sbuf, namelen);
 	return true;
