@@ -122,8 +122,9 @@ kcn_sockaddr_ntoa(char *name, size_t namelen, const struct sockaddr_storage *ss)
 	char sbuf[NI_MAXSERV + 1] = { '/', 0 };
 	int error;
 
-	error = getnameinfo((struct sockaddr *)ss, sizeof(*ss), name, namelen,
-	    sbuf + 1, sizeof(sbuf - 1), NI_NUMERICHOST | NI_NUMERICSERV);
+	error = getnameinfo((struct sockaddr *)ss, kcn_sockaddr_len(ss),
+	    name, namelen, sbuf + 1, sizeof(sbuf - 1),
+	    NI_NUMERICHOST | NI_NUMERICSERV);
 	if (error != 0)
 		goto bad;
 	strlcat(name, sbuf, namelen);
