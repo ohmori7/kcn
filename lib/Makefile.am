@@ -11,4 +11,4 @@ noinst_HEADERS =							\
 	kcn_db.h kcn_msg.h kcn_formula.h kcn_client.h
 include_HEADERS =							\
 	kcn.h kcn_log.h kcn_info.h kcn_netstat.h kcn_google.h
-libkcn_a_CFLAGS = $(CURL_CFLAGS) $(JANSSON_CFLAGS)
+libkcnse_a_CFLAGS = $(CURL_CFLAGS) $(JANSSON_CFLAGS)
