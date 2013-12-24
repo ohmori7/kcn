@@ -29,8 +29,10 @@ kcn_formula_type_aton(const char *s, enum kcn_formula_type *typep)
 		*typep = KCN_FORMULA_TYPE_ASPATHLEN;
 	else if (ISMATCH("assoc"))
 		*typep = KCN_FORMULA_TYPE_WLANASSOC;
-	else
+	else {
+		errno = ENOENT;
 		return false;
+	}
 #undef ISMATCH
 	return true;
 }
