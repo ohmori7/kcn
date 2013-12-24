@@ -120,6 +120,7 @@ kcn_netstat_search(struct kcn_info *ki, const char *keys)
 		errno = EINVAL;
 		goto bad;
 	}
+	kmq.kmq_loctype = kcn_info_loc_type(ki);
 	kmq.kmq_maxcount = kcn_info_maxnlocs(ki);
 	kmq.kmq_time = 0; /* XXX: should compile time as well */
 	if (! kcn_netstat_compile(keyc, keyv, &kmq.kmq_formula))

@@ -141,7 +141,7 @@ kcndb_server_query_process(struct kcn_net *kn, struct kcn_pkt *ikp)
 		ki = NULL;
 	else
 		/* XXX */
-		ki = kcn_info_new(KCN_LOC_TYPE_DOMAINNAME, kmq.kmq_maxcount);
+		ki = kcn_info_new(kmq.kmq_loctype, kmq.kmq_maxcount);
 
 	kcn_msg_response_init(&kmr, ki);
 	if (ki == NULL || ! kcndb_db_search_all(ki, &kmq.kmq_formula))

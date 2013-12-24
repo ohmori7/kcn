@@ -74,6 +74,7 @@ kcn_msg_query_encode(struct kcn_pkt *kp, const struct kcn_msg_query *kmq)
 	const struct kcn_formula *kf = &kmq->kmq_formula;
 
 	kcn_msg_pkt_init(kp);
+	kcn_pkt_put8(kp, kmq->kmq_loctype);
 	kcn_pkt_put8(kp, kmq->kmq_maxcount);
 	kcn_pkt_put64(kp, kmq->kmq_time);
 	kcn_pkt_put8(kp, kf->kf_type);
@@ -87,17 +88,26 @@ kcn_msg_query_decode(struct kcn_pkt *kp, struct kcn_msg_query *kmq)
 {
 	struct kcn_formula *kf;
 
-#define KCN_MSG_QUERY_MINSIZ	(1 + 8 + 1 + 1 + 8)
+#define KCN_MSG_QUERY_MINSIZ	(1 + 1 + 8 + 1 + 1 + 8)
 	if (kcn_pkt_trailingdata(kp) < KCN_MSG_QUERY_MINSIZ) {
 		errno = EINVAL; /* XXX */
 		goto bad;
 	}
+	kmq->kmq_loctype = kcn_pkt_get8(kp);
 	kmq->kmq_maxcount = kcn_pkt_get8(kp);
 	kmq->kmq_time = kcn_pkt_get64(kp);
 	kf = &kmq->kmq_formula;
 	kf->kf_type = kcn_pkt_get8(kp);
 	kf->kf_op = kcn_pkt_get8(kp);
 	kf->kf_val = kcn_pkt_get64(kp);
+	switch (kmq->kmq_loctype) {
+	case KCN_LOC_TYPE_DOMAINNAME:
+	case KCN_LOC_TYPE_URI:
+		break;
+	default:
+		errno = EINVAL; /* XXX */
+		goto bad;
+	}
 	return true;
   bad:
 	return false;
