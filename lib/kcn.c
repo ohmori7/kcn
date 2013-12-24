@@ -98,24 +98,10 @@ kcn_key_free(size_t keyc, char *keyv[])
 	free(keyv);
 }
 
-void
-kcn_init(void)
-{
-	static bool initialized = false;
-
-	if (initialized)
-		return;
-	initialized = true;
-	/* XXX: should separate these initializations??? */
-	kcn_netstat_init();
-	kcn_google_init();
-}
-
 bool
 kcn_search(struct kcn_info *ki, const char *keys)
 {
 
-	kcn_init();
 	return kcn_db_search(ki, keys);
 }
 

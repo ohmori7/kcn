@@ -9,6 +9,8 @@
 #include "kcn_log.h"
 #include "kcn_info.h"
 #include "kcn_db.h"
+#include "kcn_netstat.h"
+#include "kcn_google.h"
 
 #define KCN_DB_DEFAULT			NULL
 #define KCN_LOC_COUNT_MAX_DEFAULT	1
@@ -27,7 +29,8 @@ main(int argc, char * const argv[])
 
 	pname = (p = strrchr(argv[0], '/')) != NULL ? p + 1 : argv[0];
 
-	kcn_init();
+	kcn_netstat_init();
+	kcn_google_init();
 
 	db = KCN_DB_DEFAULT;
 	loctype = KCN_LOC_TYPE_DEFAULT;
