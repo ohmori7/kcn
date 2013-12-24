@@ -14,10 +14,10 @@ or applications of ICN.
 not exactly same as) one of an original concenpt of ICN.  KCN separates a name
 of information into an identifier and a locator as same as ICN.  An identifier
 of a name of information in KCN is, however, keywords combined with end users'
-attributes (e.g., users' locations or nationalities) while one in ICN is a
-URI-like address of information.  On the other hand, a locator of a name of
-information in KCN is URL (or URI) while one in ICN is an IP address.  That is,
-KCN separate a name of information into keywords and URLs.
+attributes (e.g., current time, users' locations or nationalities) while one in
+ICN is a URI-like address of information.  On the other hand, a locator of a
+name of information in KCN is URL (or URI) while one in ICN is an IP address.
+That is, KCN separate a name of information into keywords and URLs.
 
   This package demonstrates how KCN works and what can be applications of KCN
 by providing an acutual implementation.  We hope that this package could present
@@ -25,34 +25,55 @@ an actual example of ICN in order to make ICN being in the wild.
 
 Quick start
 ================================================================================
-  First of all, build KCN binaries, and install them as follows.
+Installation
+--------------------------------------------------------------------------------
+  First of all, build KCN binaries, and install them as follows:
 
-	1. install curl and jansson.
-	  Please see *Tested environment and tips* section in this document.
+	1. install libevent, libcurl and jansson.
 	2. extract kcn-x.x.x.tar.gz, and move to extracted directry.
 	  % tar xfz kcn-x.x.x.tar.gz
 	  % cd kcn-x.x.x
-	3. If you check out source codes by git, please read
-	   *Tips for build failures due to autoconf tools* section in this
-	   document.
+	3. If you check out source codes by git, please read *Tips for build
+	   failures due to autoconf tools* section in this document.
 	4. run *configure* script.
 	  % ./configure
 	5. build KCN binaries.
 	  % make
 	6. install KCN binaries.
 	  % sudo make install
+	7. run KCN database server, kcndbd.
+	  % sudo /usr/local/sbin/kcndbd
 
+Please see *Installation examples* section for actual examples in this document.
 When you need to specify other options for *configure* script, please consult
 with *INSTALL* file.
 
+KCN operation test
+--------------------------------------------------------------------------------
   After installation succeeds, you can demonstrate to resolve locators from
-identifier in KCN as follows:
+identifier in KCN, i.e. keywords,  as follows:
 
-	  % key2loc keyword1 keyword2 keyword3
+	  % key2loc keyword1 keyword2 keyword3 keyword4 ...
 	  result1
 	  result2
 	  result3
 	  ...
+
+  Current KCN library supports two database engines, KCN database engine and
+google searching engine.  Database engine is automatically selected in
+accordance with input keywords.  For examples,
+
+          % key2loc latency lt 100
+
+this may choose KCN database, and search for a FQDN of a host that can be
+reached with a latency, 100 msec or less.
+
+  On the other hand,
+
+	  % key2loc Kyushu Univ.
+
+this may choose google database, and search for the URI of the Web page that
+matches keywords, Kyuhsu and Univ.
 
   You can then try some applications using KCN framework as follows:
 
@@ -134,7 +155,7 @@ Required libraries and tips on build failures:
 
 	- pthread
 	- libevent
-	- curl on *BSD* (or libcurl-devel on Linux)
+	- libcurl
 	- jansson
 
   Please make sure that these and related libraries are properly installed
@@ -204,8 +225,11 @@ NetBSD current 6.99.3 or later
 	curl:
 		pkgsrc/www/curl
 	jansson:
-		pkgsrc/textproc/jansson (pkgsrc current on 2013/7/13 or later)
-		jansson-2.5 obtained from http://www.digip.org/jansson/
+		pkgsrc/textproc/jansson
+		jansson has been firstly imported to pkgsrc on 2013/7/13.
+		If your pkgsrc does not have jansson, you may obtain the
+		source code of jansson-2.5 obtained:
+			http://www.digip.org/jansson/
 
 CentOS 6.4 or later (x86_64)
 --------------------------------------------------------------------------------
@@ -219,3 +243,40 @@ CentOS 6.4 or later (x86_64)
 		libcurl-devel (7.19.7-37.el6_4)
 	jansson:
 		jansson-2.5 obtained from http://www.digip.org/jansson/
+
+Installation examples
+================================================================================
+NetBSD current 6.99.3 or later
+--------------------------------------------------------------------------------
+	  % cd /usr/pkgsrc/devel/pkg-config && make update
+	  % cd /usr/pkgsrc/www/curl && make update
+	  % cd /usr/pkgsrc/textproc/jansson && make update
+	  % sudo mkdir -p /usr/local/src
+	  % sudo chown yourusername /usr/local/src
+	  % cd /usr/local/src
+	  % git clone https://github.com/ohmori7/kcn.git
+	  % cd /usr/local/src/kcn
+	  % ./configure
+	  % make
+	  % sudo make install
+
+CentOS 6.4 or later (x86_64)
+--------------------------------------------------------------------------------
+	  % sudo yum install libevent-devel
+	  % sudo yum install pkgconfig
+	  % sudo yum install libcurl-devel
+	  % sudo mkdir -p /usr/local/src
+	  % sudo chown yourusername /usr/local/src
+	  % cd /usr/local/src 
+	  % wget http://www.digip.org/jansson/releases/jansson-2.5.tar.gz
+	  % tar xvfz jansson-2.5.tar.gz
+	  % cd /usr/local/src/jansson-2.5
+	  % ./configure
+	  % make
+	  % sudo make install
+	  % cd /usr/local/src
+	  % git clone https://github.com/ohmori7/kcn.git
+	  % cd /usr/local/src/kcn
+    	  % ./configure	PKG_CONFIG_PATH=/usr/local/lib/pkgconfig
+	  % make
+	  % sudo make install
