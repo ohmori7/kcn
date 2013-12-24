@@ -14,6 +14,15 @@
 #include "kcn_http.h"
 #include "kcn_google.h"
 
+/* for JANSSON 2.4 */
+#ifndef json_array_foreach
+#define json_array_foreach(a, i, v)					\
+	for ((i) = 0;							\
+	     (i) < json_array_size(a) &&				\
+	     ((v) = json_array_get((a), (i))) != NULL;			\
+	     (i)++)
+#endif /* ! json_array_foreach */
+
 /*
  * Google specific constants.
  *
