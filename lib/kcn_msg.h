@@ -16,6 +16,7 @@ struct kcn_msg_header {
 
 struct kcn_msg_query {
 	uint8_t kmq_maxcount;
+	uint64_t kmq_time;
 	struct kcn_formula kmq_formula;
 };
 

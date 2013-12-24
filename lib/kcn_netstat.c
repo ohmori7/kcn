@@ -121,6 +121,7 @@ kcn_netstat_search(struct kcn_info *ki, const char *keys)
 		goto bad;
 	}
 	kmq.kmq_maxcount = kcn_info_maxnlocs(ki);
+	kmq.kmq_time = 0; /* XXX: should compile time as well */
 	if (! kcn_netstat_compile(keyc, keyv, &kmq.kmq_formula))
 		goto bad;
 	if (! kcn_client_search(ki, &kmq))
