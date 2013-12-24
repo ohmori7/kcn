@@ -2,6 +2,10 @@
 #include "config.h"
 #endif /* HAVE_CONFIG_H_ */
 
+#ifndef max
+#define max(a, b)	((a) > (b) ? (a) : (b))
+#endif /* ! max */
+
 #ifndef HAVE_STRLCPY
 size_t strlcpy(char *, const char *, size_t);
 #endif /* ! HAVE_STRLCPY */

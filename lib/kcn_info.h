@@ -1,3 +1,4 @@
+#define KCN_INFO_DBNAMESTRLEN	max(sizeof("net"), sizeof("google"))
 #define KCN_INFO_COUNTRYSTRLEN	3
 #define KCN_INFO_NLOCSTRLEN						\
 	(sizeof(size_t /* ki->ki_maxnlocs */ ) * NBBY / 3 /*approximate */)
