@@ -30,6 +30,18 @@ AC_DEFUN([AC_KCN_CHECK_GCC_VA_ARGS], [
 	[AC_MSG_RESULT(no)])
 ])
 
+dnl
+AC_DEFUN([AC_KCN_CHECK_LIB_PATH], [
+	rpath=
+	for var in $$1; do
+		dir=`echo $var | sed -n 's/.*-L\(.\+\).*/\1/p'`
+		if ! test x"$dir" = x; then
+			rpath="-Wl,-rpath=$dir $rpath"
+		fi
+	done
+	$1="$rpath$$1"
+])
+
 dnl AC_KCN_CHECK_LIB(library, function, header)
 AC_DEFUN([AC_KCN_CHECK_LIB], [
 	AC_ARG_WITH($1, [  --with-$1=PREFIX     $1 library],,[with_$1=yes])

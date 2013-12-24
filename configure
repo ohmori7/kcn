@@ -8445,6 +8445,16 @@ $as_echo "yes" >&6; }
 fi
 
 
+
+	rpath=
+	for var in $CRUL_LIBS; do
+		dir=`echo $var | sed -n 's/.*-L\(.\+\).*/\1/p'`
+		if ! test x"$dir" = x; then
+			rpath="-Wl,-rpath=$dir $rpath"
+		fi
+	done
+	CRUL_LIBS="$rpath$CRUL_LIBS"
+
 #
 
 pkg_failed=no
@@ -8556,6 +8566,16 @@ $as_echo "yes" >&6; }
 	:
 fi
 
+
+
+	rpath=
+	for var in $JANSSON_LIBS; do
+		dir=`echo $var | sed -n 's/.*-L\(.\+\).*/\1/p'`
+		if ! test x"$dir" = x; then
+			rpath="-Wl,-rpath=$dir $rpath"
+		fi
+	done
+	JANSSON_LIBS="$rpath$JANSSON_LIBS"
 
 
 #
@@ -8884,6 +8904,16 @@ fi
 	CFLAGS=$cflags
 
 
+
+
+	rpath=
+	for var in $EVENT_LIBS; do
+		dir=`echo $var | sed -n 's/.*-L\(.\+\).*/\1/p'`
+		if ! test x"$dir" = x; then
+			rpath="-Wl,-rpath=$dir $rpath"
+		fi
+	done
+	EVENT_LIBS="$rpath$EVENT_LIBS"
 
 
 #
