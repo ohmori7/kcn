@@ -7,6 +7,7 @@ enum kcn_formula_type {
 	KCN_FORMULA_TYPE_HOPCOUNT,
 	KCN_FORMULA_TYPE_ASPATHLEN,
 	KCN_FORMULA_TYPE_WLANASSOC
+#define KCN_FORMULA_TYPE_MAX	(KCN_FORMULA_TYPE_WLANASSOC + 1)
 };
 
 enum kcn_formula_operator {
@@ -24,6 +25,7 @@ struct kcn_formula {
 	unsigned long long kf_val;
 };
 
+const char *kcn_formula_type_ntoa(enum kcn_formula_type);
 bool kcn_formula_type_aton(const char *, enum kcn_formula_type *);
 bool kcn_formula_operator_aton(const char *, enum kcn_formula_operator *);
 bool kcn_formula_val_aton(const char *, unsigned long long *);
