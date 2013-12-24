@@ -64,9 +64,11 @@ kcn_socket_listen(int domain, in_port_t port)
 	if (setsockopt(s, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) == -1)
 		KCN_LOG(WARN, "setsockopt(SO_REUSEADDR) failed for %d: %s",
 		    domain, strerror(errno));
+#ifdef SO_REUSEPORT /* CentOS 6.4 or less does not have this. */
 	if (setsockopt(s, SOL_SOCKET, SO_REUSEPORT, &on, sizeof(on)) == -1)
 		KCN_LOG(WARN, "setsockopt(SO_REUSEPORT) failed for %d: %s",
 		    domain, strerror(errno));
+#endif /* SO_REUSEPORT */
 
 	if (bind(s, (struct sockaddr *)&ss, sslen) == -1) {
 		KCN_LOG(ERR, "bind() failed for %d: %s",
