@@ -38,8 +38,8 @@ kcn_info_new(enum kcn_loc_type loctype, size_t maxnlocs)
 	if (ki == NULL)
 		return NULL;
 	ki->ki_loctype = loctype;
-	ki->ki_dbname[0] = '\0';
 	ki->ki_maxnlocs = maxnlocs;
+	ki->ki_dbname[0] = '\0';
 	ki->ki_country[0] = '\0';
 	ki->ki_userip[0] = '\0';
 	ki->ki_nlocs = 0;
