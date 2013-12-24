@@ -641,6 +641,7 @@ ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
 LTLIBOBJS
 LIBOBJS
+KCNSE_LIBS
 KCN_LIBS
 EVENT_LIBS
 EVENT_CFLAGS
@@ -8962,6 +8963,8 @@ fi
 CPPFLAGS="$CPPFLAGS -I../lib"
 CFLAGS="$CFLAGS -W -Wall -Werror -Wmissing-declarations"
 KCN_LIBS="-L../lib -lkcn"
+KCNSE_LIBS="-lkcnse"
+
 
 
 ac_config_files="$ac_config_files Makefile lib/Makefile key2loc/Makefile kcndbd/Makefile"

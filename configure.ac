@@ -168,7 +168,9 @@ fi
 CPPFLAGS="$CPPFLAGS -I../lib"
 CFLAGS="$CFLAGS -W -Wall -Werror -Wmissing-declarations"
 KCN_LIBS="-L../lib -lkcn"
+KCNSE_LIBS="-lkcnse"
 
 AC_SUBST(KCN_LIBS)
+AC_SUBST(KCNSE_LIBS)
 AC_CONFIG_FILES([Makefile lib/Makefile key2loc/Makefile kcndbd/Makefile])
 AC_OUTPUT
