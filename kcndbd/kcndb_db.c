@@ -17,8 +17,8 @@
 #include "kcndb_db.h"
 
 struct kcndb_db_record {
-	unsigned long long knr_val;
-	const char *knr_uri;
+	unsigned long long kdr_val;
+	const char *kdr_uri;
 };
 
 static struct kcndb_db_record kcndb_db_storage[] = {
@@ -93,31 +93,31 @@ kcndb_db_search(struct kcn_info *ki, const struct kcn_formula *kf,
 	for (i = 0; i < dbcount; i++) {
 		switch (kf->kf_op) {
 		case KCN_FORMULA_OP_LT:
-			if (kdr[i].knr_val >= kf->kf_val)
+			if (kdr[i].kdr_val >= kf->kf_val)
 				continue;
 			break;
 		case KCN_FORMULA_OP_LE:
-			if (kdr[i].knr_val > kf->kf_val)
+			if (kdr[i].kdr_val > kf->kf_val)
 				continue;
 			break;
 		case KCN_FORMULA_OP_EQ:
-			if (kdr[i].knr_val != kf->kf_val)
+			if (kdr[i].kdr_val != kf->kf_val)
 				continue;
 			break;
 		case KCN_FORMULA_OP_GT:
-			if (kdr[i].knr_val <= kf->kf_val)
+			if (kdr[i].kdr_val <= kf->kf_val)
 				continue;
 			break;
 		case KCN_FORMULA_OP_GE:
-			if (kdr[i].knr_val < kf->kf_val)
+			if (kdr[i].kdr_val < kf->kf_val)
 				continue;
 			break;
 		default:
 			assert(0);
 			continue;
 		}
-		if (! kcn_info_loc_add(ki, kdr[i].knr_uri,
-		    strlen(kdr[i].knr_uri)))
+		if (! kcn_info_loc_add(ki, kdr[i].kdr_uri,
+		    strlen(kdr[i].kdr_uri)))
 			return false;
 		if (++n >= kcn_info_maxnlocs(ki))
 			break;
