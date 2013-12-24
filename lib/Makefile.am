@@ -7,8 +7,7 @@ libkcn_a_SOURCES =							\
 noinst_HEADERS =							\
 	kcn_str.h kcn_buf.h kcn_token.h kcn_uri.h kcn_pkt.h kcn_net.h	\
 	kcn_http.h kcn_socket.h kcn_sockaddr.h				\
-	kcn_google.h kcn_netstat.h kcn_db.h kcn_msg.h kcn_formula.h	\
-	kcn_client.h
+	kcn_db.h kcn_msg.h kcn_formula.h kcn_client.h
 include_HEADERS =							\
-	kcn.h kcn_log.h kcn_info.h
+	kcn.h kcn_log.h kcn_info.h kcn_netstat.h kcn_google.h
 libkcn_a_CFLAGS = $(CURL_CFLAGS) $(JANSSON_CFLAGS)
