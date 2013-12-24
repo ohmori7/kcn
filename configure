@@ -8638,7 +8638,7 @@ else
 
 		{ $as_echo "$as_me:$LINENO: result: no" >&5
 $as_echo "no" >&6; }
-		needflag=yes
+		needldflag=yes
 		eval with=\$with_event
 		if test x"$with" = xyes; then
 			with='/usr /usr/local /usr/pkg'

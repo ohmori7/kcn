@@ -35,7 +35,7 @@ AC_DEFUN([AC_KCN_CHECK_LIB], [
 	AC_ARG_WITH($1, [  --with-$1=PREFIX     $1 library],,[with_$1=yes])
 	AC_CHECK_LIB($1, $2, [needldflag=no], [
 		AC_MSG_RESULT(no)
-		needflag=yes
+		needldflag=yes
 		eval with=\$with_$1
 		if test x"$with" = xyes; then
 			with='/usr /usr/local /usr/pkg'
