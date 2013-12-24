@@ -1,3 +1,5 @@
+#include <sys/queue.h>
+
 struct kcn_pkt_data;
 
 STAILQ_HEAD(kcn_pkt_queue, kcn_pkt_data);

@@ -1,5 +1,3 @@
-#include <sys/queue.h>
-
 #include <errno.h>
 #include <stdbool.h>
 #include <stddef.h>

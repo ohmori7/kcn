@@ -1,4 +1,4 @@
-#include <sys/queue.h>	/* XXX: for TAILQ_ENTRY. */
+#include <sys/queue.h>
 
 struct kcn_db {
 	TAILQ_ENTRY(kcn_db) kd_chain;
