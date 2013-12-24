@@ -22,4 +22,5 @@ void kcn_info_userip_set(struct kcn_info *, const char *);
 const char *kcn_info_userip(const struct kcn_info *);
 size_t kcn_info_nlocs(const struct kcn_info *);
 const char *kcn_info_loc(const struct kcn_info *, size_t);
-bool kcn_info_loc_add(struct kcn_info *, const char *, size_t);
+size_t kcn_info_loc_score(const struct kcn_info *, size_t);
+bool kcn_info_loc_add(struct kcn_info *, const char *, size_t, size_t);

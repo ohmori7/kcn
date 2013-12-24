@@ -11,6 +11,11 @@
 #include "kcn_str.h"
 #include "kcn_info.h"
 
+struct kcn_loc {
+	char *kl_uri;
+	size_t kl_score;
+};
+
 struct kcn_info {
 	enum kcn_loc_type ki_loctype;
 	size_t ki_maxnlocs;
@@ -18,7 +23,7 @@ struct kcn_info {
 	char ki_country[KCN_INFO_COUNTRYSTRLEN];
 	char ki_userip[KCN_INET_ADDRSTRLEN];
 	size_t ki_nlocs;
-	char *ki_locs[1];
+	struct kcn_loc ki_locs[1];
 };
 
 static void kcn_info_db_unset(struct kcn_info *);
@@ -48,7 +53,7 @@ kcn_info_destroy(struct kcn_info *ki)
 
 	kcn_info_db_unset(ki);
 	for (i = 0; i < ki->ki_nlocs; i++)
-		free(ki->ki_locs[i]);
+		free(ki->ki_locs[i].kl_uri);
 	free(ki);
 }
 
@@ -144,17 +149,20 @@ kcn_info_loc(const struct kcn_info *ki, size_t idx)
 
 	if (idx >= ki->ki_nlocs)
 		return NULL;
-	return ki->ki_locs[idx];
+	return ki->ki_locs[idx].kl_uri;
 }
 
 bool
-kcn_info_loc_add(struct kcn_info *ki, const char *locstr, size_t locstrlen)
+kcn_info_loc_add(struct kcn_info *ki, const char *locstr, size_t locstrlen,
+    size_t score)
 {
+	struct kcn_loc *kl = &ki->ki_locs[ki->ki_nlocs];
 
 	assert(ki->ki_nlocs < ki->ki_maxnlocs);
-	ki->ki_locs[ki->ki_nlocs] = kcn_str_dup(locstr, locstrlen);
-	if (ki->ki_locs[ki->ki_nlocs] == NULL)
+	kl->kl_uri = kcn_str_dup(locstr, locstrlen);
+	if (kl->kl_uri == NULL)
 		return false;
+	kl->kl_score = score;
 	++ki->ki_nlocs;
 	return true;
 }

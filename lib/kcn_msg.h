@@ -23,6 +23,7 @@ struct kcn_msg_query {
 struct kcn_msg_response {
 	uint8_t kmr_error;
 	uint8_t kmr_leftcount;
+	uint8_t kmr_score;
 	struct kcn_info *kmr_ki;
 };
 

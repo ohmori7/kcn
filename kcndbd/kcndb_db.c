@@ -135,7 +135,7 @@ kcndb_db_search(struct kcn_info *ki, const struct kcn_formula *kf,
 			continue;
 		}
 		if (! kcn_info_loc_add(ki, kdr[i].kdr_uri,
-		    strlen(kdr[i].kdr_uri)))
+		    strlen(kdr[i].kdr_uri), 0 /* XXX */))
 			return false;
 		if (++n >= kcn_info_maxnlocs(ki))
 			break;
