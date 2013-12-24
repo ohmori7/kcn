@@ -32,7 +32,7 @@ main(int argc, char * const argv[])
 	pname = (p = strrchr(argv[0], '/')) != NULL ? p + 1 : argv[0];
 
 	fflag = false;
-	while ((ch = getopt(argc, argv, "d:fp:v?")) != -1) {
+	while ((ch = getopt(argc, argv, "d:fhp:v?")) != -1) {
 		switch (ch) {
 		case 'd':
 			if (! kcndb_db_path_set(optarg))
