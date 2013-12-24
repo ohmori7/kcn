@@ -22,6 +22,7 @@ struct kcn_info {
 	char ki_dbname[KCN_INFO_DBNAMESTRLEN];
 	char ki_country[KCN_INFO_COUNTRYSTRLEN];
 	char ki_userip[KCN_INET_ADDRSTRLEN];
+	time_t ki_time;
 	size_t ki_nlocs;
 	struct kcn_loc ki_locs[1];
 };
@@ -42,6 +43,7 @@ kcn_info_new(enum kcn_loc_type loctype, size_t maxnlocs)
 	ki->ki_dbname[0] = '\0';
 	ki->ki_country[0] = '\0';
 	ki->ki_userip[0] = '\0';
+	ki->ki_time = 0; /* XXX */
 	ki->ki_nlocs = 0;
 	return ki;
 }
