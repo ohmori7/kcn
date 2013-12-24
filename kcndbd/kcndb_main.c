@@ -25,19 +25,20 @@ int
 main(int argc, char * const argv[])
 {
 	const char *p;
-	bool fflag;
+	bool dflag, fflag;
 	int ch;
 	unsigned long long llval;
 
 	pname = (p = strrchr(argv[0], '/')) != NULL ? p + 1 : argv[0];
 
-	fflag = false;
+	dflag = fflag = false;
 	while ((ch = getopt(argc, argv, "d:fhp:v?")) != -1) {
 		switch (ch) {
 		case 'd':
-			if (! kcndb_db_path_set(optarg))
-				usage("cannot set DB path, \"%s\"", optarg);
+			if (dflag)
+				usage("-d can be specified only once");
 				/*NOTREACHED*/
+			kcndb_db_path_set(optarg);
 			break;
 		case 'f':
 			fflag = true;
@@ -63,6 +64,10 @@ main(int argc, char * const argv[])
 	argc -= optind;
 	argv += optind;
 
+	if (! kcndb_db_init())
+		usage("cannot open database path, \"%s\"", kcndb_db_path_get());
+		/*NOTREACHED*/
+
 	if (! fflag && daemon(1, 1) == -1)
 		usage("cannot daemonize");
 		/*NOTREACHED*/
@@ -72,6 +77,8 @@ main(int argc, char * const argv[])
 		/*NOTREACHED*/
 
 	kcndb_server_loop();
+
+	kcndb_db_finish();
 
 	return 0;
 }

@@ -62,25 +62,45 @@ kcndb_db_opendir(const char *path)
 static void
 kcndb_db_closedir(void)
 {
+	int oerrno;
 
 	if (kcndb_db_dir == NULL)
 		return;
-	closedir(kcndb_db_dir);
+	oerrno = errno;
+	(void)closedir(kcndb_db_dir);
+	errno = oerrno;
 	kcndb_db_dir = NULL;
 }
 
-bool
+void
 kcndb_db_path_set(const char *path)
 {
-	static bool iscalled = false;
 
-	if (iscalled)
-		return false;
-	if (! kcndb_db_opendir(path))
-		return false;
-	iscalled = true;
 	kcndb_db_path = path;
+}
+
+const char *
+kcndb_db_path_get(void)
+{
+
+	return kcndb_db_path;
+}
+
+bool
+kcndb_db_init(void)
+{
+
+	if (! kcndb_db_opendir(kcndb_db_path))
+		return false;
+
 	return true;
+}
+
+void
+kcndb_db_finish(void)
+{
+
+	kcndb_db_closedir();
 }
 
 static bool
