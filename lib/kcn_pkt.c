@@ -74,7 +74,8 @@ void
 kcn_pkt_data_destroy(struct kcn_pkt_data *kpd)
 {
 
-	free(kpd);
+	if (kpd != NULL)
+		free(kpd);
 }
 
 size_t
