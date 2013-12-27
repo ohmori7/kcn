@@ -1,74 +1,33 @@
+#include <sys/param.h>	/* MAXPATHLEN */
+#include <sys/time.h>
+
 #include <assert.h>
+#include <dirent.h>
 #include <errno.h>
+#include <fcntl.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <string.h>
-
-#include <dirent.h>
+#include <unistd.h>
 
 #include "kcn.h"
 #include "kcn_info.h"
 #include "kcn_formula.h"
 #include "kcn_log.h"
+#include "kcn_pkt.h"
 
 #include "kcndb_db.h"
 
 struct kcndb_db_record {
+	struct timeval kdr_time;
 	unsigned long long kdr_val;
 	const char *kdr_uri;
-};
-
-static struct kcndb_db_record kcndb_db_storage[] = {
-#define BBASE	(1024ULL)
-#define KB	BBASE
-#define MB	(KB * BBASE)
-#define GB	(MB * BBASE)
-#define TB	(GB * BBASE)
-	{ 100ULL * GB,	"mobile-ip.org" },
-	{ 44ULL * GB,	"www.qgpop.net" },
-	{ 10ULL * GB,	"kcn3.mobile-ip.org" },
-	{ 5ULL * GB,	"kcn4.mobile-ip.org" },
-};
-
-static struct kcndb_db_record kcndb_db_latency[] = {
-	{ 200ULL,	"mobile-ip.org" },
-	{ 3ULL,		"wlan-exhibits-rtr.sc13.org" },
-	{ 175ULL,	"www.sinet.ad.jp" },
-	{ 30ULL,	"64.125.12.86" },
-	{ 67ULL,	"129.250.3.190" }
+	size_t kdr_urilen;
 };
 
 static const char *kcndb_db_path = KCNDB_DB_PATH_DEFAULT;
-static DIR *kcndb_db_dir = NULL;
-
-static void kcndb_db_closedir(void);
-
-static bool
-kcndb_db_opendir(const char *path)
-{
-	DIR *ndir;
-
-	ndir = opendir(path);
-	if (ndir == NULL)
-		return false;
-	kcndb_db_closedir();
-	kcndb_db_dir = ndir;
-	return true;
-}
-
-static void
-kcndb_db_closedir(void)
-{
-	int oerrno;
-
-	if (kcndb_db_dir == NULL)
-		return;
-	oerrno = errno;
-	(void)closedir(kcndb_db_dir);
-	errno = oerrno;
-	kcndb_db_dir = NULL;
-}
 
 void
 kcndb_db_path_set(const char *path)
@@ -87,9 +46,18 @@ kcndb_db_path_get(void)
 bool
 kcndb_db_init(void)
 {
+	DIR *ndir;
+	int oerrno;
 
-	if (! kcndb_db_opendir(kcndb_db_path))
+	ndir = opendir(kcndb_db_path);
+	if (ndir == NULL)
 		return false;
+
+	/* XXX: may need to pre-load onto memory... */
+
+	oerrno = errno;
+	(void)closedir(ndir);
+	errno = oerrno;
 
 	return true;
 }
@@ -98,70 +66,132 @@ void
 kcndb_db_finish(void)
 {
 
-	kcndb_db_closedir();
+	/* XXX: may need to write back on-memory cache in the future. */
+}
+
+static int
+kcndb_db_table_open(enum kcn_formula_type type)
+{
+	const char *name;
+	char path[MAXPATHLEN];
+	int fd;
+
+	name = kcn_formula_type_ntoa(type);
+	if (name == NULL) {
+		errno = ENOENT;
+		KCN_LOG(DEBUG, "unknown database type: %hu", type);
+		return -1;
+	}
+	(void)snprintf(path, sizeof(path), "%s/%s", kcndb_db_path, name);
+	fd = open(path, O_RDONLY);
+	if (fd == -1)
+		KCN_LOG(DEBUG, "cannot open database file: %s",
+		    strerror(errno));
+	return fd;
+}
+
+static void
+kcndb_db_table_close(int fd)
+{
+	int oerrno;
+
+	if (fd >= 0)
+		return;
+	oerrno = errno;
+	(void)close(fd);
+	errno = oerrno;
 }
 
 static bool
-kcndb_db_search(struct kcn_info *ki, const struct kcn_formula *kf,
-    const struct kcndb_db_record *kdr, size_t dbcount)
+kcndb_db_record_read(int fd, struct kcn_pkt *kp, struct kcndb_db_record *kdr)
 {
-	size_t i, n;
 
-	n = 0;
-	for (i = 0; i < dbcount; i++) {
+	kcn_pkt_realign(kp);
+
+	if (kcn_pkt_read(fd, kp) != 0)
+		return false;
+
+#define KCNDB_HDRSIZ	(8 + 4 + 8 + 2)
+	if (kcn_pkt_len(kp) < KCNDB_HDRSIZ)
+		return false;
+	kdr->kdr_time.tv_sec = kcn_pkt_get64(kp);
+	kdr->kdr_time.tv_usec = kcn_pkt_get32(kp);
+	kdr->kdr_val = kcn_pkt_get64(kp);
+	kdr->kdr_urilen = kcn_pkt_get16(kp);
+	if (kcn_pkt_trailingdata(kp) < kdr->kdr_urilen)
+		return false;
+
+	kdr->kdr_uri = kcn_pkt_current(kp);
+	kcn_pkt_trim_head(kp, kcn_pkt_headingdata(kp));
+	return true;
+}
+
+bool
+kcndb_db_search(struct kcn_info *ki, const struct kcn_formula *kf)
+{
+	struct kcn_pkt_data *kpd;
+	struct kcn_pkt kp;
+	struct kcndb_db_record kdr;
+	size_t i, score;
+	int fd;
+
+	fd = kcndb_db_table_open(kf->kf_type);
+	if (fd == -1) {
+		KCN_LOG(ERR, "cannot open table: %s", strerror(errno));
+		goto bad1;
+	}
+
+#define KCNDB_BUFSIZ	4096	/* XXX */
+	kpd = kcn_pkt_data_new(KCNDB_BUFSIZ);
+	if (kpd == NULL) {
+		KCN_LOG(ERR, "cannot prepare for record buffer: %s",
+		    strerror(errno));
+		goto bad1;
+	}
+	kcn_pkt_init(&kp, kpd);
+
+	score = 0; /* XXX: should compute score. */
+	for (i = 0; kcn_info_nlocs(ki) < kcn_info_maxnlocs(ki); i++) {
+		if (! kcndb_db_record_read(fd, &kp, &kdr)) {
+			KCN_LOG(ERR, "cannot read record: %s", strerror(errno));
+			goto bad2;
+		}
+
 		switch (kf->kf_op) {
 		case KCN_FORMULA_OP_LT:
-			if (kdr[i].kdr_val >= kf->kf_val)
+			if (kdr.kdr_val >= kf->kf_val)
 				continue;
 			break;
 		case KCN_FORMULA_OP_LE:
-			if (kdr[i].kdr_val > kf->kf_val)
+			if (kdr.kdr_val > kf->kf_val)
 				continue;
 			break;
 		case KCN_FORMULA_OP_EQ:
-			if (kdr[i].kdr_val != kf->kf_val)
+			if (kdr.kdr_val != kf->kf_val)
 				continue;
 			break;
 		case KCN_FORMULA_OP_GT:
-			if (kdr[i].kdr_val <= kf->kf_val)
+			if (kdr.kdr_val <= kf->kf_val)
 				continue;
 			break;
 		case KCN_FORMULA_OP_GE:
-			if (kdr[i].kdr_val < kf->kf_val)
+			if (kdr.kdr_val < kf->kf_val)
 				continue;
 			break;
 		default:
 			assert(0);
 			continue;
 		}
-		if (! kcn_info_loc_add(ki, kdr[i].kdr_uri,
-		    strlen(kdr[i].kdr_uri), 0 /* XXX */))
-			return false;
-		if (++n >= kcn_info_maxnlocs(ki))
-			break;
+		if (! kcn_info_loc_add(ki, kdr.kdr_uri, kdr.kdr_urilen, score))
+			goto bad2;
 	}
 
+	kcn_pkt_data_destroy(kpd);
+	kcndb_db_table_close(fd);
 	return true;
-}
-
-bool
-kcndb_db_search_all(struct kcn_info *ki, const struct kcn_formula *kf)
-{
-	bool rc;
-
-#define SEARCH(db)							\
-	kcndb_db_search(ki, kf, (db), sizeof(db) / sizeof((db)[0]))
-	switch (kf->kf_type) {
-	case KCN_FORMULA_TYPE_LATENCY:
-		rc = SEARCH(kcndb_db_latency);
-		break;
-	case KCN_FORMULA_TYPE_STORAGE:
-		rc = SEARCH(kcndb_db_storage);
-		break;
-	default:
-		rc = false;
-		errno = EOPNOTSUPP;
-	}
-#undef SEARCH
-	return rc;
+  bad2:
+	kcn_pkt_data_destroy(kpd);
+  bad1:
+	kcndb_db_table_close(fd);
+	return false;
 }
