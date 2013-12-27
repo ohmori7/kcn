@@ -23,8 +23,10 @@ kcn_formula_type_ntoa(enum kcn_formula_type type)
 		[KCN_FORMULA_TYPE_ASPATHLEN]	= "aspathlen",
 		[KCN_FORMULA_TYPE_WLANASSOC]	= "wlanassoc"
 	};
-	if (type >= KCN_FORMULA_TYPE_MAX)
-		type = KCN_FORMULA_TYPE_NONE;
+	if (type <= KCN_FORMULA_TYPE_NONE || type >= KCN_FORMULA_TYPE_MAX) {
+		errno = ENOENT;
+		return NULL;
+	}
 	return name[type];
 }
 
