@@ -14,8 +14,6 @@
 #include "kcn_formula.h"
 #include "kcn_msg.h"
 
-#define KCN_MSG_HDRSIZ	(1 /* version */ + 1 /* type */ + 2 /* length*/)
-
 static void
 kcn_msg_pkt_init(struct kcn_pkt *kp)
 {
@@ -30,7 +28,7 @@ kcn_msg_header_encode(struct kcn_pkt *kp, enum kcn_msg_type type)
 	kcn_pkt_prepend(kp, KCN_MSG_HDRSIZ);
 	kcn_pkt_put8(kp, KCN_MSG_VERSION);
 	kcn_pkt_put8(kp, type);
-	kcn_pkt_put16(kp, kcn_pkt_len(kp));
+	kcn_pkt_put16(kp, kcn_pkt_len(kp) - KCN_MSG_HDRSIZ);
 }
 
 bool
@@ -52,18 +50,18 @@ kcn_msg_header_decode(struct kcn_pkt *kp, struct kcn_msg_header *kmh)
 		errno = EOPNOTSUPP;
 		goto bad;
 	}
-	if (kmh->kmh_len > KCN_MSG_MAXSIZ) {
+	if (kmh->kmh_len > KCN_MSG_MAXBODYSIZ) {
 		KCN_LOG(ERR, "recv too long message, %zu bytes", kmh->kmh_len);
 		errno = E2BIG;
 		goto bad;
 	}
-	if (kcn_pkt_len(kp) < kmh->kmh_len) {
+	if (kcn_pkt_trailingdata(kp) < kmh->kmh_len) {
 		KCN_LOG(DEBUG, "recv partial message");
 		kcn_pkt_start(kp);
 		errno = EAGAIN;
 		goto bad;
 	}
-	kcn_pkt_trim_head(kp, KCN_MSG_HDRSIZ);
+	kcn_pkt_trim_head(kp, kcn_pkt_headingdata(kp));
 	return true;
   bad:
 	return false;
@@ -89,11 +87,10 @@ kcn_msg_query_decode(struct kcn_pkt *kp, const struct kcn_msg_header *kmh,
     struct kcn_msg_query *kmq)
 {
 	struct kcn_formula *kf;
-	size_t len = kmh->kmh_len - KCN_MSG_HDRSIZ;
 
 #define KCN_MSG_QUERY_SIZ	(1 + 1 + 8 + 1 + 1 + 8)
 	if (kcn_pkt_trailingdata(kp) < KCN_MSG_QUERY_SIZ ||
-	    len != KCN_MSG_QUERY_SIZ) {
+	    kmh->kmh_len != KCN_MSG_QUERY_SIZ) {
 		errno = EINVAL; /* XXX */
 		goto bad;
 	}
@@ -104,7 +101,7 @@ kcn_msg_query_decode(struct kcn_pkt *kp, const struct kcn_msg_header *kmh,
 	kf->kf_type = kcn_pkt_get8(kp);
 	kf->kf_op = kcn_pkt_get8(kp);
 	kf->kf_val = kcn_pkt_get64(kp);
-	kcn_pkt_trim_head(kp, KCN_MSG_QUERY_SIZ);
+	kcn_pkt_trim_head(kp, kcn_pkt_headingdata(kp));
 	switch (kmq->kmq_loctype) {
 	case KCN_LOC_TYPE_DOMAINNAME:
 	case KCN_LOC_TYPE_URI:
@@ -157,7 +154,7 @@ kcn_msg_response_decode(struct kcn_pkt *kp, const struct kcn_msg_header *kmh,
     struct kcn_msg_response *kmr)
 {
 	struct kcn_info *ki = kmr->kmr_ki;
-	size_t len = kmh->kmh_len - KCN_MSG_HDRSIZ;
+	size_t len = kmh->kmh_len;
 
 #define KCN_MSG_RESPONSE_MINSIZ		(1 + 1 + 1)
 	if (kcn_pkt_trailingdata(kp) < KCN_MSG_RESPONSE_MINSIZ ||
@@ -169,7 +166,7 @@ kcn_msg_response_decode(struct kcn_pkt *kp, const struct kcn_msg_header *kmh,
 	kmr->kmr_leftcount = kcn_pkt_get8(kp);
 	kmr->kmr_score = kcn_pkt_get8(kp);
 	len -= KCN_MSG_RESPONSE_MINSIZ;
-	kcn_pkt_trim_head(kp, KCN_MSG_RESPONSE_MINSIZ);
+	kcn_pkt_trim_head(kp, kcn_pkt_headingdata(kp));
 	if (kcn_info_maxnlocs(ki) - kcn_info_nlocs(ki) < kmr->kmr_leftcount) {
 		KCN_LOG(ERR, "too many responses, %u", kmr->kmr_leftcount);
 		errno = ETOOMANYREFS; /* XXX */

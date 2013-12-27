@@ -1,4 +1,7 @@
 #define KCN_MSG_VERSION		1U
+#define KCN_MSG_HDRSIZ		(1 /* version */ + 1 /* type */ + 2 /* length*/)
+#define KCN_MSG_MAXSIZ		4096
+#define KCN_MSG_MAXBODYSIZ	(KCN_MSG_MAXSIZ - KCN_MSG_HDRSIZ)
 
 enum kcn_msg_type {
 	KCN_MSG_TYPE_RESERVED,
@@ -27,8 +30,6 @@ struct kcn_msg_response {
 	uint8_t kmr_score;
 	struct kcn_info *kmr_ki;
 };
-
-#define KCN_MSG_MAXSIZ	4096
 
 bool kcn_msg_header_decode(struct kcn_pkt *, struct kcn_msg_header *);
 void kcn_msg_query_encode(struct kcn_pkt *, const struct kcn_msg_query *);
