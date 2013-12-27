@@ -136,10 +136,8 @@ kcndb_db_search(struct kcn_info *ki, const struct kcn_formula *kf)
 	int fd;
 
 	fd = kcndb_db_table_open(kf->kf_type);
-	if (fd == -1) {
-		KCN_LOG(ERR, "cannot open table: %s", strerror(errno));
+	if (fd == -1)
 		goto bad1;
-	}
 
 #define KCNDB_BUFSIZ	4096	/* XXX */
 	kpd = kcn_pkt_data_new(KCNDB_BUFSIZ);
