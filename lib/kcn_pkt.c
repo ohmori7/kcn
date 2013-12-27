@@ -126,6 +126,22 @@ kcn_pkt_trailingdata(const struct kcn_pkt *kp)
 }
 
 void
+kcn_pkt_forward(struct kcn_pkt *kp, size_t len)
+{
+
+	assert(kcn_pkt_trailingdata(kp) >= len);
+	kp->kp_cp += len;
+}
+
+void
+kcn_pkt_backward(struct kcn_pkt *kp, size_t len)
+{
+
+	assert(kcn_pkt_headingdata(kp) >= len);
+	kp->kp_cp -= len;
+}
+
+void
 kcn_pkt_start(struct kcn_pkt *kp)
 {
 
