@@ -186,3 +186,35 @@ kcn_msg_response_decode(struct kcn_pkt *kp, const struct kcn_msg_header *kmh,
   bad:
 	return false;
 }
+
+void
+kcn_msg_add_encode(struct kcn_pkt *kp, const struct kcn_msg_add *kma)
+{
+
+	kcn_msg_pkt_init(kp);
+	kcn_pkt_put64(kp, kma->kma_time);
+	kcn_pkt_put64(kp, kma->kma_val);
+	kcn_pkt_put(kp, kma->kma_loc, kma->kma_loclen);
+	kcn_msg_header_encode(kp, KCN_MSG_TYPE_QUERY);
+}
+
+bool
+kcn_msg_add_decode(struct kcn_pkt *kp, const struct kcn_msg_header *kmh,
+    struct kcn_msg_add *kma)
+{
+
+#define KCN_MSG_ADD_MINSIZ	(8 + 8)
+	if (kcn_pkt_trailingdata(kp) < KCN_MSG_ADD_MINSIZ ||
+	    kmh->kmh_len < KCN_MSG_ADD_MINSIZ) {
+		errno = EINVAL;
+		goto bad;
+	}
+	kma->kma_time = kcn_pkt_get64(kp);
+	kma->kma_val = kcn_pkt_get64(kp);
+	kma->kma_loc = kcn_pkt_current(kp);
+	kma->kma_loclen = kmh->kmh_len - KCN_MSG_ADD_MINSIZ;
+	kcn_pkt_trim_head(kp, kmh->kmh_len);
+	return true;
+  bad:
+	return false;
+}
