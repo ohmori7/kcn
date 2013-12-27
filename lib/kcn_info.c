@@ -53,6 +53,8 @@ kcn_info_destroy(struct kcn_info *ki)
 {
 	size_t i;
 
+	if (ki == NULL)
+		return;
 	kcn_info_db_unset(ki);
 	for (i = 0; i < ki->ki_nlocs; i++)
 		free(ki->ki_locs[i].kl_uri);
