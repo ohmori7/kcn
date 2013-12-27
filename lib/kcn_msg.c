@@ -193,7 +193,7 @@ kcn_msg_add_encode(struct kcn_pkt *kp, const struct kcn_msg_add *kma)
 	kcn_pkt_put64(kp, kma->kma_time);
 	kcn_pkt_put64(kp, kma->kma_val);
 	kcn_pkt_put(kp, kma->kma_loc, kma->kma_loclen);
-	kcn_msg_header_encode(kp, KCN_MSG_TYPE_QUERY);
+	kcn_msg_header_encode(kp, KCN_MSG_TYPE_ADD);
 }
 
 bool
