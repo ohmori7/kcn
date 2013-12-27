@@ -88,7 +88,6 @@ kcn_msg_query_decode(struct kcn_pkt *kp, const struct kcn_msg_header *kmh,
 {
 	struct kcn_formula *kf;
 
-#define KCN_MSG_QUERY_SIZ	(1 + 1 + 8 + 1 + 1 + 8)
 	if (kcn_pkt_trailingdata(kp) < KCN_MSG_QUERY_SIZ ||
 	    kmh->kmh_len != KCN_MSG_QUERY_SIZ) {
 		errno = EINVAL; /* XXX */
@@ -156,7 +155,6 @@ kcn_msg_response_decode(struct kcn_pkt *kp, const struct kcn_msg_header *kmh,
 	struct kcn_info *ki = kmr->kmr_ki;
 	size_t len = kmh->kmh_len;
 
-#define KCN_MSG_RESPONSE_MINSIZ		(1 + 1 + 1)
 	if (kcn_pkt_trailingdata(kp) < KCN_MSG_RESPONSE_MINSIZ ||
 	    len < KCN_MSG_RESPONSE_MINSIZ) {
 		errno = EINVAL; /* XXX */
@@ -203,7 +201,6 @@ kcn_msg_add_decode(struct kcn_pkt *kp, const struct kcn_msg_header *kmh,
     struct kcn_msg_add *kma)
 {
 
-#define KCN_MSG_ADD_MINSIZ	(8 + 8)
 	if (kcn_pkt_trailingdata(kp) < KCN_MSG_ADD_MINSIZ ||
 	    kmh->kmh_len < KCN_MSG_ADD_MINSIZ) {
 		errno = EINVAL;
