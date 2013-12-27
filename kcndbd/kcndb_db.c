@@ -9,6 +9,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 
@@ -20,14 +21,20 @@
 
 #include "kcndb_db.h"
 
-struct kcndb_db_record {
-	struct timeval kdr_time;
-	unsigned long long kdr_val;
-	const char *kdr_uri;
-	size_t kdr_urilen;
+enum kcndb_db_op {
+	KCNDB_DB_OP_READ,
+	KCNDB_DB_OP_WRITE
+};
+
+struct kcndb_db_table {
+	int kdt_fd;
+	struct kcn_pkt kdt_kp;
+	struct kcn_pkt_data *kdt_kpd;
 };
 
 static const char *kcndb_db_path = KCNDB_DB_PATH_DEFAULT;
+
+static void kcndb_db_table_destroy(struct kcndb_db_table *);
 
 void
 kcndb_db_path_set(const char *path)
@@ -69,46 +76,104 @@ kcndb_db_finish(void)
 	/* XXX: may need to write back on-memory cache in the future. */
 }
 
-static int
-kcndb_db_table_open(enum kcn_formula_type type)
+static struct kcndb_db_table *
+kcndb_db_table_new(void)
+{
+	struct kcndb_db_table *kdt;
+
+	kdt = malloc(sizeof(*kdt));
+	if (kdt == NULL)
+		goto bad;
+	kdt->kdt_fd = -1;
+#define KCNDB_BUFSIZ	4096	/* XXX */
+	kdt->kdt_kpd = kcn_pkt_data_new(KCNDB_BUFSIZ);
+	if (kdt->kdt_kpd == NULL)
+		goto bad;
+	kcn_pkt_init(&kdt->kdt_kp, kdt->kdt_kpd);
+	return kdt;
+  bad:
+	kcndb_db_table_destroy(kdt);
+	return NULL;
+}
+
+static void
+kcndb_db_table_destroy(struct kcndb_db_table *kdt)
+{
+	int oerrno;
+
+	if (kdt == NULL)
+		return;
+	if (kdt->kdt_fd >= 0) {
+		oerrno = errno;
+		(void)close(kdt->kdt_fd);
+		errno = oerrno;
+	}
+	kcn_pkt_data_destroy(kdt->kdt_kpd);
+	free(kdt);
+}
+
+static struct kcndb_db_table *
+kcndb_db_table_open(enum kcn_formula_type type, enum kcndb_db_op op)
 {
 	const char *name;
 	char path[MAXPATHLEN];
-	int fd;
+	struct kcndb_db_table *kdt;
+	int flags;
 
 	name = kcn_formula_type_ntoa(type);
 	if (name == NULL) {
 		errno = ENOENT;
 		KCN_LOG(DEBUG, "unknown database type: %hu", type);
-		return -1;
+		return NULL;
 	}
+
+	kdt = kcndb_db_table_new();
+	if (kdt == NULL) {
+		KCN_LOG(DEBUG, "cannot database table: %s", strerror(errno));
+		return NULL;
+	}
+
 	(void)snprintf(path, sizeof(path), "%s/%s", kcndb_db_path, name);
-	fd = open(path, O_RDONLY);
-	if (fd == -1)
+	if (op == KCNDB_DB_OP_READ)
+		flags = O_RDONLY;
+	else {
+		assert(op == KCNDB_DB_OP_WRITE);
+		flags = O_WRONLY | O_CREAT | O_APPEND;
+	}
+	kdt->kdt_fd = open(path, flags);
+	if (kdt->kdt_fd == -1) {
 		KCN_LOG(DEBUG, "cannot open database file: %s",
 		    strerror(errno));
-	return fd;
+		goto bad;
+	}
+	return kdt;
+  bad:
+	kcndb_db_table_destroy(kdt);
+	return NULL;
 }
 
-static void
-kcndb_db_table_close(int fd)
+struct kcndb_db_table *
+kcndb_db_table_create(enum kcn_formula_type type)
 {
-	int oerrno;
 
-	if (fd >= 0)
-		return;
-	oerrno = errno;
-	(void)close(fd);
-	errno = oerrno;
+	return kcndb_db_table_open(type, KCNDB_DB_OP_WRITE);
+}
+
+void
+kcndb_db_table_close(struct kcndb_db_table *kdt)
+{
+
+	kcndb_db_table_destroy(kdt);
 }
 
 static bool
-kcndb_db_record_read(int fd, struct kcn_pkt *kp, struct kcndb_db_record *kdr)
+kcndb_db_record_read(struct kcndb_db_table *kdt, struct kcndb_db_record *kdr)
 {
+	struct kcn_pkt *kp = &kdt->kdt_kp;
 
 	kcn_pkt_realign(kp);
 
-	if (kcn_pkt_read(fd, kp) != 0)
+	if (kcn_pkt_read(kdt->kdt_fd, kp) != 0)
 		return false;
 
 #define KCNDB_HDRSIZ	(8 + 4 + 8 + 2)
@@ -120,39 +185,47 @@ kcndb_db_record_read(int fd, struct kcn_pkt *kp, struct kcndb_db_record *kdr)
 	kdr->kdr_urilen = kcn_pkt_get16(kp);
 	if (kcn_pkt_trailingdata(kp) < kdr->kdr_urilen)
 		return false;
-
 	kdr->kdr_uri = kcn_pkt_current(kp);
 	kcn_pkt_trim_head(kp, kcn_pkt_headingdata(kp));
 	return true;
 }
 
 bool
+kcndb_db_record_add(struct kcndb_db_table *kdt, struct kcndb_db_record *kdr)
+{
+	struct kcn_pkt *kp = &kdt->kdt_kp;
+	size_t urilen;
+
+	kcn_pkt_put64(kp, kdr->kdr_time.tv_sec);
+	kcn_pkt_put32(kp, kdr->kdr_time.tv_usec);
+	kcn_pkt_put64(kp, kdr->kdr_val);
+	urilen = strlen(kdr->kdr_uri);
+	kcn_pkt_put16(kp, urilen);
+	kcn_pkt_put(kp, kdr->kdr_uri, urilen);
+	while (kcn_pkt_trailingdata(kp) > 0)
+		if (kcn_pkt_write(kdt->kdt_fd, kp) != 0)
+			return false;
+	kcn_pkt_reset(kp, 0);
+	return true;
+}
+
+bool
 kcndb_db_search(struct kcn_info *ki, const struct kcn_formula *kf)
 {
-	struct kcn_pkt_data *kpd;
-	struct kcn_pkt kp;
+	struct kcndb_db_table *kdt;
 	struct kcndb_db_record kdr;
 	size_t i, score;
-	int fd;
 
-	fd = kcndb_db_table_open(kf->kf_type);
-	if (fd == -1)
-		goto bad1;
-
-#define KCNDB_BUFSIZ	4096	/* XXX */
-	kpd = kcn_pkt_data_new(KCNDB_BUFSIZ);
-	if (kpd == NULL) {
-		KCN_LOG(ERR, "cannot prepare for record buffer: %s",
-		    strerror(errno));
-		goto bad1;
-	}
-	kcn_pkt_init(&kp, kpd);
+	kdt = kcndb_db_table_open(kf->kf_type, KCNDB_DB_OP_READ);
+	if (kdt == NULL)
+		goto bad;
 
 	score = 0; /* XXX: should compute score. */
 	for (i = 0; kcn_info_nlocs(ki) < kcn_info_maxnlocs(ki); i++) {
-		if (! kcndb_db_record_read(fd, &kp, &kdr)) {
+		if (! kcndb_db_record_read(kdt, &kdr)) {
+			/* XXX: should we accept this error??? */
 			KCN_LOG(ERR, "cannot read record: %s", strerror(errno));
-			goto bad2;
+			goto bad;
 		}
 
 		switch (kf->kf_op) {
@@ -181,15 +254,12 @@ kcndb_db_search(struct kcn_info *ki, const struct kcn_formula *kf)
 			continue;
 		}
 		if (! kcn_info_loc_add(ki, kdr.kdr_uri, kdr.kdr_urilen, score))
-			goto bad2;
+			goto bad;
 	}
 
-	kcn_pkt_data_destroy(kpd);
-	kcndb_db_table_close(fd);
+	kcndb_db_table_close(kdt);
 	return true;
-  bad2:
-	kcn_pkt_data_destroy(kpd);
-  bad1:
-	kcndb_db_table_close(fd);
+  bad:
+	kcndb_db_table_close(kdt);
 	return false;
 }
