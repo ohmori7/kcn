@@ -63,6 +63,7 @@ kcn_msg_header_decode(struct kcn_pkt *kp, struct kcn_msg_header *kmh)
 		errno = EAGAIN;
 		goto bad;
 	}
+	kcn_pkt_trim_head(kp, KCN_MSG_HDRSIZ);
 	return true;
   bad:
 	return false;
@@ -84,12 +85,15 @@ kcn_msg_query_encode(struct kcn_pkt *kp, const struct kcn_msg_query *kmq)
 }
 
 bool
-kcn_msg_query_decode(struct kcn_pkt *kp, struct kcn_msg_query *kmq)
+kcn_msg_query_decode(struct kcn_pkt *kp, const struct kcn_msg_header *kmh,
+    struct kcn_msg_query *kmq)
 {
 	struct kcn_formula *kf;
+	size_t len = kmh->kmh_len - KCN_MSG_HDRSIZ;
 
-#define KCN_MSG_QUERY_MINSIZ	(1 + 1 + 8 + 1 + 1 + 8)
-	if (kcn_pkt_trailingdata(kp) < KCN_MSG_QUERY_MINSIZ) {
+#define KCN_MSG_QUERY_SIZ	(1 + 1 + 8 + 1 + 1 + 8)
+	if (kcn_pkt_trailingdata(kp) < KCN_MSG_QUERY_SIZ ||
+	    len != KCN_MSG_QUERY_SIZ) {
 		errno = EINVAL; /* XXX */
 		goto bad;
 	}
@@ -100,6 +104,7 @@ kcn_msg_query_decode(struct kcn_pkt *kp, struct kcn_msg_query *kmq)
 	kf->kf_type = kcn_pkt_get8(kp);
 	kf->kf_op = kcn_pkt_get8(kp);
 	kf->kf_val = kcn_pkt_get64(kp);
+	kcn_pkt_trim_head(kp, KCN_MSG_QUERY_SIZ);
 	switch (kmq->kmq_loctype) {
 	case KCN_LOC_TYPE_DOMAINNAME:
 	case KCN_LOC_TYPE_URI:
@@ -148,29 +153,34 @@ kcn_msg_response_encode(struct kcn_pkt *kp, const struct kcn_msg_response *kmr)
 }
 
 bool
-kcn_msg_response_decode(struct kcn_pkt *kp, struct kcn_msg_response *kmr)
+kcn_msg_response_decode(struct kcn_pkt *kp, const struct kcn_msg_header *kmh,
+    struct kcn_msg_response *kmr)
 {
 	struct kcn_info *ki = kmr->kmr_ki;
+	size_t len = kmh->kmh_len - KCN_MSG_HDRSIZ;
 
 #define KCN_MSG_RESPONSE_MINSIZ		(1 + 1 + 1)
-	if (kcn_pkt_trailingdata(kp) < KCN_MSG_RESPONSE_MINSIZ) {
+	if (kcn_pkt_trailingdata(kp) < KCN_MSG_RESPONSE_MINSIZ ||
+	    len < KCN_MSG_RESPONSE_MINSIZ) {
 		errno = EINVAL; /* XXX */
 		goto bad;
 	}
 	kmr->kmr_error = kcn_pkt_get8(kp);
 	kmr->kmr_leftcount = kcn_pkt_get8(kp);
 	kmr->kmr_score = kcn_pkt_get8(kp);
+	len -= KCN_MSG_RESPONSE_MINSIZ;
+	kcn_pkt_trim_head(kp, KCN_MSG_RESPONSE_MINSIZ);
 	if (kcn_info_maxnlocs(ki) - kcn_info_nlocs(ki) < kmr->kmr_leftcount) {
 		KCN_LOG(ERR, "too many responses, %u", kmr->kmr_leftcount);
 		errno = ETOOMANYREFS; /* XXX */
 		goto bad;
 	}
 
-	if (! kcn_info_loc_add(kmr->kmr_ki, kcn_pkt_current(kp),
-	    kcn_pkt_trailingdata(kp), kmr->kmr_score))
+	if (! kcn_info_loc_add(kmr->kmr_ki, kcn_pkt_current(kp), len,
+	    kmr->kmr_score))
 		goto bad;
+	kcn_pkt_trim_head(kp, len);
 
-	kcn_pkt_reset(kp, 0);
 	if (kmr->kmr_leftcount != 0) {
 		errno = EAGAIN;
 		goto bad;

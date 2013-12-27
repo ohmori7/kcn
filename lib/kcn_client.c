@@ -31,7 +31,7 @@ kcn_client_read(struct kcn_net *kn, struct kcn_pkt *kp, void *arg)
 		errno = EINVAL;
 		goto bad;
 	}
-	if (! kcn_msg_response_decode(kp, kmr))
+	if (! kcn_msg_response_decode(kp, &kmh, kmr))
 		goto bad;
 	return 0;
   bad:

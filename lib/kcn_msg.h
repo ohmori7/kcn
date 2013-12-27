@@ -32,7 +32,9 @@ struct kcn_msg_response {
 
 bool kcn_msg_header_decode(struct kcn_pkt *, struct kcn_msg_header *);
 void kcn_msg_query_encode(struct kcn_pkt *, const struct kcn_msg_query *);
-bool kcn_msg_query_decode(struct kcn_pkt *, struct kcn_msg_query *);
+bool kcn_msg_query_decode(struct kcn_pkt *, const struct kcn_msg_header *,
+    struct kcn_msg_query *);
 void kcn_msg_response_init(struct kcn_msg_response *, struct kcn_info *);
 void kcn_msg_response_encode(struct kcn_pkt *, const struct kcn_msg_response *);
-bool kcn_msg_response_decode(struct kcn_pkt *, struct kcn_msg_response *);
+bool kcn_msg_response_decode(struct kcn_pkt *, const struct kcn_msg_header *,
+    struct kcn_msg_response *);

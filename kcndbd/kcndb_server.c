@@ -130,14 +130,15 @@ kcndb_server_loop(void)
 }
 
 static bool
-kcndb_server_query_process(struct kcn_net *kn, struct kcn_pkt *ikp)
+kcndb_server_query_process(struct kcn_net *kn, struct kcn_pkt *ikp,
+    const struct kcn_msg_header *kmh)
 {
 	struct kcn_pkt okp;
 	struct kcn_msg_query kmq;
 	struct kcn_msg_response kmr;
 	struct kcn_info *ki;
 
-	if (! kcn_msg_query_decode(ikp, &kmq))
+	if (! kcn_msg_query_decode(ikp, kmh, &kmq))
 		ki = NULL;
 	else
 		/* XXX */
@@ -177,7 +178,7 @@ kcndb_server_recv(struct kcn_net *kn, struct kcn_pkt *kp, void *arg)
 
 	switch (kmh.kmh_type) {
 	case KCN_MSG_TYPE_QUERY:
-		rc = kcndb_server_query_process(kn, kp);
+		rc = kcndb_server_query_process(kn, kp, &kmh);
 		break;
 	case KCN_MSG_TYPE_ADD: /* XXX */
 	case KCN_MSG_TYPE_DEL: /* XXX */
