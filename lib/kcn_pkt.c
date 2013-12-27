@@ -109,6 +109,14 @@ kcn_pkt_trailingspace(const struct kcn_pkt *kp)
 }
 
 size_t
+kcn_pkt_headingdata(const struct kcn_pkt *kp)
+{
+
+	assert(kp->kp_cp >= kp->kp_sp);
+	return kp->kp_cp - kp->kp_sp;
+}
+
+size_t
 kcn_pkt_trailingdata(const struct kcn_pkt *kp)
 {
 
@@ -130,7 +138,7 @@ kcn_pkt_end(struct kcn_pkt *kp)
 	kp->kp_cp = kp->kp_ep;
 }
 
-static void
+void
 kcn_pkt_trim_head(struct kcn_pkt *kp, size_t len)
 {
 
@@ -138,6 +146,17 @@ kcn_pkt_trim_head(struct kcn_pkt *kp, size_t len)
 	kp->kp_sp += len;
 	if (kp->kp_sp > kp->kp_cp)
 		kcn_pkt_start(kp);
+}
+
+void
+kcn_pkt_realign(struct kcn_pkt *kp)
+{
+	size_t len;
+
+	len = kcn_pkt_len(kp);
+	memmove(kp->kp_buf, kcn_pkt_head(kp), len);
+	kp->kp_sp = kp->kp_cp = 0;
+	kp->kp_ep = len;
 }
 
 void *
