@@ -1,3 +1,4 @@
+#include <errno.h>
 #include <stdarg.h>
 #include <stdbool.h> /* XXX: just for bool in kcn.h */
 #include <stdio.h>
@@ -19,9 +20,12 @@ void
 kcn_log(const char *fmt, ...)
 {
 	va_list ap;
+	int oerrno;
 
+	oerrno = errno;
 	va_start(ap, fmt);
 	vfprintf(stderr, fmt, ap);
 	va_end(ap);
 	fprintf(stderr, "\n");
+	errno = oerrno;
 }

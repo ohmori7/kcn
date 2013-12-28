@@ -3,11 +3,8 @@
 #define KCN_LOG_ISLOGGING(p)	(kcn_log_priority >= LOG_ ## p)
 #define _KCN_LOG(p, ...)						\
 do {									\
-	if (KCN_LOG_ISLOGGING(p)) {					\
-		int __kcn_log_oerrno = errno;				\
+	if (KCN_LOG_ISLOGGING(p))					\
 		kcn_log(__VA_ARGS__);					\
-		errno = __kcn_log_oerrno;				\
-	}								\
 } while (0/*CONSTCOND*/)
 
 #if HAVE_GCC_VA_ARGS
