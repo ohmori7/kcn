@@ -318,6 +318,7 @@ kcn_pkt_put(struct kcn_pkt *kp, const void *p, size_t len)
 
 	kcn_pkt_append(kp, len);
 	memcpy(kcn_pkt_current(kp), p, len);
+	kcn_pkt_forward(kp, len);
 }
 
 bool
