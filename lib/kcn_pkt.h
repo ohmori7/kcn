@@ -42,3 +42,4 @@ void kcn_pkt_drop(struct kcn_pkt *, struct kcn_pkt_queue *);
 void kcn_pkt_purge(struct kcn_pkt_queue *);
 int kcn_pkt_read(int, struct kcn_pkt *);
 int kcn_pkt_write(int, struct kcn_pkt *);
+void kcn_pkt_dump(const struct kcn_pkt *, size_t);

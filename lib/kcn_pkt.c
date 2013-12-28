@@ -7,6 +7,8 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "kcn.h"
+#include "kcn_log.h"
 #include "kcn_pkt.h"
 
 struct kcn_pkt_data {
@@ -411,4 +413,45 @@ kcn_pkt_write(int fd, struct kcn_pkt *kp)
 	if (error == 0)
 		kcn_pkt_trim_head(kp, len);
 	return error;
+}
+
+#define KCN_PKT_DUMP_MAXOCTETS	16
+#define KCN_PKT_DUMP_BUFSIZ	(KCN_PKT_DUMP_MAXOCTETS * sizeof("ff") + 1)
+
+static void
+kcn_pkt_dump_line(struct kcn_pkt *kp, size_t maxoctets)
+{
+	char buf[KCN_PKT_DUMP_BUFSIZ], *cp;
+	static const char ntoa[] = "0123456789abcdef";
+	size_t i;
+	uint8_t v;
+
+	if (maxoctets == 0)
+		return;
+	for (i = 0, cp = buf; i < maxoctets; i++) {
+		v = kcn_pkt_get8(kp);
+		*cp++ = ntoa[(v >> 4) & 0xfU];
+		*cp++ = ntoa[(v     ) & 0xfU];
+		*cp++ = ' ';
+		if (i == KCN_PKT_DUMP_MAXOCTETS / 2)
+			*cp++ = ' ';
+	}
+	*--cp = '\0';
+	KCN_LOG(DEBUG, "%s", buf);
+}
+
+void
+kcn_pkt_dump(const struct kcn_pkt *kp0, size_t len)
+{
+	struct kcn_pkt kp;
+	int i, n;
+
+	if (! KCN_LOG_ISLOGGING(DEBUG))
+		return;
+	kp = *kp0;
+	kcn_pkt_start(&kp);
+	n = len / KCN_PKT_DUMP_MAXOCTETS;
+	for (i = 0; i < n; i++)
+		kcn_pkt_dump_line(&kp, KCN_PKT_DUMP_MAXOCTETS);
+	kcn_pkt_dump_line(&kp, len % KCN_PKT_DUMP_MAXOCTETS);
 }
