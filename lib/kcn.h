@@ -5,6 +5,9 @@
 #ifndef max
 #define max(a, b)	((a) > (b) ? (a) : (b))
 #endif /* ! max */
+#ifndef min
+#define min(a, b)	((a) < (b) ? (a) : (b))
+#endif /* ! max */
 
 #ifndef HAVE_STRLCPY
 size_t strlcpy(char *, const char *, size_t);
