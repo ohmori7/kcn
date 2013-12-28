@@ -29,6 +29,7 @@ kcn_msg_header_encode(struct kcn_pkt *kp, enum kcn_msg_type type)
 	kcn_pkt_put8(kp, KCN_MSG_VERSION);
 	kcn_pkt_put8(kp, type);
 	kcn_pkt_put16(kp, kcn_pkt_len(kp) - KCN_MSG_HDRSIZ);
+	kcn_pkt_dump(kp, kcn_pkt_len(kp));
 }
 
 bool
@@ -43,6 +44,8 @@ kcn_msg_header_decode(struct kcn_pkt *kp, struct kcn_msg_header *kmh)
 	kmh->kmh_version = kcn_pkt_get8(kp);
 	kmh->kmh_type = kcn_pkt_get8(kp);
 	kmh->kmh_len = kcn_pkt_get16(kp);
+	kcn_pkt_dump(kp, KCN_MSG_HDRSIZ +
+	    min(kmh->kmh_len, kcn_pkt_trailingdata(kp)));
 
 	if (kmh->kmh_version != KCN_MSG_VERSION) {
 		KCN_LOG(ERR, "recv version mismatch %u (local) and %u (remote)",
