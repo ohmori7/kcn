@@ -35,6 +35,7 @@ struct kcn_net {
 	char kn_name[KCN_SOCKNAMELEN];
 	struct event kn_evread;
 	struct event kn_evwrite;
+	struct kcn_pkt kn_ipkt;
 	struct kcn_pkt_data *kn_ipktdata;
 	struct kcn_pkt_data *kn_opktdata;
 	struct kcn_pkt_queue kn_opktq;
@@ -74,6 +75,7 @@ kcn_net_new(struct event_base *evb, int fd, size_t size, const char *name,
 	event_set(&kn->kn_evwrite, fd, EV_WRITE | EV_TIMEOUT,
 	    kcn_net_write_cb, kn);
 	kn->kn_ipktdata = kcn_pkt_data_new(size);
+	kcn_pkt_init(&kn->kn_ipkt, kn->kn_ipktdata);
 	kn->kn_opktdata = kcn_pkt_data_new(size);
 	kcn_pkt_queue_init(&kn->kn_opktq);
 	kn->kn_readcb = readcb;
@@ -220,7 +222,6 @@ static void
 kcn_net_read_cb(int fd, short events, void *arg)
 {
 	struct kcn_net *kn = arg;
-	struct kcn_pkt kp;
 	int error;
 
 	assert(kn->kn_fd == fd);
@@ -228,16 +229,14 @@ kcn_net_read_cb(int fd, short events, void *arg)
 	if (! kcn_net_event_check(kn, events, EV_READ))
 		return;
 
-	kcn_pkt_init(&kp, kn->kn_ipktdata);
-
-	error = kcn_pkt_read(kn->kn_fd, &kp);
+	error = kcn_pkt_read(kn->kn_fd, &kn->kn_ipkt);
 	if (error == EAGAIN)
 		goto out;
 	if (error != 0) {
 		LOG(DEBUG, "read() failed: %s", strerror(error));
 		goto out;
 	}
-	error = (*kn->kn_readcb)(kn, &kp, kn->kn_data);
+	error = (*kn->kn_readcb)(kn, &kn->kn_ipkt, kn->kn_data);
   out:
 	if (error == EAGAIN)
 		kcn_net_read_enable(kn);
