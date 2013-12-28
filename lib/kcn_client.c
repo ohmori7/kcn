@@ -26,11 +26,10 @@ struct kcn_client {
 	struct kcn_msg_response kc_kmr;
 };
 
-static void kcn_client_destroy(struct kcn_client *);
 static int kcn_client_read(struct kcn_net *, struct kcn_pkt *, void *);
 
-static struct kcn_client *
-kcn_client_new(void)
+struct kcn_client *
+kcn_client_new(struct event_base *evb)
 {
 	struct kcn_client *kc;
 	struct sockaddr_storage ss;
@@ -40,7 +39,7 @@ kcn_client_new(void)
 	if (kc == NULL)
 		goto bad;
 	kc->kc_fd = -1;
-	kc->kc_evb = NULL;
+	kc->kc_evb = evb;
 	kc->kc_kn = NULL;
 
 	if (! kcn_sockaddr_aton(&ss, KCN_NETSTAT_SERVER_STR_DEFAULT,
@@ -51,12 +50,6 @@ kcn_client_new(void)
 	kc->kc_fd = kcn_socket_connect(&ss);
 	if (kc->kc_fd == -1)
 		goto bad;
-
-	kc->kc_evb = event_init();
-	if (kc->kc_evb == NULL) {
-		KCN_LOG(ERR, "cannot allocate event base");
-		goto bad;
-	}
 
 	kcn_sockaddr_ntoa(name, sizeof(name), &ss);
 	kc->kc_kn = kcn_net_new(kc->kc_evb, kc->kc_fd, KCN_MSG_MAXSIZ, name,
@@ -72,14 +65,12 @@ kcn_client_new(void)
 	return NULL;
 }
 
-static void
+void
 kcn_client_destroy(struct kcn_client *kc)
 {
 
 	if (kc == NULL)
 		return;
-	if (kc->kc_evb != NULL)
-		event_base_free(kc->kc_evb);
 	if (kc->kc_kn != NULL)
 		kcn_net_destroy(kc->kc_kn);
 	else
@@ -120,7 +111,17 @@ kcn_client_query_send(struct kcn_client *kc, const struct kcn_msg_query *kmq)
 	return kcn_net_read_enable(kc->kc_kn);
 }
 
-static bool
+bool
+kcn_client_add_send(struct kcn_client *kc, const struct kcn_msg_add *kma)
+{
+	struct kcn_pkt kp;
+
+	kcn_net_opkt(kc->kc_kn, &kp);
+	kcn_msg_add_encode(&kp, kma);
+	return kcn_net_write(kc->kc_kn, &kp);
+}
+
+bool
 kcn_client_loop(struct kcn_client *kc)
 {
 
@@ -130,9 +131,14 @@ kcn_client_loop(struct kcn_client *kc)
 bool
 kcn_client_search(struct kcn_info *ki, const struct kcn_msg_query *kmq)
 {
+	struct event_base *evb;
 	struct kcn_client *kc;
 
-	kc = kcn_client_new();
+	evb = event_init();
+	if (evb == NULL)
+		goto bad;
+
+	kc = kcn_client_new(evb);
 	if (kc == NULL)
 		goto bad;
 
@@ -150,8 +156,12 @@ kcn_client_search(struct kcn_info *ki, const struct kcn_msg_query *kmq)
 		goto bad;
 	}
 	kcn_client_destroy(kc);
+	event_base_free(evb);
 	return true;
   bad:
-	kcn_client_destroy(kc);
+	if (evb != NULL) {
+		kcn_client_destroy(kc);
+		event_base_free(evb);
+	}
 	return false;
 }
