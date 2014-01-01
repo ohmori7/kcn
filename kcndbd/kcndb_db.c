@@ -193,15 +193,19 @@ bool
 kcndb_db_record_add(struct kcndb_db_table *kdt, struct kcndb_db_record *kdr)
 {
 	struct kcn_pkt *kp = &kdt->kdt_kp;
+	int error;
 
 	kcn_pkt_put64(kp, kdr->kdr_time.tv_sec);
 	kcn_pkt_put32(kp, kdr->kdr_time.tv_usec);
 	kcn_pkt_put64(kp, kdr->kdr_val);
 	kcn_pkt_put16(kp, kdr->kdr_loclen);
 	kcn_pkt_put(kp, kdr->kdr_loc, kdr->kdr_loclen);
-	while (kcn_pkt_trailingdata(kp) > 0)
-		if (kcn_pkt_write(kdt->kdt_fd, kp) != 0)
+	while (kcn_pkt_len(kp) > 0)
+		if ((error = kcn_pkt_write(kdt->kdt_fd, kp)) != 0) {
+			KCN_LOG(ERR, "cannot write database: %s",
+			    strerror(error));
 			return false;
+		}
 	kcn_pkt_reset(kp, 0);
 	return true;
 }
