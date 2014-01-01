@@ -399,7 +399,7 @@ kcn_pkt_read(int fd, struct kcn_pkt *kp)
 			break;
 	}
 	if (error == 0)
-		kcn_pkt_append(kp, len);
+		kcn_pkt_append(kp, kcn_pkt_trailingdata(kp) + len);
 	return error;
 }
 
