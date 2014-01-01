@@ -175,5 +175,6 @@ KCNSE_LIBS="-lkcnse"
 
 AC_SUBST(KCN_LIBS)
 AC_SUBST(KCNSE_LIBS)
-AC_CONFIG_FILES([Makefile lib/Makefile key2loc/Makefile kcndbd/Makefile])
+AC_CONFIG_FILES([Makefile lib/Makefile key2loc/Makefile kcndbd/Makefile	\
+	kcndbctl/Makefile])
 AC_OUTPUT
