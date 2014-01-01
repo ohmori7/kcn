@@ -4,7 +4,7 @@
 #define KCN_MSG_MAXBODYSIZ	(KCN_MSG_MAXSIZ - KCN_MSG_HDRSIZ)
 #define KCN_MSG_QUERY_SIZ	(1 + 1 + 8 + 1 + 1 + 8)
 #define KCN_MSG_RESPONSE_MINSIZ	(1 + 1 + 1)
-#define KCN_MSG_ADD_MINSIZ	(8 + 8)
+#define KCN_MSG_ADD_MINSIZ	(1 + 8 + 8)
 #define KCN_MSG_MAXLOCSIZ						\
 	(KCN_MSG_MAXBODYSIZ - max(KCN_MSG_RESPONSE_MINSIZ, KCN_MSG_ADD_MINSIZ))
 
@@ -37,6 +37,7 @@ struct kcn_msg_response {
 };
 
 struct kcn_msg_add {
+	enum kcn_formula_type kma_type;
 	uint64_t kma_time;
 	uint64_t kma_val;
 	const char *kma_loc;

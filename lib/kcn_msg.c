@@ -193,6 +193,7 @@ kcn_msg_add_encode(struct kcn_pkt *kp, const struct kcn_msg_add *kma)
 {
 
 	kcn_msg_pkt_init(kp);
+	kcn_pkt_put8(kp, kma->kma_type);
 	kcn_pkt_put64(kp, kma->kma_time);
 	kcn_pkt_put64(kp, kma->kma_val);
 	kcn_pkt_put(kp, kma->kma_loc, kma->kma_loclen);
@@ -209,6 +210,7 @@ kcn_msg_add_decode(struct kcn_pkt *kp, const struct kcn_msg_header *kmh,
 		errno = EINVAL;
 		goto bad;
 	}
+	kma->kma_type = kcn_pkt_get8(kp);
 	kma->kma_time = kcn_pkt_get64(kp);
 	kma->kma_val = kcn_pkt_get64(kp);
 	kma->kma_loc = kcn_pkt_current(kp);
