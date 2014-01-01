@@ -174,7 +174,8 @@ kcn_pkt_realign(struct kcn_pkt *kp)
 
 	len = kcn_pkt_len(kp);
 	memmove(kp->kp_buf, kcn_pkt_head(kp), len);
-	kp->kp_sp = kp->kp_cp = 0;
+	kp->kp_cp -= kp->kp_sp;
+	kp->kp_sp = 0;
 	kp->kp_ep = len;
 }
 
