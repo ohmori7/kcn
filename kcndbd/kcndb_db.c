@@ -229,6 +229,11 @@ kcndb_db_search(struct kcn_info *ki, const struct kcn_formula *kf)
 			goto bad;
 		}
 
+		KCN_LOG(DEBUG, "record: %llu %llu %.*s (%zu)",
+		    (unsigned long long)kdr.kdr_time.tv_sec,
+		    (unsigned long long)kdr.kdr_val,
+		    (int)kdr.kdr_loclen, kdr.kdr_loc, kdr.kdr_loclen);
+
 		switch (kf->kf_op) {
 		case KCN_FORMULA_OP_LT:
 			if (kdr.kdr_val >= kf->kf_val)
@@ -254,12 +259,9 @@ kcndb_db_search(struct kcn_info *ki, const struct kcn_formula *kf)
 			assert(0);
 			continue;
 		}
+		KCN_LOG(DEBUG, "record: match");
 		if (! kcn_info_loc_add(ki, kdr.kdr_loc, kdr.kdr_loclen, score))
 			goto bad;
-		KCN_LOG(DEBUG, "record found: %llu %llu %.*s",
-		    (unsigned long long)kdr.kdr_time.tv_sec,
-		    (unsigned long long)kdr.kdr_val,
-		    (int)kdr.kdr_loclen, kdr.kdr_loc);
 	}
 
 	if (kcn_info_nlocs(ki) == 0) {
