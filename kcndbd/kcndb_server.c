@@ -164,6 +164,18 @@ kcndb_server_query_process(struct kcn_net *kn, struct kcn_pkt *ikp,
 	return true;
 }
 
+static bool
+kcndb_server_add_process(struct kcn_net *kn, struct kcn_pkt *kp,
+    const struct kcn_msg_header *kmh)
+{
+	struct kcn_msg_add kma;
+
+	(void)kn;
+	if (! kcn_msg_add_decode(kp, kmh, &kma))
+		return false;
+	return true;
+}
+
 static int
 kcndb_server_recv(struct kcn_net *kn, struct kcn_pkt *kp, void *arg)
 {
@@ -173,21 +185,28 @@ kcndb_server_recv(struct kcn_net *kn, struct kcn_pkt *kp, void *arg)
 
 	LOG(DEBUG, "recv %u bytes", kcn_pkt_trailingdata(kp));
 
-	if (! kcn_msg_header_decode(kp, &kmh))
-		goto bad;
+	while (kcn_pkt_trailingdata(kp) > 0) {
+		if (! kcn_msg_header_decode(kp, &kmh))
+			goto bad;
 
-	switch (kmh.kmh_type) {
-	case KCN_MSG_TYPE_QUERY:
-		rc = kcndb_server_query_process(kn, kp, &kmh);
-		break;
-	case KCN_MSG_TYPE_ADD: /* XXX */
-	case KCN_MSG_TYPE_DEL: /* XXX */
-	default:
-		rc = false;
-		errno = EOPNOTSUPP;
+		switch (kmh.kmh_type) {
+		case KCN_MSG_TYPE_QUERY:
+			rc = kcndb_server_query_process(kn, kp, &kmh);
+			break;
+		case KCN_MSG_TYPE_ADD:
+			rc = kcndb_server_add_process(kn, kp, &kmh);
+			break;
+		case KCN_MSG_TYPE_DEL: /* XXX */
+		default:
+			rc = false;
+			errno = EOPNOTSUPP;
+		}
+		if (! rc) {
+			if (errno == EAGAIN)
+				kcn_pkt_start(kp);
+			goto bad;
+		}
 	}
-	if (! rc)
-		goto bad;
 
 	return EAGAIN;
   bad:
