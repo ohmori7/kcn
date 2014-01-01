@@ -141,7 +141,7 @@ kcndb_db_table_open(enum kcn_formula_type type, enum kcndb_db_op op)
 		assert(op == KCNDB_DB_OP_WRITE);
 		flags = O_WRONLY | O_CREAT | O_APPEND;
 	}
-	kdt->kdt_fd = open(path, flags);
+	kdt->kdt_fd = open(path, flags, S_IRUSR | S_IWUSR);
 	if (kdt->kdt_fd == -1) {
 		KCN_LOG(DEBUG, "cannot open database file: %s",
 		    strerror(errno));
