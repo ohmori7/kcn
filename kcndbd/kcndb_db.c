@@ -185,6 +185,7 @@ kcndb_db_record_read(struct kcndb_db_table *kdt, struct kcndb_db_record *kdr)
 	if (kcn_pkt_trailingdata(kp) < kdr->kdr_loclen)
 		return false;
 	kdr->kdr_loc = kcn_pkt_current(kp);
+	kcn_pkt_forward(kp, kdr->kdr_loclen);
 	kcn_pkt_trim_head(kp, kcn_pkt_headingdata(kp));
 	return true;
 }
