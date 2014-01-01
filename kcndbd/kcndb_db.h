@@ -3,8 +3,8 @@
 struct kcndb_db_record {
 	struct timeval kdr_time;
 	unsigned long long kdr_val;
-	const char *kdr_uri;
-	size_t kdr_urilen;
+	const char *kdr_loc;
+	size_t kdr_loclen;
 };
 
 struct kcndb_db_table;

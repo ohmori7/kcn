@@ -180,10 +180,10 @@ kcndb_db_record_read(struct kcndb_db_table *kdt, struct kcndb_db_record *kdr)
 	kdr->kdr_time.tv_sec = kcn_pkt_get64(kp);
 	kdr->kdr_time.tv_usec = kcn_pkt_get32(kp);
 	kdr->kdr_val = kcn_pkt_get64(kp);
-	kdr->kdr_urilen = kcn_pkt_get16(kp);
-	if (kcn_pkt_trailingdata(kp) < kdr->kdr_urilen)
+	kdr->kdr_loclen = kcn_pkt_get16(kp);
+	if (kcn_pkt_trailingdata(kp) < kdr->kdr_loclen)
 		return false;
-	kdr->kdr_uri = kcn_pkt_current(kp);
+	kdr->kdr_loc = kcn_pkt_current(kp);
 	kcn_pkt_trim_head(kp, kcn_pkt_headingdata(kp));
 	return true;
 }
@@ -192,14 +192,14 @@ bool
 kcndb_db_record_add(struct kcndb_db_table *kdt, struct kcndb_db_record *kdr)
 {
 	struct kcn_pkt *kp = &kdt->kdt_kp;
-	size_t urilen;
+	size_t loclen;
 
 	kcn_pkt_put64(kp, kdr->kdr_time.tv_sec);
 	kcn_pkt_put32(kp, kdr->kdr_time.tv_usec);
 	kcn_pkt_put64(kp, kdr->kdr_val);
-	urilen = strlen(kdr->kdr_uri);
-	kcn_pkt_put16(kp, urilen);
-	kcn_pkt_put(kp, kdr->kdr_uri, urilen);
+	loclen = strlen(kdr->kdr_loc);
+	kcn_pkt_put16(kp, loclen);
+	kcn_pkt_put(kp, kdr->kdr_loc, loclen);
 	while (kcn_pkt_trailingdata(kp) > 0)
 		if (kcn_pkt_write(kdt->kdt_fd, kp) != 0)
 			return false;
@@ -251,7 +251,7 @@ kcndb_db_search(struct kcn_info *ki, const struct kcn_formula *kf)
 			assert(0);
 			continue;
 		}
-		if (! kcn_info_loc_add(ki, kdr.kdr_uri, kdr.kdr_urilen, score))
+		if (! kcn_info_loc_add(ki, kdr.kdr_loc, kdr.kdr_loclen, score))
 			goto bad;
 	}
 
