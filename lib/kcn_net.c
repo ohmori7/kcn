@@ -248,6 +248,11 @@ bool
 kcn_net_write(struct kcn_net *kn, struct kcn_pkt *kp)
 {
 
+	if (kn->kn_state == KCN_NET_STATE_DISCONNECTED) {
+		errno = ENETDOWN;
+		LOG(ERR, "cannot enqueue packet", strerror(errno));
+		return false;
+	}
 	if (! kcn_pkt_enqueue(kp, &kn->kn_opktq)) {
 		LOG(ERR, "cannot enqueue packet: %s", strerror(errno));
 		return false;
