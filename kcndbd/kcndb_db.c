@@ -168,21 +168,38 @@ kcndb_db_table_close(struct kcndb_db_table *kdt)
 }
 
 static bool
+kcndb_db_record_ensure(struct kcndb_db_table *kdt, size_t len)
+{
+	struct kcn_pkt *kp = &kdt->kdt_kp;
+	int error;
+
+	while (kcn_pkt_len(kp) < len) {
+		error = kcn_pkt_read(kdt->kdt_fd, kp);
+		if (error != 0) {
+			errno = error;
+			if (error != ESHUTDOWN)
+				KCN_LOG(ERR, "cannot read database: %s",
+				    strerror(error));
+			return false;
+		}
+	}
+	return true;
+}
+
+static bool
 kcndb_db_record_read(struct kcndb_db_table *kdt, struct kcndb_db_record *kdr)
 {
 	struct kcn_pkt *kp = &kdt->kdt_kp;
 
-	if (kcn_pkt_read(kdt->kdt_fd, kp) != 0)
+#define KCNDB_HDRSIZ	(8 + 4 + 8 + 2)
+	if (! kcndb_db_record_ensure(kdt, KCNDB_HDRSIZ))
 		return false;
 
-#define KCNDB_HDRSIZ	(8 + 4 + 8 + 2)
-	if (kcn_pkt_len(kp) < KCNDB_HDRSIZ)
-		return false;
 	kdr->kdr_time.tv_sec = kcn_pkt_get64(kp);
 	kdr->kdr_time.tv_usec = kcn_pkt_get32(kp);
 	kdr->kdr_val = kcn_pkt_get64(kp);
 	kdr->kdr_loclen = kcn_pkt_get16(kp);
-	if (kcn_pkt_trailingdata(kp) < kdr->kdr_loclen)
+	if (! kcndb_db_record_ensure(kdt, KCNDB_HDRSIZ + kdr->kdr_loclen))
 		return false;
 	kdr->kdr_loc = kcn_pkt_current(kp);
 	kcn_pkt_forward(kp, kdr->kdr_loclen);
@@ -225,6 +242,8 @@ kcndb_db_search(struct kcn_info *ki, const struct kcn_formula *kf)
 	score = 0; /* XXX: should compute score. */
 	for (i = 0; kcn_info_nlocs(ki) < kcn_info_maxnlocs(ki); i++) {
 		if (! kcndb_db_record_read(kdt, &kdr)) {
+			if (errno == ESHUTDOWN)
+				break;
 			/* XXX: should we accept this error??? */
 			KCN_LOG(ERR, "cannot read record: %s", strerror(errno));
 			goto bad;
