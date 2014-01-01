@@ -410,7 +410,7 @@ kcn_pkt_write(int fd, struct kcn_pkt *kp)
 	int error;
 
 	for (;;) {
-		len = write(fd, kcn_pkt_head(kp), kcn_pkt_trailingdata(kp));
+		len = write(fd, kcn_pkt_head(kp), kcn_pkt_len(kp));
 		error = kcn_pkt_error(len, errno);
 		if (error != EINTR)
 			break;
