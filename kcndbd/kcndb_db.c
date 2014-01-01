@@ -129,7 +129,8 @@ kcndb_db_table_open(enum kcn_formula_type type, enum kcndb_db_op op)
 
 	kdt = kcndb_db_table_new();
 	if (kdt == NULL) {
-		KCN_LOG(DEBUG, "cannot database table: %s", strerror(errno));
+		KCN_LOG(DEBUG, "cannot allocate database table: %s",
+		    strerror(errno));
 		return NULL;
 	}
 
