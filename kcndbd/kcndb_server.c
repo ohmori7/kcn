@@ -65,12 +65,12 @@ kcndb_thread_finish(struct kcndb_thread *kt)
 		event_base_free(kt->kt_evb);
 }
 
-bool
+void
 kcndb_server_port_set(uint16_t port)
 {
 
+	assert(port >= KCNDB_NET_PORT_MIN);
 	kcndb_server_port = htons(port);
-	return true;
 }
 
 bool

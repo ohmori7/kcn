@@ -49,9 +49,7 @@ main(int argc, char * const argv[])
 			    KCNDB_NET_PORT_MAX, &llval))
 				usage("invalid TCP port number");
 				/*NOTERACHED*/
-			if (! kcndb_server_port_set(llval))
-				usage("cannot set TCP port, \"%s\"", optarg);
-				/*NOTREACHED*/
+			kcndb_server_port_set(llval);
 			break;
 		case 'v':
 			kcn_log_priority_increment();
