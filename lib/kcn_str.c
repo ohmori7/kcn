@@ -18,7 +18,7 @@ kcn_strtoull(const char *s, unsigned long long min, unsigned long long max,
 	errno = 0;
 	llval = strtoll(s, &ep, 10);
 	if (s[0] == '\0' || *ep != '\0') {
-		errno = ERANGE;
+		errno = EINVAL;
 		return false;
 	}
 	if (errno == ERANGE && (llval == ULLONG_MAX || llval == 0))
