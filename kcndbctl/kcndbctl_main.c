@@ -1,3 +1,4 @@
+#include <sys/param.h>	/* MAXPATHLEN */
 #include <sys/stat.h>
 #include <sys/file.h>	/* XXX: flock on linux. */
 #include <assert.h>
@@ -76,6 +77,26 @@ Usage: %s [-v] <filename>\n\
 \n",
 	    pname);
 	exit(EXIT_FAILURE);
+}
+
+static bool
+path2tabletype(const char *path, enum kcn_formula_type *typep)
+{
+	char buf[MAXPATHLEN];
+	enum kcn_formula_type type;
+
+	for (type = KCN_FORMULA_TYPE_MIN + 1;
+	     type < KCN_FORMULA_TYPE_MAX;
+	     type++) {
+		(void)snprintf(buf, sizeof(buf), "%s.txt",
+		    kcn_formula_type_ntoa(type));
+		if (strstr(path, buf) != NULL) {
+			*typep = type;
+			return true;
+		}
+	}
+	errno = ENOENT;
+	return false;
 }
 
 static bool
@@ -161,6 +182,7 @@ get64(struct kcn_pkt *kp, uint64_t *vp)
 }
 
 struct kcn_file {
+	enum kcn_formula_type kf_type;
 	size_t kf_size;
 	size_t kf_line;
 	struct kcn_pkt kf_kp;
@@ -182,6 +204,7 @@ readfile(int fd, short event, void *arg)
 	error = kcn_pkt_read(fd, kp);
 	if (error != 0)
 		goto out;
+	kma.kma_type = kf->kf_type;
 	kf->kf_size -= kcn_pkt_len(kp);
 	while (kf->kf_size == 0 || kcn_pkt_len(kp) >= KCN_MSG_MAXSIZ) {
 		if (! getstr(kp, &kma.kma_loc, &kma.kma_loclen) ||
@@ -222,6 +245,11 @@ doit(const char *path)
 	int fd;
 
 	kf.kf_line = 0;
+
+	if (! path2tabletype(path, &kf.kf_type))
+		err(EXIT_FAILURE, "cannot guess table type from file name");
+	KCN_LOG(INFO, "choose a table type of %s",
+	    kcn_formula_type_ntoa(kf.kf_type));
 
 	evb = event_init();
 	if (evb == NULL)
