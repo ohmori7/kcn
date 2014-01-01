@@ -171,8 +171,6 @@ kcndb_db_record_read(struct kcndb_db_table *kdt, struct kcndb_db_record *kdr)
 {
 	struct kcn_pkt *kp = &kdt->kdt_kp;
 
-	kcn_pkt_realign(kp);
-
 	if (kcn_pkt_read(kdt->kdt_fd, kp) != 0)
 		return false;
 

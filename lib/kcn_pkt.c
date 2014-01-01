@@ -388,7 +388,10 @@ kcn_pkt_read(int fd, struct kcn_pkt *kp)
 	ssize_t len;
 	int error;
 
-	assert(kcn_pkt_trailingspace(kp) > 0);
+	if (kcn_pkt_trailingspace(kp) == 0) {
+		kcn_pkt_realign(kp);
+		assert(kcn_pkt_trailingspace(kp) > 0);
+	}
 	for (;;) {
 		len = read(fd, kcn_pkt_tail(kp), kcn_pkt_trailingspace(kp));
 		error = kcn_pkt_error(len, errno);
