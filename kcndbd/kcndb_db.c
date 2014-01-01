@@ -258,6 +258,11 @@ kcndb_db_search(struct kcn_info *ki, const struct kcn_formula *kf)
 			goto bad;
 	}
 
+	if (kcn_info_nlocs(ki) == 0) {
+		errno = ESRCH;
+		goto bad;
+	}
+
 	kcndb_db_table_close(kdt);
 	return true;
   bad:
