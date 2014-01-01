@@ -18,7 +18,7 @@ kcn_formula_type_ntoa(enum kcn_formula_type type)
 		[KCN_FORMULA_TYPE_STORAGE]	= "storage",
 		[KCN_FORMULA_TYPE_CPULOAD]	= "cpu",
 		[KCN_FORMULA_TYPE_TRAFFIC]	= "traffic",
-		[KCN_FORMULA_TYPE_LATENCY]	= "latency",
+		[KCN_FORMULA_TYPE_RTT]		= "rtt",
 		[KCN_FORMULA_TYPE_HOPCOUNT]	= "hopcount",
 		[KCN_FORMULA_TYPE_ASPATHLEN]	= "aspathlen",
 		[KCN_FORMULA_TYPE_WLANASSOC]	= "wlanassoc"
@@ -41,8 +41,8 @@ kcn_formula_type_aton(const char *s, enum kcn_formula_type *typep)
 		*typep = KCN_FORMULA_TYPE_CPULOAD;
 	else if (ISMATCH("traffic"))
 		*typep = KCN_FORMULA_TYPE_TRAFFIC;
-	else if (ISMATCH("latency"))
-		*typep = KCN_FORMULA_TYPE_LATENCY;
+	else if (ISMATCH("rtt"))
+		*typep = KCN_FORMULA_TYPE_RTT;
 	else if (ISMATCH("hop") || ISMATCH("ttl"))
 		*typep = KCN_FORMULA_TYPE_HOPCOUNT;
 	else if (ISMATCH("as"))
