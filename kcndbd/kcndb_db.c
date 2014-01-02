@@ -1,5 +1,4 @@
 #include <sys/param.h>	/* MAXPATHLEN */
-#include <sys/time.h>
 
 #include <assert.h>
 #include <dirent.h>
