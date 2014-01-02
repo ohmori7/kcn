@@ -36,6 +36,7 @@ void kcn_pkt_put16(struct kcn_pkt *, uint16_t);
 void kcn_pkt_put32(struct kcn_pkt *, uint32_t);
 void kcn_pkt_put64(struct kcn_pkt *, uint64_t);
 void kcn_pkt_put(struct kcn_pkt *, const void *, size_t);
+void kcn_pkt_putnull(struct kcn_pkt *, size_t);
 bool kcn_pkt_enqueue(struct kcn_pkt *, struct kcn_pkt_queue *);
 bool kcn_pkt_fetch(struct kcn_pkt *, struct kcn_pkt_queue *);
 void kcn_pkt_drop(struct kcn_pkt *, struct kcn_pkt_queue *);

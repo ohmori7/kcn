@@ -322,6 +322,15 @@ kcn_pkt_put(struct kcn_pkt *kp, const void *p, size_t len)
 	kcn_pkt_forward(kp, len);
 }
 
+void
+kcn_pkt_putnull(struct kcn_pkt *kp, size_t len)
+{
+
+	kcn_pkt_append(kp, len);
+	memset(kcn_pkt_current(kp), 0, len);
+	kcn_pkt_forward(kp, len);
+}
+
 bool
 kcn_pkt_enqueue(struct kcn_pkt *kp, struct kcn_pkt_queue *kpq)
 {
