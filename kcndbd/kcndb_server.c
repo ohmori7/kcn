@@ -146,7 +146,7 @@ kcndb_server_query_process(struct kcn_net *kn, struct kcn_pkt *ikp,
 		ki = kcn_info_new(kmq.kmq_loctype, kmq.kmq_maxcount);
 
 	kcn_msg_response_init(&kmr, ki);
-	if (ki == NULL || ! kcndb_db_search(ki, &kmq.kmq_formula))
+	if (ki == NULL || ! kcndb_db_search(ki, &kmq.kmq_eq))
 		kmr.kmr_error = errno;
 	else  {
 		assert(kcn_info_nlocs(ki) > 0);

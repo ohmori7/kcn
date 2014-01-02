@@ -60,12 +60,12 @@ kcndb_db_finish(void)
 }
 
 static struct kcndb_file *
-kcndb_db_table_open(enum kcn_formula_type type, enum kcndb_file_op op)
+kcndb_db_table_open(enum kcn_eq_type type, enum kcndb_file_op op)
 {
 	const char *name;
 	char path[MAXPATHLEN];
 
-	name = kcn_formula_type_ntoa(type);
+	name = kcn_eq_type_ntoa(type);
 	if (name == NULL) {
 		errno = ENOENT;
 		KCN_LOG(DEBUG, "unknown database type: %hu", type);
@@ -77,7 +77,7 @@ kcndb_db_table_open(enum kcn_formula_type type, enum kcndb_file_op op)
 }
 
 struct kcndb_file *
-kcndb_db_table_create(enum kcn_formula_type type)
+kcndb_db_table_create(enum kcn_eq_type type)
 {
 
 	return kcndb_db_table_open(type, KCNDB_FILE_OP_WRITE);
@@ -123,19 +123,19 @@ kcndb_db_record_add(struct kcndb_file *kf, struct kcndb_db_record *kdr)
 }
 
 bool
-kcndb_db_search(struct kcn_info *ki, const struct kcn_formula *kf)
+kcndb_db_search(struct kcn_info *ki, const struct kcn_eq *ke)
 {
-	struct kcndb_file *kfile;
+	struct kcndb_file *kf;
 	struct kcndb_db_record kdr;
 	size_t i, score;
 
-	kfile = kcndb_db_table_open(kf->kf_type, KCNDB_FILE_OP_READ);
-	if (kfile == NULL)
+	kf = kcndb_db_table_open(ke->ke_type, KCNDB_FILE_OP_READ);
+	if (kf == NULL)
 		goto bad;
 
 	score = 0; /* XXX: should compute score. */
 	for (i = 0; kcn_info_nlocs(ki) < kcn_info_maxnlocs(ki); i++) {
-		if (! kcndb_db_record_read(kfile, &kdr)) {
+		if (! kcndb_db_record_read(kf, &kdr)) {
 			if (errno == ESHUTDOWN)
 				break;
 			/* XXX: should we accept this error??? */
@@ -148,25 +148,25 @@ kcndb_db_search(struct kcn_info *ki, const struct kcn_formula *kf)
 		    (unsigned long long)kdr.kdr_val,
 		    (int)kdr.kdr_loclen, kdr.kdr_loc, kdr.kdr_loclen);
 
-		switch (kf->kf_op) {
-		case KCN_FORMULA_OP_LT:
-			if (kdr.kdr_val >= kf->kf_val)
+		switch (ke->ke_op) {
+		case KCN_EQ_OP_LT:
+			if (kdr.kdr_val >= ke->ke_val)
 				continue;
 			break;
-		case KCN_FORMULA_OP_LE:
-			if (kdr.kdr_val > kf->kf_val)
+		case KCN_EQ_OP_LE:
+			if (kdr.kdr_val > ke->ke_val)
 				continue;
 			break;
-		case KCN_FORMULA_OP_EQ:
-			if (kdr.kdr_val != kf->kf_val)
+		case KCN_EQ_OP_EQ:
+			if (kdr.kdr_val != ke->ke_val)
 				continue;
 			break;
-		case KCN_FORMULA_OP_GT:
-			if (kdr.kdr_val <= kf->kf_val)
+		case KCN_EQ_OP_GT:
+			if (kdr.kdr_val <= ke->ke_val)
 				continue;
 			break;
-		case KCN_FORMULA_OP_GE:
-			if (kdr.kdr_val < kf->kf_val)
+		case KCN_EQ_OP_GE:
+			if (kdr.kdr_val < ke->ke_val)
 				continue;
 			break;
 		default:
@@ -186,9 +186,9 @@ kcndb_db_search(struct kcn_info *ki, const struct kcn_formula *kf)
 		goto bad;
 	}
 
-	kcndb_db_table_close(kfile);
+	kcndb_db_table_close(kf);
 	return true;
   bad:
-	kcndb_db_table_close(kfile);
+	kcndb_db_table_close(kf);
 	return false;
 }

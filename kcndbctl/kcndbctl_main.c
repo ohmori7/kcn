@@ -80,16 +80,14 @@ Usage: %s [-v] <filename>\n\
 }
 
 static bool
-path2tabletype(const char *path, enum kcn_formula_type *typep)
+path2tabletype(const char *path, enum kcn_eq_type *typep)
 {
 	char buf[MAXPATHLEN];
-	enum kcn_formula_type type;
+	enum kcn_eq_type type;
 
-	for (type = KCN_FORMULA_TYPE_MIN + 1;
-	     type < KCN_FORMULA_TYPE_MAX;
-	     type++) {
+	for (type = KCN_EQ_TYPE_MIN + 1; type < KCN_EQ_TYPE_MAX; type++) {
 		(void)snprintf(buf, sizeof(buf), "%s.txt",
-		    kcn_formula_type_ntoa(type));
+		    kcn_eq_type_ntoa(type));
 		if (strstr(path, buf) != NULL) {
 			*typep = type;
 			return true;
@@ -182,7 +180,7 @@ get64(struct kcn_pkt *kp, uint64_t *vp)
 }
 
 struct kcn_file {
-	enum kcn_formula_type kf_type;
+	enum kcn_eq_type kf_type;
 	size_t kf_size;
 	size_t kf_line;
 	struct kcn_pkt kf_kp;
@@ -249,7 +247,7 @@ doit(const char *path)
 	if (! path2tabletype(path, &kf.kf_type))
 		err(EXIT_FAILURE, "cannot guess table type from file name");
 	KCN_LOG(INFO, "choose a table type of %s",
-	    kcn_formula_type_ntoa(kf.kf_type));
+	    kcn_eq_type_ntoa(kf.kf_type));
 
 	evb = event_init();
 	if (evb == NULL)

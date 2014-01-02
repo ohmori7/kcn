@@ -93,17 +93,17 @@ do {									\
 }
 
 static bool
-kcn_netstat_compile(size_t keyc, char * const keyv[], struct kcn_formula *kf)
+kcn_netstat_compile(size_t keyc, char * const keyv[], struct kcn_eq *ke)
 {
 
 	errno = 0;
 	if (keyc < 3)
 		return false;
-	if (! kcn_formula_type_aton(keyv[0], &kf->kf_type))
+	if (! kcn_eq_type_aton(keyv[0], &ke->ke_type))
 		return false;
-	if (! kcn_formula_operator_aton(keyv[1], &kf->kf_op))
+	if (! kcn_eq_operator_aton(keyv[1], &ke->ke_op))
 		return false;
-	if (! kcn_formula_val_aton(keyv[2], &kf->kf_val))
+	if (! kcn_eq_val_aton(keyv[2], &ke->ke_val))
 		return false;
 	return true;
 }
@@ -123,7 +123,7 @@ kcn_netstat_search(struct kcn_info *ki, const char *keys)
 	kmq.kmq_loctype = kcn_info_loc_type(ki);
 	kmq.kmq_maxcount = kcn_info_maxnlocs(ki);
 	kmq.kmq_time = 0; /* XXX: should compile time as well */
-	if (! kcn_netstat_compile(keyc, keyv, &kmq.kmq_formula))
+	if (! kcn_netstat_compile(keyc, keyv, &kmq.kmq_eq))
 		goto bad;
 	if (! kcn_client_search(ki, &kmq))
 		goto bad;

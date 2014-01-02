@@ -26,7 +26,7 @@ struct kcn_msg_query {
 	enum kcn_loc_type kmq_loctype;
 	uint8_t kmq_maxcount;
 	uint64_t kmq_time;
-	struct kcn_formula kmq_formula;
+	struct kcn_eq kmq_eq;
 };
 
 struct kcn_msg_response {
@@ -37,7 +37,7 @@ struct kcn_msg_response {
 };
 
 struct kcn_msg_add {
-	enum kcn_formula_type kma_type;
+	enum kcn_eq_type kma_type;
 	uint64_t kma_time;
 	uint64_t kma_val;
 	const char *kma_loc;
