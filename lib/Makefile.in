@@ -79,7 +79,7 @@ am_libkcn_a_OBJECTS = kcn.$(OBJEXT) kcn_str.$(OBJEXT) \
 	kcn_net.$(OBJEXT) kcn_uri.$(OBJEXT) kcn_socket.$(OBJEXT) \
 	kcn_sockaddr.$(OBJEXT) kcn_info.$(OBJEXT) \
 	kcn_netstat.$(OBJEXT) kcn_db.$(OBJEXT) kcn_msg.$(OBJEXT) \
-	kcn_formula.$(OBJEXT) kcn_client.$(OBJEXT)
+	kcn_eq.$(OBJEXT) kcn_client.$(OBJEXT)
 libkcn_a_OBJECTS = $(am_libkcn_a_OBJECTS)
 libkcnse_a_AR = $(AR) $(ARFLAGS)
 libkcnse_a_LIBADD =
@@ -215,7 +215,7 @@ lib_LIBRARIES = libkcn.a libkcnse.a
 libkcn_a_SOURCES = \
 	kcn.c kcn_str.c kcn_log.c kcn_token.c kcn_pkt.c	kcn_net.c	\
 	kcn_uri.c kcn_socket.c kcn_sockaddr.c kcn_info.c kcn_netstat.c	\
-	kcn_db.c kcn_msg.c kcn_formula.c kcn_client.c
+	kcn_db.c kcn_msg.c kcn_eq.c kcn_client.c
 
 libkcnse_a_SOURCES = \
 	kcn_buf.c kcn_uri.c kcn_http.c kcn_google.c
@@ -223,7 +223,7 @@ libkcnse_a_SOURCES = \
 noinst_HEADERS = \
 	kcn_str.h kcn_buf.h kcn_token.h kcn_uri.h kcn_pkt.h kcn_net.h	\
 	kcn_http.h kcn_socket.h kcn_sockaddr.h				\
-	kcn_db.h kcn_msg.h kcn_formula.h kcn_client.h
+	kcn_db.h kcn_msg.h kcn_eq.h kcn_client.h
 
 include_HEADERS = \
 	kcn.h kcn_log.h kcn_info.h kcn_netstat.h kcn_google.h
@@ -313,7 +313,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/kcn.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/kcn_client.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/kcn_db.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/kcn_formula.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/kcn_eq.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/kcn_info.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/kcn_log.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/kcn_msg.Po@am__quote@

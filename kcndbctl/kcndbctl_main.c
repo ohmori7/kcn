@@ -23,7 +23,7 @@
 #include "kcn_str.h"
 #include "kcn_pkt.h"
 #include "kcn_net.h"
-#include "kcn_formula.h"
+#include "kcn_eq.h"
 #include "kcn_msg.h"
 #include "kcn_client.h"
 

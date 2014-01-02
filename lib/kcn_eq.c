@@ -8,7 +8,7 @@
 #include <string.h>
 
 #include "kcn_str.h"
-#include "kcn_formula.h"
+#include "kcn_eq.h"
 
 const char *
 kcn_formula_type_ntoa(enum kcn_formula_type type)
