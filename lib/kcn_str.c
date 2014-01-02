@@ -1,6 +1,7 @@
 #include <errno.h>
 #include <limits.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -43,4 +44,16 @@ kcn_str_dup(const char *s0, size_t len)
 	memcpy(s, s0, len);
 	s[len] = '\0';
 	return s;
+}
+
+unsigned int
+kcn_str_hash(const char *s, size_t slen, size_t hsize)
+{
+#define KCN_STR_HASH_DJB2_INIT	5381
+	unsigned int h = KCN_STR_HASH_DJB2_INIT;
+	const uint8_t *cp, *limit;
+
+	for (cp = (const unsigned char *)s, limit = cp + slen; cp < limit; cp++)
+		h = (h << 5) + h + *cp;
+	return (h + (h >> 5)) % hsize;
 }
