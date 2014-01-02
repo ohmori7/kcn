@@ -179,8 +179,7 @@ kcndb_server_add_process(struct kcn_net *kn, struct kcn_pkt *kp,
 	kdt = kcndb_db_table_create(kma.kma_type);
 	if (kdt == NULL)
 		return false;
-	kdr.kdr_time.tv_sec = kma.kma_time;
-	kdr.kdr_time.tv_usec = 0;
+	kdr.kdr_time = kma.kma_time;
 	kdr.kdr_val = kma.kma_val;
 	kdr.kdr_loc = kma.kma_loc;
 	kdr.kdr_loclen = kma.kma_loclen;

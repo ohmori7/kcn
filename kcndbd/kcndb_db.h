@@ -1,7 +1,7 @@
 #define KCNDB_DB_PATH_DEFAULT	"/var/db/kcndb"
 
 struct kcndb_db_record {
-	struct timeval kdr_time;
+	time_t kdr_time;
 	unsigned long long kdr_val;
 	const char *kdr_loc;
 	size_t kdr_loclen;

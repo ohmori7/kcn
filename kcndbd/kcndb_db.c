@@ -195,8 +195,7 @@ kcndb_db_record_read(struct kcndb_db_table *kdt, struct kcndb_db_record *kdr)
 	if (! kcndb_db_record_ensure(kdt, KCNDB_HDRSIZ))
 		return false;
 
-	kdr->kdr_time.tv_sec = kcn_pkt_get64(kp);
-	kdr->kdr_time.tv_usec = kcn_pkt_get32(kp);
+	kdr->kdr_time = kcn_pkt_get64(kp);
 	kdr->kdr_val = kcn_pkt_get64(kp);
 	kdr->kdr_loclen = kcn_pkt_get16(kp);
 	if (! kcndb_db_record_ensure(kdt, KCNDB_HDRSIZ + kdr->kdr_loclen))
@@ -213,8 +212,7 @@ kcndb_db_record_add(struct kcndb_db_table *kdt, struct kcndb_db_record *kdr)
 	struct kcn_pkt *kp = &kdt->kdt_kp;
 	int error;
 
-	kcn_pkt_put64(kp, kdr->kdr_time.tv_sec);
-	kcn_pkt_put32(kp, kdr->kdr_time.tv_usec);
+	kcn_pkt_put64(kp, kdr->kdr_time);
 	kcn_pkt_put64(kp, kdr->kdr_val);
 	kcn_pkt_put16(kp, kdr->kdr_loclen);
 	kcn_pkt_put(kp, kdr->kdr_loc, kdr->kdr_loclen);
@@ -250,7 +248,7 @@ kcndb_db_search(struct kcn_info *ki, const struct kcn_formula *kf)
 		}
 
 		KCN_LOG(DEBUG, "record[%zu]: %llu %llu %.*s (%zu)", i,
-		    (unsigned long long)kdr.kdr_time.tv_sec,
+		    (unsigned long long)kdr.kdr_time,
 		    (unsigned long long)kdr.kdr_val,
 		    (int)kdr.kdr_loclen, kdr.kdr_loc, kdr.kdr_loclen);
 
