@@ -179,10 +179,6 @@ kcn_msg_response_decode(struct kcn_pkt *kp, const struct kcn_msg_header *kmh,
 		goto bad;
 	kcn_pkt_trim_head(kp, len);
 
-	if (kmr->kmr_leftcount != 0) {
-		errno = EAGAIN;
-		goto bad;
-	}
 	return true;
   bad:
 	return false;

@@ -63,17 +63,20 @@ kcn_client_read(struct kcn_net *kn, struct kcn_pkt *kp, void *arg)
 	struct kcn_msg_header kmh;
 
 	(void)kn;
-	if (! kcn_msg_header_decode(kp, &kmh))
-		goto bad;
-	if (kmh.kmh_type != KCN_MSG_TYPE_RESPONSE) {
-		errno = EINVAL;
-		goto bad;
-	}
-	if (! kcn_msg_response_decode(kp, &kmh, kmr))
-		goto bad;
+	do {
+		if (! kcn_msg_header_decode(kp, &kmh))
+			goto bad;
+		if (kmh.kmh_type != KCN_MSG_TYPE_RESPONSE) {
+			errno = EINVAL;
+			goto bad;
+		}
+		if (! kcn_msg_response_decode(kp, &kmh, kmr))
+			goto bad;
+	} while (kmr->kmr_leftcount > 0);
 	return 0;
   bad:
-	kmr->kmr_error = errno;
+	if (errno != EAGAIN)
+		kmr->kmr_error = errno;
 	return errno;
 }
 
