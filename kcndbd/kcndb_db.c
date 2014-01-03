@@ -297,6 +297,9 @@ kcndb_db_search(struct kcn_info *ki, const struct kcn_eq *ke)
 		    (unsigned long long)kdr.kdr_val,
 		    (size_t)kdr.kdr_locidx);
 
+		if (! kcn_eq_time_match(kdr.kdr_time, ke))
+			continue;
+
 		switch (ke->ke_op) {
 		case KCN_EQ_OP_LT:
 			if (kdr.kdr_val >= ke->ke_val)

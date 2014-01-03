@@ -9,6 +9,7 @@
 #include <time.h>
 
 #include "kcn_str.h"
+#include "kcn_time.h"
 #include "kcn_eq.h"
 
 const char *
@@ -90,4 +91,15 @@ kcn_eq_val_aton(const char *w, unsigned long long *valp)
 {
 
 	return kcn_strtoull(w, 0, ULLONG_MAX, valp);
+}
+
+bool
+kcn_eq_time_match(time_t t, const struct kcn_eq *ke)
+{
+
+	if (t > ke->ke_end)
+		return false;
+	if (ke->ke_start != KCN_TIME_NOW && t < ke->ke_start)
+		return false;
+	return true;
 }

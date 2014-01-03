@@ -32,3 +32,4 @@ const char *kcn_eq_type_ntoa(enum kcn_eq_type);
 bool kcn_eq_type_aton(const char *, enum kcn_eq_type *);
 bool kcn_eq_operator_aton(const char *, enum kcn_eq_operator *);
 bool kcn_eq_val_aton(const char *, unsigned long long *);
+bool kcn_eq_time_match(time_t, const struct kcn_eq *);
