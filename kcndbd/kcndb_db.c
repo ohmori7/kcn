@@ -225,7 +225,7 @@ kcndb_db_loc_lookup(struct kcndb_db_table *kdt, uint64_t idx,
 	struct kcndb_file *kf = kdt->kdt_loc;
 	struct kcn_pkt *kp = kcndb_file_buf(kf);
 
-	if ((uint64_t /*XXX*/)kcndb_file_size(kf) < idx) {
+	if (kcndb_file_size(kf) < idx) {
 		errno = EINVAL;
 		return false;
 	}

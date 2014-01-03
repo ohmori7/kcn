@@ -15,7 +15,7 @@
 
 struct kcndb_file {
 	int kf_fd;
-	off_t kf_size;
+	size_t kf_size;
 	struct kcn_pkt kf_kp;
 	struct kcn_pkt_data *kf_kpd;
 };
@@ -65,7 +65,7 @@ kcndb_file_size_get(struct kcndb_file *kf)
 
 	if (fstat(kf->kf_fd, &st) == -1)
 		return false;
-	kf->kf_size = st.st_size;
+	kf->kf_size = st.st_size; /* convert off_t to size_t */
 	return true;
 }
 
@@ -110,7 +110,7 @@ kcndb_file_fd(const struct kcndb_file *kf)
 	return kf->kf_fd;
 }
 
-off_t
+size_t
 kcndb_file_size(const struct kcndb_file *kf)
 {
 
