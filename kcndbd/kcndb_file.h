@@ -1,6 +1,6 @@
 #define KCNDB_FILE_BUFSIZ	4096	/* XXX */
 
-struct kcndb_file *kcndb_file_open(const char *, int);
+struct kcndb_file *kcndb_file_open(const char *);
 void kcndb_file_close(struct kcndb_file *);
 int kcndb_file_fd(const struct kcndb_file *);
 size_t kcndb_file_size(const struct kcndb_file *);

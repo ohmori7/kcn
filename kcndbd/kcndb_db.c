@@ -93,10 +93,10 @@ kcndb_db_table_open(enum kcn_eq_type type)
 
 	(void)snprintf(path, sizeof(path), "%s/%s%s",
 	    kcndb_db_path, name, KCNDB_DB_PATH_LOC_SUFFIX);
-	kdt->kdt_loc = kcndb_file_open(path, O_RDWR | O_CREAT);
+	kdt->kdt_loc = kcndb_file_open(path);
 
 	(void)snprintf(path, sizeof(path), "%s/%s", kcndb_db_path, name);
-	kdt->kdt_table = kcndb_file_open(path, O_RDWR | O_CREAT);
+	kdt->kdt_table = kcndb_file_open(path);
 
 	if (kdt->kdt_loc == NULL || kdt->kdt_table == NULL)
 		goto bad;

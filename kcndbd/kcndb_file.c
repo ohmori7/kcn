@@ -70,7 +70,7 @@ kcndb_file_size_get(struct kcndb_file *kf)
 }
 
 struct kcndb_file *
-kcndb_file_open(const char *path, int flags)
+kcndb_file_open(const char *path)
 {
 	struct kcndb_file *kf;
 
@@ -81,7 +81,7 @@ kcndb_file_open(const char *path, int flags)
 		return NULL;
 	}
 
-	kf->kf_fd = open(path, flags, S_IRUSR | S_IWUSR);
+	kf->kf_fd = open(path, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
 	if (kf->kf_fd == -1) {
 		KCN_LOG(DEBUG, "cannot open file: %s", strerror(errno));
 		goto bad;
