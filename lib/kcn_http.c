@@ -6,7 +6,7 @@
 #include <curl/curl.h>
 
 #include "kcn.h"
-#include "kcn_buf.h"
+#include "kcn_httpbuf.h"
 #include "kcn_http.h"
 
 static int

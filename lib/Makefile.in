@@ -83,8 +83,8 @@ am_libkcn_a_OBJECTS = kcn.$(OBJEXT) kcn_str.$(OBJEXT) \
 libkcn_a_OBJECTS = $(am_libkcn_a_OBJECTS)
 libkcnse_a_AR = $(AR) $(ARFLAGS)
 libkcnse_a_LIBADD =
-am_libkcnse_a_OBJECTS = libkcnse_a-kcn_buf.$(OBJEXT) \
-	libkcnse_a-kcn_uri.$(OBJEXT) libkcnse_a-kcn_http.$(OBJEXT) \
+am_libkcnse_a_OBJECTS = libkcnse_a-kcn_uri.$(OBJEXT) \
+	libkcnse_a-kcn_httpbuf.$(OBJEXT) libkcnse_a-kcn_http.$(OBJEXT) \
 	libkcnse_a-kcn_google.$(OBJEXT)
 libkcnse_a_OBJECTS = $(am_libkcnse_a_OBJECTS)
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
@@ -218,11 +218,11 @@ libkcn_a_SOURCES = \
 	kcn_db.c kcn_msg.c kcn_eq.c kcn_client.c
 
 libkcnse_a_SOURCES = \
-	kcn_buf.c kcn_uri.c kcn_http.c kcn_google.c
+	kcn_uri.c kcn_httpbuf.c kcn_http.c kcn_google.c
 
 noinst_HEADERS = \
-	kcn_str.h kcn_buf.h kcn_token.h kcn_uri.h kcn_pkt.h kcn_net.h	\
-	kcn_http.h kcn_socket.h kcn_sockaddr.h				\
+	kcn_str.h kcn_token.h kcn_uri.h kcn_pkt.h kcn_net.h		\
+	kcn_http.h kcn_httpbuf.h kcn_socket.h kcn_sockaddr.h		\
 	kcn_time.h kcn_db.h kcn_msg.h kcn_eq.h kcn_client.h
 
 include_HEADERS = \
@@ -325,9 +325,9 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/kcn_str.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/kcn_token.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/kcn_uri.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libkcnse_a-kcn_buf.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libkcnse_a-kcn_google.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libkcnse_a-kcn_http.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libkcnse_a-kcn_httpbuf.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libkcnse_a-kcn_uri.Po@am__quote@
 
 .c.o:
@@ -344,20 +344,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(COMPILE) -c `$(CYGPATH_W) '$<'`
 
-libkcnse_a-kcn_buf.o: kcn_buf.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libkcnse_a_CFLAGS) $(CFLAGS) -MT libkcnse_a-kcn_buf.o -MD -MP -MF $(DEPDIR)/libkcnse_a-kcn_buf.Tpo -c -o libkcnse_a-kcn_buf.o `test -f 'kcn_buf.c' || echo '$(srcdir)/'`kcn_buf.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libkcnse_a-kcn_buf.Tpo $(DEPDIR)/libkcnse_a-kcn_buf.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='kcn_buf.c' object='libkcnse_a-kcn_buf.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libkcnse_a_CFLAGS) $(CFLAGS) -c -o libkcnse_a-kcn_buf.o `test -f 'kcn_buf.c' || echo '$(srcdir)/'`kcn_buf.c
-
-libkcnse_a-kcn_buf.obj: kcn_buf.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libkcnse_a_CFLAGS) $(CFLAGS) -MT libkcnse_a-kcn_buf.obj -MD -MP -MF $(DEPDIR)/libkcnse_a-kcn_buf.Tpo -c -o libkcnse_a-kcn_buf.obj `if test -f 'kcn_buf.c'; then $(CYGPATH_W) 'kcn_buf.c'; else $(CYGPATH_W) '$(srcdir)/kcn_buf.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libkcnse_a-kcn_buf.Tpo $(DEPDIR)/libkcnse_a-kcn_buf.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='kcn_buf.c' object='libkcnse_a-kcn_buf.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libkcnse_a_CFLAGS) $(CFLAGS) -c -o libkcnse_a-kcn_buf.obj `if test -f 'kcn_buf.c'; then $(CYGPATH_W) 'kcn_buf.c'; else $(CYGPATH_W) '$(srcdir)/kcn_buf.c'; fi`
-
 libkcnse_a-kcn_uri.o: kcn_uri.c
 @am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libkcnse_a_CFLAGS) $(CFLAGS) -MT libkcnse_a-kcn_uri.o -MD -MP -MF $(DEPDIR)/libkcnse_a-kcn_uri.Tpo -c -o libkcnse_a-kcn_uri.o `test -f 'kcn_uri.c' || echo '$(srcdir)/'`kcn_uri.c
 @am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libkcnse_a-kcn_uri.Tpo $(DEPDIR)/libkcnse_a-kcn_uri.Po
@@ -371,6 +357,20 @@ libkcnse_a-kcn_uri.obj: kcn_uri.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='kcn_uri.c' object='libkcnse_a-kcn_uri.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libkcnse_a_CFLAGS) $(CFLAGS) -c -o libkcnse_a-kcn_uri.obj `if test -f 'kcn_uri.c'; then $(CYGPATH_W) 'kcn_uri.c'; else $(CYGPATH_W) '$(srcdir)/kcn_uri.c'; fi`
+
+libkcnse_a-kcn_httpbuf.o: kcn_httpbuf.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libkcnse_a_CFLAGS) $(CFLAGS) -MT libkcnse_a-kcn_httpbuf.o -MD -MP -MF $(DEPDIR)/libkcnse_a-kcn_httpbuf.Tpo -c -o libkcnse_a-kcn_httpbuf.o `test -f 'kcn_httpbuf.c' || echo '$(srcdir)/'`kcn_httpbuf.c
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libkcnse_a-kcn_httpbuf.Tpo $(DEPDIR)/libkcnse_a-kcn_httpbuf.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='kcn_httpbuf.c' object='libkcnse_a-kcn_httpbuf.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libkcnse_a_CFLAGS) $(CFLAGS) -c -o libkcnse_a-kcn_httpbuf.o `test -f 'kcn_httpbuf.c' || echo '$(srcdir)/'`kcn_httpbuf.c
+
+libkcnse_a-kcn_httpbuf.obj: kcn_httpbuf.c
+@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libkcnse_a_CFLAGS) $(CFLAGS) -MT libkcnse_a-kcn_httpbuf.obj -MD -MP -MF $(DEPDIR)/libkcnse_a-kcn_httpbuf.Tpo -c -o libkcnse_a-kcn_httpbuf.obj `if test -f 'kcn_httpbuf.c'; then $(CYGPATH_W) 'kcn_httpbuf.c'; else $(CYGPATH_W) '$(srcdir)/kcn_httpbuf.c'; fi`
+@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/libkcnse_a-kcn_httpbuf.Tpo $(DEPDIR)/libkcnse_a-kcn_httpbuf.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='kcn_httpbuf.c' object='libkcnse_a-kcn_httpbuf.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libkcnse_a_CFLAGS) $(CFLAGS) -c -o libkcnse_a-kcn_httpbuf.obj `if test -f 'kcn_httpbuf.c'; then $(CYGPATH_W) 'kcn_httpbuf.c'; else $(CYGPATH_W) '$(srcdir)/kcn_httpbuf.c'; fi`
 
 libkcnse_a-kcn_http.o: kcn_http.c
 @am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(libkcnse_a_CFLAGS) $(CFLAGS) -MT libkcnse_a-kcn_http.o -MD -MP -MF $(DEPDIR)/libkcnse_a-kcn_http.Tpo -c -o libkcnse_a-kcn_http.o `test -f 'kcn_http.c' || echo '$(srcdir)/'`kcn_http.c

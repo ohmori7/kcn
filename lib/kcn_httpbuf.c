@@ -3,7 +3,7 @@
 #include <string.h>
 
 #include "kcn.h"
-#include "kcn_buf.h"
+#include "kcn_httpbuf.h"
 
 struct kcn_buf {
 	void *kb_ptr;
