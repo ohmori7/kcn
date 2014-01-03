@@ -2,7 +2,7 @@
 #define KCN_MSG_HDRSIZ		(1 /* version */ + 1 /* type */ + 2 /* length*/)
 #define KCN_MSG_MAXSIZ		4096
 #define KCN_MSG_MAXBODYSIZ	(KCN_MSG_MAXSIZ - KCN_MSG_HDRSIZ)
-#define KCN_MSG_QUERY_SIZ	(1 + 1 + 8 + 1 + 1 + 8)
+#define KCN_MSG_QUERY_SIZ	(1 + 1 + 1 + 1 + 8 + 8 + 8)
 #define KCN_MSG_RESPONSE_MINSIZ	(1 + 1 + 1)
 #define KCN_MSG_ADD_MINSIZ	(1 + 8 + 8)
 #define KCN_MSG_MAXLOCSIZ						\
