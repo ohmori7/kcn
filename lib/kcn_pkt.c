@@ -448,7 +448,7 @@ kcn_pkt_dump_line(struct kcn_pkt *kp, size_t maxoctets)
 		*cp++ = ntoa[(v >> 4) & 0xfU];
 		*cp++ = ntoa[(v     ) & 0xfU];
 		*cp++ = ' ';
-		if (i == KCN_PKT_DUMP_MAXOCTETS / 2)
+		if (i + 1 == KCN_PKT_DUMP_MAXOCTETS / 2)
 			*cp++ = ' ';
 	}
 	*--cp = '\0';
