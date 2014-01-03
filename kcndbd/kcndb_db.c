@@ -162,7 +162,7 @@ kcndb_db_loc_init(struct kcndb_db_table *kdt)
 #define KCNDB_DB_LOC_INDEXSIZ	sizeof(uint64_t)
 #define KCNDB_DB_LOC_INDEXTABLESIZ					\
 	(KCNDB_DB_LOC_INDEXSIZ * KCNDB_DB_LOC_HASHSIZ)
-	kp = kcndb_file_packet(kf);
+	kp = kcndb_file_buf(kf);
 	kcn_pkt_putnull(kp, KCNDB_DB_LOC_INDEXTABLESIZ);
 	return kcndb_file_append(kf);
 }
@@ -179,7 +179,7 @@ kcndb_db_loc_add(struct kcndb_db_table *kdt, const char *loc, size_t loclen,
 
 	kf = kdt->kdt_loc;
 	h = kcn_str_hash(loc, loclen, KCNDB_DB_LOC_HASHSIZ);
-	kp = kcndb_file_packet(kf);
+	kp = kcndb_file_buf(kf);
 	if (! kcndb_file_seek_head(kf, 0))
 		return false;
 	if (! kcndb_file_ensure(kf, KCNDB_DB_LOC_INDEXSIZ))
@@ -223,7 +223,7 @@ kcndb_db_loc_lookup(struct kcndb_db_table *kdt, uint64_t idx,
     const char **locp, size_t *loclenp)
 {
 	struct kcndb_file *kf = kdt->kdt_loc;
-	struct kcn_pkt *kp = kcndb_file_packet(kf);
+	struct kcn_pkt *kp = kcndb_file_buf(kf);
 
 	if ((uint64_t /*XXX*/)kcndb_file_size(kf) < idx) {
 		errno = EINVAL;
@@ -244,7 +244,7 @@ kcndb_db_loc_lookup(struct kcndb_db_table *kdt, uint64_t idx,
 static bool
 kcndb_db_record_read(struct kcndb_db_table *kdt, struct kcndb_db_record *kdr)
 {
-	struct kcn_pkt *kp = kcndb_file_packet(kdt->kdt_table);
+	struct kcn_pkt *kp = kcndb_file_buf(kdt->kdt_table);
 
 #define KCNDB_HDRSIZ	(8 + 8 + 8)
 	if (! kcndb_file_ensure(kdt->kdt_table, KCNDB_HDRSIZ))
@@ -260,7 +260,7 @@ kcndb_db_record_read(struct kcndb_db_table *kdt, struct kcndb_db_record *kdr)
 bool
 kcndb_db_record_add(struct kcndb_db_table *kdt, struct kcndb_db_record *kdr)
 {
-	struct kcn_pkt *kp = kcndb_file_packet(kdt->kdt_table);
+	struct kcn_pkt *kp = kcndb_file_buf(kdt->kdt_table);
 
 	if (! kcndb_db_loc_add(kdt, kdr->kdr_loc, kdr->kdr_loclen,
 	    &kdr->kdr_locidx))

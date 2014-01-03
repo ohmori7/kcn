@@ -118,7 +118,7 @@ kcndb_file_size(const struct kcndb_file *kf)
 }
 
 struct kcn_pkt *
-kcndb_file_packet(struct kcndb_file *kf)
+kcndb_file_buf(struct kcndb_file *kf)
 {
 
 	return &kf->kf_kp;
@@ -127,7 +127,7 @@ kcndb_file_packet(struct kcndb_file *kf)
 bool
 kcndb_file_ensure(struct kcndb_file *kf, size_t len)
 {
-	struct kcn_pkt *kp = kcndb_file_packet(kf);
+	struct kcn_pkt *kp = kcndb_file_buf(kf);
 	int error;
 
 	while (kcn_pkt_len(kp) < len) {
@@ -167,7 +167,7 @@ kcndb_file_seek_head(struct kcndb_file *kf, off_t off)
 bool
 kcndb_file_write(struct kcndb_file *kf)
 {
-	struct kcn_pkt *kp = kcndb_file_packet(kf);
+	struct kcn_pkt *kp = kcndb_file_buf(kf);
 	int error;
 
 	while (kcn_pkt_len(kp) > 0)
