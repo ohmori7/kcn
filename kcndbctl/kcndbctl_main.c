@@ -205,9 +205,9 @@ readfile(int fd, short event, void *arg)
 	kma.kma_type = kf->kf_type;
 	kf->kf_size -= kcn_pkt_len(kp);
 	while (kf->kf_size == 0 || kcn_pkt_len(kp) >= KCN_MSG_MAXSIZ) {
-		if (! getstr(kp, &kma.kma_loc, &kma.kma_loclen) ||
+		if (! get64(kp, &kma.kma_time) ||
 		    ! get64(kp, &kma.kma_val) ||
-		    ! get64(kp, &kma.kma_time)) {
+		    ! getstr(kp, &kma.kma_loc, &kma.kma_loclen)) {
 			if (errno != EAGAIN)
 				err(EXIT_FAILURE, "invalid field");
 			KCN_LOG(DEBUG, "partial read");
