@@ -9,12 +9,14 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #include "kcn.h"
 #include "kcn_info.h"
 #include "kcn_eq.h"
 #include "kcn_db.h"
 #include "kcn_pkt.h"
+#include "kcn_time.h"
 #include "kcn_msg.h"
 #include "kcn_client.h"
 #include "kcn_netstat.h"
@@ -105,6 +107,14 @@ kcn_netstat_compile(size_t keyc, char * const keyv[], struct kcn_eq *ke)
 		return false;
 	if (! kcn_eq_val_aton(keyv[2], &ke->ke_val))
 		return false;
+	if (keyc == 3) {
+		ke->ke_start = KCN_TIME_NOW;
+		if (time(&ke->ke_end) == -1)
+			return false;
+		ke->ke_end -= KCN_TIME_JITTER;
+	} else {
+		/* XXX: should compile time expressions. */
+	}
 	return true;
 }
 
@@ -122,7 +132,6 @@ kcn_netstat_search(struct kcn_info *ki, const char *keys)
 	}
 	kmq.kmq_loctype = kcn_info_loc_type(ki);
 	kmq.kmq_maxcount = kcn_info_maxnlocs(ki);
-	kmq.kmq_time = 0; /* XXX: should compile time as well */
 	if (! kcn_netstat_compile(keyc, keyv, &kmq.kmq_eq))
 		goto bad;
 	if (! kcn_client_search(ki, &kmq))

@@ -25,7 +25,6 @@ struct kcn_msg_header {
 struct kcn_msg_query {
 	enum kcn_loc_type kmq_loctype;
 	uint8_t kmq_maxcount;
-	uint64_t kmq_time;
 	struct kcn_eq kmq_eq;
 };
 

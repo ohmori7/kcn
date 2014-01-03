@@ -6,6 +6,7 @@
 #include <limits.h>
 #include <stdbool.h>
 #include <string.h>
+#include <time.h>
 
 #include "kcn_str.h"
 #include "kcn_eq.h"

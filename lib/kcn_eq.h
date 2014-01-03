@@ -24,6 +24,8 @@ struct kcn_eq {
 	enum kcn_eq_type ke_type;
 	enum kcn_eq_operator ke_op;
 	unsigned long long ke_val;
+	time_t ke_start;
+	time_t ke_end;
 };
 
 const char *kcn_eq_type_ntoa(enum kcn_eq_type);
