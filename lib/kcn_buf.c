@@ -9,7 +9,7 @@
 
 #include "kcn.h"
 #include "kcn_log.h"
-#include "kcn_pkt.h"
+#include "kcn_buf.h"
 
 struct kcn_pkt_data {
 	STAILQ_ENTRY(kcn_pkt_data) kpd_chain;

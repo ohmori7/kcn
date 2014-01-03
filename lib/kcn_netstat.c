@@ -15,7 +15,7 @@
 #include "kcn_info.h"
 #include "kcn_eq.h"
 #include "kcn_db.h"
-#include "kcn_pkt.h"
+#include "kcn_buf.h"
 #include "kcn_time.h"
 #include "kcn_msg.h"
 #include "kcn_client.h"

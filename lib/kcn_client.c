@@ -13,7 +13,7 @@
 #include "kcn_log.h"
 #include "kcn_socket.h"
 #include "kcn_sockaddr.h"
-#include "kcn_pkt.h"
+#include "kcn_buf.h"
 #include "kcn_msg.h"
 #include "kcn_net.h"
 #include "kcn_netstat.h"

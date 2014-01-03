@@ -12,7 +12,7 @@
 #include "kcn.h"
 #include "kcn_log.h"
 #include "kcn_socket.h"
-#include "kcn_pkt.h"
+#include "kcn_buf.h"
 #include "kcn_net.h"
 
 /* hack for libevent 1.4.13-4.el6 on CentOS 6.x. */

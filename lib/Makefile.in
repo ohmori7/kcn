@@ -75,7 +75,7 @@ ARFLAGS = cru
 libkcn_a_AR = $(AR) $(ARFLAGS)
 libkcn_a_LIBADD =
 am_libkcn_a_OBJECTS = kcn.$(OBJEXT) kcn_str.$(OBJEXT) \
-	kcn_log.$(OBJEXT) kcn_token.$(OBJEXT) kcn_pkt.$(OBJEXT) \
+	kcn_log.$(OBJEXT) kcn_token.$(OBJEXT) kcn_buf.$(OBJEXT) \
 	kcn_net.$(OBJEXT) kcn_uri.$(OBJEXT) kcn_socket.$(OBJEXT) \
 	kcn_sockaddr.$(OBJEXT) kcn_info.$(OBJEXT) \
 	kcn_netstat.$(OBJEXT) kcn_db.$(OBJEXT) kcn_msg.$(OBJEXT) \
@@ -213,7 +213,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 lib_LIBRARIES = libkcn.a libkcnse.a
 libkcn_a_SOURCES = \
-	kcn.c kcn_str.c kcn_log.c kcn_token.c kcn_pkt.c	kcn_net.c	\
+	kcn.c kcn_str.c kcn_log.c kcn_token.c kcn_buf.c	kcn_net.c	\
 	kcn_uri.c kcn_socket.c kcn_sockaddr.c kcn_info.c kcn_netstat.c	\
 	kcn_db.c kcn_msg.c kcn_eq.c kcn_client.c
 
@@ -221,7 +221,7 @@ libkcnse_a_SOURCES = \
 	kcn_uri.c kcn_httpbuf.c kcn_http.c kcn_google.c
 
 noinst_HEADERS = \
-	kcn_str.h kcn_token.h kcn_uri.h kcn_pkt.h kcn_net.h		\
+	kcn_str.h kcn_token.h kcn_uri.h kcn_buf.h kcn_net.h		\
 	kcn_http.h kcn_httpbuf.h kcn_socket.h kcn_sockaddr.h		\
 	kcn_time.h kcn_db.h kcn_msg.h kcn_eq.h kcn_client.h
 
@@ -311,6 +311,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/kcn.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/kcn_buf.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/kcn_client.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/kcn_db.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/kcn_eq.Po@am__quote@
@@ -319,7 +320,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/kcn_msg.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/kcn_net.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/kcn_netstat.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/kcn_pkt.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/kcn_sockaddr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/kcn_socket.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/kcn_str.Po@am__quote@

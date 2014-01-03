@@ -21,7 +21,7 @@
 #include "kcn_log.h"
 #include "kcn_info.h"
 #include "kcn_str.h"
-#include "kcn_pkt.h"
+#include "kcn_buf.h"
 #include "kcn_net.h"
 #include "kcn_eq.h"
 #include "kcn_msg.h"

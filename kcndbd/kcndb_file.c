@@ -10,7 +10,7 @@
 
 #include "kcn.h"
 #include "kcn_log.h"
-#include "kcn_pkt.h"
+#include "kcn_buf.h"
 #include "kcndb_file.h"
 
 struct kcndb_file {
