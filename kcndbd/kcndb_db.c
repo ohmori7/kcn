@@ -1,7 +1,6 @@
 #include <sys/param.h>	/* MAXPATHLEN */
 
 #include <assert.h>
-#include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <stdbool.h>
@@ -26,7 +25,9 @@ struct kcndb_db_table {
 };
 
 static const char *kcndb_db_path = KCNDB_DB_PATH_DEFAULT;
+static struct kcndb_db_table *kcndb_db[KCN_EQ_TYPE_MAX - 1];
 
+static void kcndb_db_table_close(struct kcndb_db_table *);
 static bool kcndb_db_loc_init(struct kcndb_db_table *);
 
 static struct kcndb_db_table *
@@ -49,6 +50,13 @@ kcndb_db_table_destroy(struct kcndb_db_table *kdt)
 	free(kdt);
 }
 
+static int
+kcndb_db_table_type2index(enum kcn_eq_type type)
+{
+
+	return type - 1;
+}
+
 void
 kcndb_db_path_set(const char *path)
 {
@@ -63,39 +71,12 @@ kcndb_db_path_get(void)
 	return kcndb_db_path;
 }
 
-bool
-kcndb_db_init(void)
-{
-	DIR *ndir;
-	int oerrno;
-
-	ndir = opendir(kcndb_db_path);
-	if (ndir == NULL)
-		return false;
-
-	/* XXX: may need to pre-load onto memory... */
-
-	oerrno = errno;
-	(void)closedir(ndir);
-	errno = oerrno;
-
-	return true;
-}
-
-void
-kcndb_db_finish(void)
-{
-
-	/* XXX: may need to write back on-memory cache in the future. */
-}
-
 static struct kcndb_db_table *
-kcndb_db_table_open(enum kcn_eq_type type, int flags)
+kcndb_db_table_open(enum kcn_eq_type type)
 {
 	struct kcndb_db_table *kdt;
 	const char *name;
 	char path[MAXPATHLEN];
-	int tflags;
 
 	name = kcn_eq_type_ntoa(type);
 	if (name == NULL) {
@@ -112,13 +93,10 @@ kcndb_db_table_open(enum kcn_eq_type type, int flags)
 
 	(void)snprintf(path, sizeof(path), "%s/%s%s",
 	    kcndb_db_path, name, KCNDB_DB_PATH_LOC_SUFFIX);
-	kdt->kdt_loc = kcndb_file_open(path, flags);
+	kdt->kdt_loc = kcndb_file_open(path, O_RDWR | O_CREAT);
 
-	tflags = flags;
-	if (flags & O_RDWR)
-		tflags |= O_APPEND;
 	(void)snprintf(path, sizeof(path), "%s/%s", kcndb_db_path, name);
-	kdt->kdt_table = kcndb_file_open(path, tflags);
+	kdt->kdt_table = kcndb_file_open(path, O_RDWR | O_CREAT);
 
 	if (kdt->kdt_loc == NULL || kdt->kdt_table == NULL)
 		goto bad;
@@ -130,14 +108,7 @@ kcndb_db_table_open(enum kcn_eq_type type, int flags)
 	return NULL;
 }
 
-struct kcndb_db_table *
-kcndb_db_table_create(enum kcn_eq_type type)
-{
-
-	return kcndb_db_table_open(type, O_RDWR | O_CREAT);
-}
-
-void
+static void
 kcndb_db_table_close(struct kcndb_db_table *kdt)
 {
 
@@ -146,6 +117,16 @@ kcndb_db_table_close(struct kcndb_db_table *kdt)
 	kcndb_file_close(kdt->kdt_loc);
 	kcndb_file_close(kdt->kdt_table);
 	kcndb_db_table_destroy(kdt);
+}
+
+static struct kcndb_db_table *
+kcndb_db_table_lookup(enum kcn_eq_type type)
+{
+	int idx;
+
+	idx = kcndb_db_table_type2index(type);
+	assert(idx >= 0);
+	return kcndb_db[idx];
 }
 
 static bool
@@ -180,6 +161,7 @@ kcndb_db_loc_add(struct kcndb_db_table *kdt, const char *loc, size_t loclen,
 	kf = kdt->kdt_loc;
 	h = kcn_str_hash(loc, loclen, KCNDB_DB_LOC_HASHSIZ);
 	kp = kcndb_file_buf(kf);
+	kcn_pkt_reset(kp, 0);
 	if (! kcndb_file_seek_head(kf, 0))
 		return false;
 	if (! kcndb_file_ensure(kf, KCNDB_DB_LOC_INDEXSIZ))
@@ -258,29 +240,35 @@ kcndb_db_record_read(struct kcndb_db_table *kdt, struct kcndb_db_record *kdr)
 }
 
 bool
-kcndb_db_record_add(struct kcndb_db_table *kdt, struct kcndb_db_record *kdr)
+kcndb_db_record_add(enum kcn_eq_type type, struct kcndb_db_record *kdr)
 {
-	struct kcn_pkt *kp = kcndb_file_buf(kdt->kdt_table);
+	struct kcndb_db_table *kdt;
+	struct kcn_pkt *kp;
 
+	kdt = kcndb_db_table_lookup(type);
+	kp = kcndb_file_buf(kdt->kdt_table);
 	if (! kcndb_db_loc_add(kdt, kdr->kdr_loc, kdr->kdr_loclen,
 	    &kdr->kdr_locidx))
 		return false;
 	kcn_pkt_put64(kp, kdr->kdr_time);
 	kcn_pkt_put64(kp, kdr->kdr_val);
 	kcn_pkt_put64(kp, kdr->kdr_locidx);
-	return kcndb_file_write(kdt->kdt_table);
+	return kcndb_file_append(kdt->kdt_table);
 }
 
 bool
 kcndb_db_search(struct kcn_info *ki, const struct kcn_eq *ke)
 {
 	struct kcndb_db_table *kdt;
+	struct kcn_pkt *kp;
 	struct kcndb_db_record kdr;
 	size_t i, score;
 
-	kdt = kcndb_db_table_open(ke->ke_type, O_RDONLY);
-	if (kdt == NULL)
+	kdt = kcndb_db_table_lookup(ke->ke_type);
+	if (! kcndb_file_seek_head(kdt->kdt_table, 0))
 		goto bad;
+	kp = kcndb_file_buf(kdt->kdt_table);
+	kcn_pkt_reset(kp, 0);
 
 	score = 0; /* XXX: should compute score. */
 	for (i = 0; kcn_info_nlocs(ki) < kcn_info_maxnlocs(ki); i++) {
@@ -342,9 +330,38 @@ kcndb_db_search(struct kcn_info *ki, const struct kcn_eq *ke)
 		goto bad;
 	}
 
-	kcndb_db_table_close(kdt);
 	return true;
   bad:
-	kcndb_db_table_close(kdt);
 	return false;
+}
+
+bool
+kcndb_db_init(void)
+{
+	enum kcn_eq_type type;
+	int idx;
+
+	for (type = KCN_EQ_TYPE_MIN + 1; type < KCN_EQ_TYPE_MAX; type++) {
+		idx = kcndb_db_table_type2index(type);
+		kcndb_db[idx] = kcndb_db_table_open(type);
+		if (kcndb_db[idx] == NULL)
+			return false;
+	}
+	/* XXX: may need to pre-load onto memory... */
+
+	return true;
+}
+
+void
+kcndb_db_finish(void)
+{
+	enum kcn_eq_type type;
+	int idx;
+
+	for (type = KCN_EQ_TYPE_MIN + 1; type < KCN_EQ_TYPE_MAX; type++) {
+		idx = kcndb_db_table_type2index(type);
+		kcndb_db_table_close(kcndb_db[idx]);
+		kcndb_db[idx] = NULL;
+	}
+	/* XXX: may need to write back on-memory cache in the future. */
 }

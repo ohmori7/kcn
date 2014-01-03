@@ -170,21 +170,16 @@ kcndb_server_add_process(struct kcn_net *kn, struct kcn_pkt *kp,
 {
 	struct kcn_msg_add kma;
 	struct kcndb_db_record kdr;
-	struct kcndb_db_table *kdt;
 	bool rc;
 
 	(void)kn;
 	if (! kcn_msg_add_decode(kp, kmh, &kma))
 		return false;
-	kdt = kcndb_db_table_create(kma.kma_type);
-	if (kdt == NULL)
-		return false;
 	kdr.kdr_time = kma.kma_time;
 	kdr.kdr_val = kma.kma_val;
 	kdr.kdr_loc = kma.kma_loc;
 	kdr.kdr_loclen = kma.kma_loclen;
-	rc = kcndb_db_record_add(kdt, &kdr);
-	kcndb_db_table_close(kdt);
+	rc = kcndb_db_record_add(kma.kma_type, &kdr);
 	return rc;
 }
 
