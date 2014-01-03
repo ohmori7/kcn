@@ -108,10 +108,10 @@ kcn_netstat_compile(size_t keyc, char * const keyv[], struct kcn_eq *ke)
 	if (! kcn_eq_val_aton(keyv[2], &ke->ke_val))
 		return false;
 	if (keyc == 3) {
-		ke->ke_start = KCN_TIME_NOW;
-		if (time(&ke->ke_end) == -1)
+		if (time(&ke->ke_start) == -1)
 			return false;
-		ke->ke_end -= KCN_TIME_JITTER;
+		ke->ke_start -= KCN_TIME_JITTER;
+		ke->ke_end = KCN_TIME_NOW;
 	} else {
 		/* XXX: should compile time expressions. */
 	}

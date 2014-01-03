@@ -97,9 +97,9 @@ bool
 kcn_eq_time_match(time_t t, const struct kcn_eq *ke)
 {
 
-	if (t > ke->ke_end)
+	if (ke->ke_end != KCN_TIME_NOW && t > ke->ke_end)
 		return false;
-	if (ke->ke_start != KCN_TIME_NOW && t < ke->ke_start)
+	if (t < ke->ke_start)
 		return false;
 	return true;
 }
