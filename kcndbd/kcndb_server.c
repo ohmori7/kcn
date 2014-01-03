@@ -19,7 +19,6 @@
 #include "kcn_net.h"
 #include "kcn_msg.h"
 #include "kcn_netstat.h"
-#include "kcndb_file.h"
 #include "kcndb_db.h"
 #include "kcndb_server.h"
 
@@ -171,21 +170,21 @@ kcndb_server_add_process(struct kcn_net *kn, struct kcn_pkt *kp,
 {
 	struct kcn_msg_add kma;
 	struct kcndb_db_record kdr;
-	struct kcndb_file *kf;
+	struct kcndb_db_table *kdt;
 	bool rc;
 
 	(void)kn;
 	if (! kcn_msg_add_decode(kp, kmh, &kma))
 		return false;
-	kf = kcndb_db_table_create(kma.kma_type);
-	if (kf == NULL)
+	kdt = kcndb_db_table_create(kma.kma_type);
+	if (kdt == NULL)
 		return false;
 	kdr.kdr_time = kma.kma_time;
 	kdr.kdr_val = kma.kma_val;
 	kdr.kdr_loc = kma.kma_loc;
 	kdr.kdr_loclen = kma.kma_loclen;
-	rc = kcndb_db_record_add(kf, &kdr);
-	kcndb_db_table_close(kf);
+	rc = kcndb_db_record_add(kdt, &kdr);
+	kcndb_db_table_close(kdt);
 	return rc;
 }
 
