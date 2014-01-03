@@ -5,59 +5,59 @@
 #include "kcn.h"
 #include "kcn_httpbuf.h"
 
-struct kcn_buf {
-	void *kb_ptr;
-	size_t kb_size;
+struct kcn_httpbuf {
+	void *khb_ptr;
+	size_t khb_size;
 };
 
-struct kcn_buf *
-kcn_buf_new(void)
+struct kcn_httpbuf *
+kcn_httpbuf_new(void)
 {
-	struct kcn_buf *kb;
+	struct kcn_httpbuf *khb;
 
-	kb = malloc(sizeof(*kb));
-	if (kb == NULL)
+	khb = malloc(sizeof(*khb));
+	if (khb == NULL)
 		return NULL;
-	kb->kb_ptr = NULL;
-	kb->kb_size = 0;
-	return kb;
+	khb->khb_ptr = NULL;
+	khb->khb_size = 0;
+	return khb;
 }
 
 void
-kcn_buf_destroy(struct kcn_buf *kb)
+kcn_httpbuf_destroy(struct kcn_httpbuf *khb)
 {
 
-	if (kb == NULL)
+	if (khb == NULL)
 		return;
-	if (kb->kb_ptr != NULL)
-		free(kb->kb_ptr);
-	free(kb);
+	if (khb->khb_ptr != NULL)
+		free(khb->khb_ptr);
+	free(khb);
 }
 
 void *
-kcn_buf_get(struct kcn_buf *kb)
+kcn_httpbuf_get(struct kcn_httpbuf *khb)
 {
 	void *p;
 
-	p = kb->kb_ptr;
-	kb->kb_ptr = NULL;
-	kb->kb_size = 0;
+	p = khb->khb_ptr;
+	khb->khb_ptr = NULL;
+	khb->khb_size = 0;
 	return p;
 }
 
 bool
-kcn_buf_append(struct kcn_buf *kb, const void *p, size_t size)
+kcn_httpbuf_append(struct kcn_httpbuf *khb, const void *p, size_t size)
 {
 	void *np;
 
-	if (kb->kb_size > kb->kb_size + size)
+	if (khb->khb_size > khb->khb_size + size)
 		return false;
-	np = realloc(kb->kb_ptr, kb->kb_size + size);
+	np = realloc(khb->khb_ptr, khb->khb_size + size);
 	if (np == NULL)
 		return false;
-	memcpy(np + kb->kb_size, p, size);
-	kb->kb_ptr = np;
-	kb->kb_size += size;
+	memcpy(np + khb->khb_size, p, size);
+	khb->khb_ptr = np;
+	khb->khb_size += size;
 
 	return true;
 }

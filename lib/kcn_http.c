@@ -21,14 +21,14 @@ kcn_http_curl_code2errno(CURLcode cc)
 }
 
 static size_t
-kcn_http_curl_callback(const char *p, size_t size, size_t n, void *kb)
+kcn_http_curl_callback(const char *p, size_t size, size_t n, void *khb)
 {
 	size_t totalsize;
 
 	totalsize = size * n;
 	if (totalsize < size)
 		return 0;
-	if (! kcn_buf_append(kb, p, totalsize))
+	if (! kcn_httpbuf_append(khb, p, totalsize))
 		return 0;
 	return totalsize;
 }
@@ -36,15 +36,15 @@ kcn_http_curl_callback(const char *p, size_t size, size_t n, void *kb)
 char *
 kcn_http_response_get(const char *uri)
 {
-	struct kcn_buf *kb;
+	struct kcn_httpbuf *khb;
 	CURL *curl;
 	CURLcode cc;
 	char *p;
 
 	assert(uri != NULL);
 	p = NULL;
-	kb = kcn_buf_new();
-	if (kb == NULL)
+	khb = kcn_httpbuf_new();
+	if (khb == NULL)
 		goto bad;
 
 	curl = curl_easy_init();
@@ -52,14 +52,14 @@ kcn_http_response_get(const char *uri)
 		goto bad;
 	curl_easy_setopt(curl, CURLOPT_URL, uri);
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, kcn_http_curl_callback);
-	curl_easy_setopt(curl, CURLOPT_WRITEDATA, kb);
+	curl_easy_setopt(curl, CURLOPT_WRITEDATA, khb);
 	cc = curl_easy_perform(curl);
 	curl_easy_cleanup(curl);
 
 	switch (cc) {
 	case CURLE_OK:
-		if (kcn_buf_append(kb, "\0", 1))
-			p = kcn_buf_get(kb);
+		if (kcn_httpbuf_append(khb, "\0", 1))
+			p = kcn_httpbuf_get(khb);
 		break;
 	default:
 		errno = kcn_http_curl_code2errno(cc);
@@ -67,7 +67,7 @@ kcn_http_response_get(const char *uri)
 	}
 
   bad:
-	kcn_buf_destroy(kb);
+	kcn_httpbuf_destroy(khb);
 	return p;
 }
 
