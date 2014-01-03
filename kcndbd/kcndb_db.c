@@ -133,7 +133,7 @@ static bool
 kcndb_db_loc_init(struct kcndb_db_table *kdt)
 {
 	struct kcndb_file *kf;
-	struct kcn_pkt *kp;
+	struct kcn_buf *kb;
 
 	kf = kdt->kdt_loc;
 	if (kcndb_file_size(kf) > 0)
@@ -143,8 +143,8 @@ kcndb_db_loc_init(struct kcndb_db_table *kdt)
 #define KCNDB_DB_LOC_INDEXSIZ	sizeof(uint64_t)
 #define KCNDB_DB_LOC_INDEXTABLESIZ					\
 	(KCNDB_DB_LOC_INDEXSIZ * KCNDB_DB_LOC_HASHSIZ)
-	kp = kcndb_file_buf(kf);
-	kcn_pkt_putnull(kp, KCNDB_DB_LOC_INDEXTABLESIZ);
+	kb = kcndb_file_buf(kf);
+	kcn_buf_putnull(kb, KCNDB_DB_LOC_INDEXTABLESIZ);
 	return kcndb_file_append(kf);
 }
 
@@ -154,44 +154,44 @@ kcndb_db_loc_add(struct kcndb_db_table *kdt, const char *loc, size_t loclen,
 {
 	struct kcndb_file *kf;
 	unsigned int h;
-	struct kcn_pkt *kp;
+	struct kcn_buf *kb;
 	uint64_t idx, oidx;
 	size_t len;
 
 	kf = kdt->kdt_loc;
 	h = kcn_str_hash(loc, loclen, KCNDB_DB_LOC_HASHSIZ);
-	kp = kcndb_file_buf(kf);
-	kcn_pkt_reset(kp, 0);
+	kb = kcndb_file_buf(kf);
+	kcn_buf_reset(kb, 0);
 	if (! kcndb_file_seek_head(kf, 0))
 		return false;
 	if (! kcndb_file_ensure(kf, KCNDB_DB_LOC_INDEXSIZ))
 		return false;
-	kcn_pkt_forward(kp, KCNDB_DB_LOC_INDEXSIZ * h);
-	while ((idx = kcn_pkt_get64(kp)) != 0) {
+	kcn_buf_forward(kb, KCNDB_DB_LOC_INDEXSIZ * h);
+	while ((idx = kcn_buf_get64(kb)) != 0) {
 		if (! kcndb_file_seek_head(kf, idx))
 			return false;
-		kcn_pkt_reset(kp, 0);
+		kcn_buf_reset(kb, 0);
 		if (! kcndb_file_ensure(kf, sizeof(uint16_t)))
 			return false;
-		len = kcn_pkt_get16(kp);
+		len = kcn_buf_get16(kb);
 		if (! kcndb_file_ensure(kf, len + sizeof(uint64_t)))
 			return false;
 		if (loclen == len &&
-		    strncmp(kcn_pkt_current(kp), loc, loclen) == 0)
+		    strncmp(kcn_buf_current(kb), loc, loclen) == 0)
 			goto out;
-		kcn_pkt_forward(kp, len);
+		kcn_buf_forward(kb, len);
 	}
 
-	oidx = idx + kcn_pkt_headingdata(kp) - sizeof(idx);
+	oidx = idx + kcn_buf_headingdata(kb) - sizeof(idx);
 	idx = kcndb_file_size(kf);
-	kcn_pkt_reset(kp, 0);
-	kcn_pkt_put16(kp, loclen);
-	kcn_pkt_put(kp, loc, loclen);
-	kcn_pkt_put64(kp, 0);
+	kcn_buf_reset(kb, 0);
+	kcn_buf_put16(kb, loclen);
+	kcn_buf_put(kb, loc, loclen);
+	kcn_buf_put64(kb, 0);
 	if (! kcndb_file_append(kf))
 		return false;
 
-	kcn_pkt_put64(kp, idx);
+	kcn_buf_put64(kb, idx);
 	if (! kcndb_file_seek_head(kf, oidx) || ! kcndb_file_write(kf))
 		return false;
   out:
@@ -205,37 +205,37 @@ kcndb_db_loc_lookup(struct kcndb_db_table *kdt, uint64_t idx,
     const char **locp, size_t *loclenp)
 {
 	struct kcndb_file *kf = kdt->kdt_loc;
-	struct kcn_pkt *kp = kcndb_file_buf(kf);
+	struct kcn_buf *kb = kcndb_file_buf(kf);
 
 	if (kcndb_file_size(kf) < idx) {
 		errno = EINVAL;
 		return false;
 	}
-	kcn_pkt_reset(kp, 0);
+	kcn_buf_reset(kb, 0);
 	if (! kcndb_file_seek_head(kf, idx))
 		return false;
 	if (! kcndb_file_ensure(kf, sizeof(uint16_t)))
 		return false;
-	*loclenp = kcn_pkt_get16(kp);
+	*loclenp = kcn_buf_get16(kb);
 	if (! kcndb_file_ensure(kf, *loclenp))
 		return false;
-	*locp = kcn_pkt_current(kp);
+	*locp = kcn_buf_current(kb);
 	return true;
 }
 
 static bool
 kcndb_db_record_read(struct kcndb_db_table *kdt, struct kcndb_db_record *kdr)
 {
-	struct kcn_pkt *kp = kcndb_file_buf(kdt->kdt_table);
+	struct kcn_buf *kb = kcndb_file_buf(kdt->kdt_table);
 
 #define KCNDB_HDRSIZ	(8 + 8 + 8)
 	if (! kcndb_file_ensure(kdt->kdt_table, KCNDB_HDRSIZ))
 		return false;
 
-	kdr->kdr_time = kcn_pkt_get64(kp);
-	kdr->kdr_val = kcn_pkt_get64(kp);
-	kdr->kdr_locidx = kcn_pkt_get64(kp);
-	kcn_pkt_trim_head(kp, kcn_pkt_headingdata(kp));
+	kdr->kdr_time = kcn_buf_get64(kb);
+	kdr->kdr_val = kcn_buf_get64(kb);
+	kdr->kdr_locidx = kcn_buf_get64(kb);
+	kcn_buf_trim_head(kb, kcn_buf_headingdata(kb));
 	return true;
 }
 
@@ -243,16 +243,16 @@ bool
 kcndb_db_record_add(enum kcn_eq_type type, struct kcndb_db_record *kdr)
 {
 	struct kcndb_db_table *kdt;
-	struct kcn_pkt *kp;
+	struct kcn_buf *kb;
 
 	kdt = kcndb_db_table_lookup(type);
-	kp = kcndb_file_buf(kdt->kdt_table);
+	kb = kcndb_file_buf(kdt->kdt_table);
 	if (! kcndb_db_loc_add(kdt, kdr->kdr_loc, kdr->kdr_loclen,
 	    &kdr->kdr_locidx))
 		return false;
-	kcn_pkt_put64(kp, kdr->kdr_time);
-	kcn_pkt_put64(kp, kdr->kdr_val);
-	kcn_pkt_put64(kp, kdr->kdr_locidx);
+	kcn_buf_put64(kb, kdr->kdr_time);
+	kcn_buf_put64(kb, kdr->kdr_val);
+	kcn_buf_put64(kb, kdr->kdr_locidx);
 	return kcndb_file_append(kdt->kdt_table);
 }
 
@@ -260,15 +260,15 @@ bool
 kcndb_db_search(struct kcn_info *ki, const struct kcn_eq *ke)
 {
 	struct kcndb_db_table *kdt;
-	struct kcn_pkt *kp;
+	struct kcn_buf *kb;
 	struct kcndb_db_record kdr;
 	size_t i, score;
 
 	kdt = kcndb_db_table_lookup(ke->ke_type);
 	if (! kcndb_file_seek_head(kdt->kdt_table, 0))
 		goto bad;
-	kp = kcndb_file_buf(kdt->kdt_table);
-	kcn_pkt_reset(kp, 0);
+	kb = kcndb_file_buf(kdt->kdt_table);
+	kcn_buf_reset(kb, 0);
 
 	score = 0; /* XXX: should compute score. */
 	for (i = 0; kcn_info_nlocs(ki) < kcn_info_maxnlocs(ki); i++) {

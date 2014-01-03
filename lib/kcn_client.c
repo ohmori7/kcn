@@ -19,7 +19,7 @@
 #include "kcn_netstat.h"
 #include "kcn_client.h"
 
-static int kcn_client_read(struct kcn_net *, struct kcn_pkt *, void *);
+static int kcn_client_read(struct kcn_net *, struct kcn_buf *, void *);
 
 struct kcn_net *
 kcn_client_init(struct event_base *evb, void *data)
@@ -57,20 +57,20 @@ kcn_client_finish(struct kcn_net *kn)
 }
 
 static int
-kcn_client_read(struct kcn_net *kn, struct kcn_pkt *kp, void *arg)
+kcn_client_read(struct kcn_net *kn, struct kcn_buf *kb, void *arg)
 {
 	struct kcn_msg_response *kmr = arg;
 	struct kcn_msg_header kmh;
 
 	(void)kn;
 	do {
-		if (! kcn_msg_header_decode(kp, &kmh))
+		if (! kcn_msg_header_decode(kb, &kmh))
 			goto bad;
 		if (kmh.kmh_type != KCN_MSG_TYPE_RESPONSE) {
 			errno = EINVAL;
 			goto bad;
 		}
-		if (! kcn_msg_response_decode(kp, &kmh, kmr))
+		if (! kcn_msg_response_decode(kb, &kmh, kmr))
 			goto bad;
 	} while (kmr->kmr_leftcount > 0);
 	return 0;
@@ -83,11 +83,11 @@ kcn_client_read(struct kcn_net *kn, struct kcn_pkt *kp, void *arg)
 static bool
 kcn_client_query_send(struct kcn_net *kn, const struct kcn_msg_query *kmq)
 {
-	struct kcn_pkt kp;
+	struct kcn_buf kb;
 
-	kcn_net_opkt(kn, &kp);
-	kcn_msg_query_encode(&kp, kmq);
-	if (! kcn_net_write(kn, &kp))
+	kcn_net_opkt(kn, &kb);
+	kcn_msg_query_encode(&kb, kmq);
+	if (! kcn_net_write(kn, &kb))
 		return false;
 	return kcn_net_read_enable(kn);
 }
@@ -95,11 +95,11 @@ kcn_client_query_send(struct kcn_net *kn, const struct kcn_msg_query *kmq)
 bool
 kcn_client_add_send(struct kcn_net *kn, const struct kcn_msg_add *kma)
 {
-	struct kcn_pkt kp;
+	struct kcn_buf kb;
 
-	kcn_net_opkt(kn, &kp);
-	kcn_msg_add_encode(&kp, kma);
-	return kcn_net_write(kn, &kp);
+	kcn_net_opkt(kn, &kb);
+	kcn_msg_add_encode(&kb, kma);
+	return kcn_net_write(kn, &kb);
 }
 
 bool

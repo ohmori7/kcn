@@ -109,34 +109,34 @@ getfilesize(int fd, size_t *sizep)
 }
 
 static bool
-bufalloc(struct kcn_pkt *kp, size_t filesize)
+bufalloc(struct kcn_buf *kb, size_t filesize)
 {
 	size_t bufsize;
-	struct kcn_pkt_data *kpd;
+	struct kcn_buf_data *kbd;
 
 #define MAXBUFSIZ	(1ULL << 20)	/* 1MB */
 	if (filesize < MAXBUFSIZ)
 		bufsize = filesize;
 	else
 		bufsize = MAXBUFSIZ;
-	kpd = kcn_pkt_data_new(bufsize);
-	if (kpd == NULL)
+	kbd = kcn_buf_data_new(bufsize);
+	if (kbd == NULL)
 		return false;
-	kcn_pkt_init(kp, kpd);
+	kcn_buf_init(kb, kbd);
 	return true;
 }
 
 static bool
-forward(struct kcn_pkt *kp)
+forward(struct kcn_buf *kb)
 {
 	int c;
 
 	for (;;) {
-		if (kcn_pkt_trailingdata(kp) == 0) {
+		if (kcn_buf_trailingdata(kb) == 0) {
 			errno = EAGAIN;
 			return false;
 		}
-		c = kcn_pkt_get8(kp);
+		c = kcn_buf_get8(kb);
 		if (isspace(c))
 			return true;
 		if (! isprint(c)) {
@@ -147,14 +147,14 @@ forward(struct kcn_pkt *kp)
 }
 
 static bool
-getstr(struct kcn_pkt *kp, const char **s, size_t *slenp)
+getstr(struct kcn_buf *kb, const char **s, size_t *slenp)
 {
 	size_t slen;
 
-	*s = kcn_pkt_current(kp);
-	if (! forward(kp))
+	*s = kcn_buf_current(kb);
+	if (! forward(kb))
 		return false;
-	slen = *slenp = kcn_pkt_current(kp) - (void *)*s - 1;
+	slen = *slenp = kcn_buf_current(kb) - (void *)*s - 1;
 	if (slen > KCN_MSG_MAXLOCSIZ) {
 		errno = E2BIG;
 		return false;
@@ -163,16 +163,16 @@ getstr(struct kcn_pkt *kp, const char **s, size_t *slenp)
 }
 
 static bool
-get64(struct kcn_pkt *kp, uint64_t *vp)
+get64(struct kcn_buf *kb, uint64_t *vp)
 {
 	unsigned long long ullval;
 	const char *p;
 
-	p = kcn_pkt_current(kp);
-	if (! forward(kp))
+	p = kcn_buf_current(kb);
+	if (! forward(kb))
 		return false;
-	kcn_pkt_backward(kp, 1);
-	kcn_pkt_put8(kp, '\0');
+	kcn_buf_backward(kb, 1);
+	kcn_buf_put8(kb, '\0');
 	if (! kcn_strtoull(p, 0, ULLONG_MAX, &ullval))
 		return false;
 	*vp = ullval;
@@ -183,7 +183,7 @@ struct kcn_file {
 	enum kcn_eq_type kf_type;
 	size_t kf_size;
 	size_t kf_line;
-	struct kcn_pkt kf_kp;
+	struct kcn_buf kf_kb;
 	struct event kf_ev;
 	struct kcn_net *kf_kn;
 };
@@ -192,36 +192,36 @@ static void
 readfile(int fd, short event, void *arg)
 {
 	struct kcn_file *kf = arg;
-	struct kcn_pkt *kp = &kf->kf_kp;
+	struct kcn_buf *kb = &kf->kf_kb;
 	struct kcn_msg_add kma;
 	int error;
 
 	if ((event & EV_READ) == 0)
 		goto again;
 
-	error = kcn_pkt_read(fd, kp);
+	error = kcn_buf_read(fd, kb);
 	if (error != 0)
 		goto out;
 	kma.kma_type = kf->kf_type;
-	kf->kf_size -= kcn_pkt_len(kp);
-	while (kf->kf_size == 0 || kcn_pkt_len(kp) >= KCN_MSG_MAXSIZ) {
-		if (! get64(kp, &kma.kma_time) ||
-		    ! get64(kp, &kma.kma_val) ||
-		    ! getstr(kp, &kma.kma_loc, &kma.kma_loclen)) {
+	kf->kf_size -= kcn_buf_len(kb);
+	while (kf->kf_size == 0 || kcn_buf_len(kb) >= KCN_MSG_MAXSIZ) {
+		if (! get64(kb, &kma.kma_time) ||
+		    ! get64(kb, &kma.kma_val) ||
+		    ! getstr(kb, &kma.kma_loc, &kma.kma_loclen)) {
 			if (errno != EAGAIN)
 				err(EXIT_FAILURE, "invalid field");
 			KCN_LOG(DEBUG, "partial read");
-			kcn_pkt_start(kp);
+			kcn_buf_start(kb);
 			break;
 		}
 		if (! kcn_client_add_send(kf->kf_kn, &kma))
 			err(EXIT_FAILURE, "cannot send add message");
 		++kf->kf_line;
-		kcn_pkt_trim_head(kp, kcn_pkt_headingdata(kp));
+		kcn_buf_trim_head(kb, kcn_buf_headingdata(kb));
 		KCN_LOG(DEBUG, "%zu %llu %.*s", kma.kma_time,
 		    kma.kma_val, (int)kma.kma_loclen, kma.kma_loc);
 	}
-	kf->kf_size += kcn_pkt_len(kp);
+	kf->kf_size += kcn_buf_len(kb);
 
   out:
 	KCN_LOG(INFO, "file read with %s", strerror(error));
@@ -265,7 +265,7 @@ doit(const char *path)
 		err(EXIT_FAILURE, "cannot lock file: %s", strerror(errno));
 	if (! getfilesize(fd, &kf.kf_size))
 		err(EXIT_FAILURE, "cannot get file size: %s", strerror(errno));
-	if (! bufalloc(&kf.kf_kp, kf.kf_size))
+	if (! bufalloc(&kf.kf_kb, kf.kf_size))
 		err(EXIT_FAILURE, "cannot alloc. buffer: %s", strerror(errno));
 	event_set(&kf.kf_ev, fd, EV_READ, readfile, &kf);
 	if (event_base_set(evb, &kf.kf_ev) == -1)

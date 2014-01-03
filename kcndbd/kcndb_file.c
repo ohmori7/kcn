@@ -16,8 +16,8 @@
 struct kcndb_file {
 	int kf_fd;
 	size_t kf_size;
-	struct kcn_pkt kf_kp;
-	struct kcn_pkt_data *kf_kpd;
+	struct kcn_buf kf_kb;
+	struct kcn_buf_data *kf_kbd;
 };
 
 static void kcndb_file_destroy(struct kcndb_file *);
@@ -32,10 +32,10 @@ kcndb_file_new(void)
 		goto bad;
 	kf->kf_fd = -1;
 	kf->kf_size = 0;
-	kf->kf_kpd = kcn_pkt_data_new(KCNDB_FILE_BUFSIZ);
-	if (kf->kf_kpd == NULL)
+	kf->kf_kbd = kcn_buf_data_new(KCNDB_FILE_BUFSIZ);
+	if (kf->kf_kbd == NULL)
 		goto bad;
-	kcn_pkt_init(&kf->kf_kp, kf->kf_kpd);
+	kcn_buf_init(&kf->kf_kb, kf->kf_kbd);
 	return kf;
   bad:
 	kcndb_file_destroy(kf);
@@ -54,7 +54,7 @@ kcndb_file_destroy(struct kcndb_file *kf)
 		(void)close(kf->kf_fd);
 		errno = oerrno;
 	}
-	kcn_pkt_data_destroy(kf->kf_kpd);
+	kcn_buf_data_destroy(kf->kf_kbd);
 	free(kf);
 }
 
@@ -117,21 +117,21 @@ kcndb_file_size(const struct kcndb_file *kf)
 	return kf->kf_size;
 }
 
-struct kcn_pkt *
+struct kcn_buf *
 kcndb_file_buf(struct kcndb_file *kf)
 {
 
-	return &kf->kf_kp;
+	return &kf->kf_kb;
 }
 
 bool
 kcndb_file_ensure(struct kcndb_file *kf, size_t len)
 {
-	struct kcn_pkt *kp = kcndb_file_buf(kf);
+	struct kcn_buf *kb = kcndb_file_buf(kf);
 	int error;
 
-	while (kcn_pkt_len(kp) < len) {
-		error = kcn_pkt_read(kf->kf_fd, kp);
+	while (kcn_buf_len(kb) < len) {
+		error = kcn_buf_read(kf->kf_fd, kb);
 		if (error != 0) {
 			errno = error;
 			if (error != ESHUTDOWN)
@@ -167,15 +167,15 @@ kcndb_file_seek_head(struct kcndb_file *kf, off_t off)
 bool
 kcndb_file_write(struct kcndb_file *kf)
 {
-	struct kcn_pkt *kp = kcndb_file_buf(kf);
+	struct kcn_buf *kb = kcndb_file_buf(kf);
 	int error;
 
-	while (kcn_pkt_len(kp) > 0)
-		if ((error = kcn_pkt_write(kf->kf_fd, kp)) != 0) {
+	while (kcn_buf_len(kb) > 0)
+		if ((error = kcn_buf_write(kf->kf_fd, kb)) != 0) {
 			KCN_LOG(ERR, "cannot write file: %s", strerror(error));
 			return false;
 		}
-	kcn_pkt_reset(kp, 0);
+	kcn_buf_reset(kb, 0);
 	return true;
 }
 
@@ -187,7 +187,7 @@ kcndb_file_append(struct kcndb_file *kf)
 
 	if (! kcndb_file_seek(kf, 0, SEEK_END))
 		return false;
-	len = kcn_pkt_len(&kf->kf_kp);
+	len = kcn_buf_len(&kf->kf_kb);
 	rc = kcndb_file_write(kf);
 	if (rc)
 		kf->kf_size += len;
