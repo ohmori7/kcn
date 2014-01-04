@@ -1,4 +1,3 @@
-#define KCNDB_DB_PATH_DEFAULT		"/var/db/kcndb"
 #define KCNDB_DB_PATH_LOC_SUFFIX	"-loc"
 
 struct kcndb_db_record {

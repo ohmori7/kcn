@@ -643,6 +643,7 @@ LTLIBOBJS
 LIBOBJS
 KCNSE_LIBS
 KCN_LIBS
+KCN_DB_PATH
 EVENT_LIBS
 EVENT_CFLAGS
 JANSSON_LIBS
@@ -8988,6 +8989,15 @@ fi
 
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 fi
+
+#
+KCN_DB_PATH="/var/db/kcndb"
+
+cat >>confdefs.h <<\_ACEOF
+#define KCN_DB_PATH "/var/db/kcndb"
+_ACEOF
+
+
 
 #
 CPPFLAGS="$CPPFLAGS -I../lib"

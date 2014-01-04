@@ -168,6 +168,11 @@ else
 fi
 
 #
+KCN_DB_PATH="/var/db/kcndb"
+AC_DEFINE([KCN_DB_PATH],"/var/db/kcndb",[KCN database directory.])
+AC_SUBST(KCN_DB_PATH)
+
+#
 CPPFLAGS="$CPPFLAGS -I../lib"
 CFLAGS="$CFLAGS -W -Wall -Werror -Wmissing-declarations"
 KCN_LIBS="-L../lib -lkcn"

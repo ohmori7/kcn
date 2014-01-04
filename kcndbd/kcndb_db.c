@@ -40,7 +40,7 @@ struct kcndb_db_base {
 
 #define KCNDB_DB_BASE_INITIALIZER	{ 0, 0, PTHREAD_RWLOCK_INITIALIZER }
 
-static const char *kcndb_db_path = KCNDB_DB_PATH_DEFAULT;
+static const char *kcndb_db_path = KCN_DB_PATH;
 
 static struct kcndb_db_base kcndb_db_base[KCN_EQ_TYPE_MAX - 1] = {
 	[TYPE2INDEX(KCN_EQ_TYPE_STORAGE)]	= KCNDB_DB_BASE_INITIALIZER,

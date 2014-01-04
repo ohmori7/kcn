@@ -105,6 +105,6 @@ Options:\n\
 	-p: TCP listen port number (default %d)\n\
 	-v: increment verbosity (can be specified 7 times at maximum)\n\
 \n",
-	    pname, KCNDB_DB_PATH_DEFAULT, KCN_NETSTAT_PORT_DEFAULT);
+	    pname, KCN_DB_PATH, KCN_NETSTAT_PORT_DEFAULT);
 	exit(EXIT_FAILURE);
 }
