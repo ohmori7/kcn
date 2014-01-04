@@ -34,7 +34,12 @@ size_t strlcat(char *, const char *, size_t);
 #error unknown endianness
 #endif /* BYTE_ORDER != LITTLE_ENDIAN && BYTE_ORDER != BIG_ENDIAN */
 
-struct kcn_info; /* XXX */
+enum kcn_loc_type {
+	KCN_LOC_TYPE_DOMAINNAME,
+	KCN_LOC_TYPE_URI
+};
+
+struct kcn_info;
 
 char *kcn_key_concat(int, char * const []);
 char **kcn_key_split(const char *, size_t *);

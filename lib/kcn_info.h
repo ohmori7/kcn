@@ -3,11 +3,6 @@
 #define KCN_INFO_NLOCSTRLEN						\
 	(sizeof(size_t /* ki->ki_maxnlocs */ ) * NBBY / 3 /*approximate */)
 
-enum kcn_loc_type {
-	KCN_LOC_TYPE_DOMAINNAME,
-	KCN_LOC_TYPE_URI
-};
-
 struct kcn_info;
 
 struct kcn_info *kcn_info_new(enum kcn_loc_type, size_t);
