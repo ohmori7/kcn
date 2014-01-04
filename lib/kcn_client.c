@@ -102,7 +102,7 @@ kcn_client_query_send(struct kcn_net *kn, const struct kcn_msg_query *kmq)
 {
 	struct kcn_buf kb;
 
-	kcn_net_opkt(kn, &kb);
+	kcn_net_obuf(kn, &kb);
 	kcn_msg_query_encode(&kb, kmq);
 	if (! kcn_net_write(kn, &kb))
 		return false;
@@ -114,7 +114,7 @@ kcn_client_add_send(struct kcn_net *kn, const struct kcn_msg_add *kma)
 {
 	struct kcn_buf kb;
 
-	kcn_net_opkt(kn, &kb);
+	kcn_net_obuf(kn, &kb);
 	kcn_msg_add_encode(&kb, kma);
 	return kcn_net_write(kn, &kb);
 }

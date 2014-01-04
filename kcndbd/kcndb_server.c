@@ -136,7 +136,7 @@ kcndb_server_response_send(const struct kcndb_db_record *kdr, size_t score,
 	struct kcn_buf okb;
 	struct kcn_msg_response kmr;
 
-	kcn_net_opkt(kn, &okb);
+	kcn_net_obuf(kn, &okb);
 #define KCNDB_SERVER_RESPONSE_MAGIC	((void *)1U)
 	if (kdr != KCNDB_SERVER_RESPONSE_MAGIC) {
 		kmr.kmr_error = 0;
