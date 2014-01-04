@@ -16,6 +16,7 @@
 #include "kcn_sockaddr.h"
 #include "kcn_buf.h"
 #include "kcn_net.h"
+#include "kcn_time.h"
 #include "kcn_msg.h"
 #include "kcn_netstat.h"
 #include "kcndb_db.h"
@@ -183,7 +184,12 @@ kcndb_server_add_process(struct kcn_net *kn, struct kcn_buf *kb,
 	kt = kcn_net_data(kn);
 	if (! kcn_msg_add_decode(kb, kmh, &kma))
 		return false;
-	kdr.kdr_time = kma.kma_time;
+	if (kma.kma_time != (uint64_t)KCN_TIME_NOW)
+		kdr.kdr_time = kma.kma_time;
+	else if (time(&kdr.kdr_time) == -1) {
+		KCN_LOG(DEBUG, "cannot get current time");
+		return false;
+	}
 	kdr.kdr_val = kma.kma_val;
 	kdr.kdr_loc = kma.kma_loc;
 	kdr.kdr_loclen = kma.kma_loclen;
