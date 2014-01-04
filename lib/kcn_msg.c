@@ -91,11 +91,11 @@ kcn_msg_query_decode(struct kcn_buf *kb, const struct kcn_msg_header *kmh,
 {
 	struct kcn_eq *ke;
 
-	if (kcn_buf_trailingdata(kb) < KCN_MSG_QUERY_SIZ ||
-	    kmh->kmh_len != KCN_MSG_QUERY_SIZ) {
+	if (kmh->kmh_len != KCN_MSG_QUERY_SIZ) {
 		errno = EINVAL; /* XXX */
 		goto bad;
 	}
+	assert(kcn_buf_trailingdata(kb) >= KCN_MSG_QUERY_SIZ);
 	kmq->kmq_loctype = kcn_buf_get8(kb);
 	kmq->kmq_maxcount = kcn_buf_get8(kb);
 	ke = &kmq->kmq_eq;
@@ -146,11 +146,11 @@ kcn_msg_response_decode(struct kcn_buf *kb, const struct kcn_msg_header *kmh,
 {
 	size_t len = kmh->kmh_len;
 
-	if (kcn_buf_trailingdata(kb) < KCN_MSG_RESPONSE_MINSIZ ||
-	    len < KCN_MSG_RESPONSE_MINSIZ) {
+	if (len < KCN_MSG_RESPONSE_MINSIZ) {
 		errno = EINVAL; /* XXX */
 		goto bad;
 	}
+	assert(kcn_buf_trailingdata(kb) >= KCN_MSG_RESPONSE_MINSIZ);
 	kmr->kmr_error = kcn_buf_get8(kb);
 	kmr->kmr_score = kcn_buf_get8(kb);
 	kmr->kmr_loclen = len - KCN_MSG_RESPONSE_MINSIZ;
@@ -182,11 +182,11 @@ kcn_msg_add_decode(struct kcn_buf *kb, const struct kcn_msg_header *kmh,
     struct kcn_msg_add *kma)
 {
 
-	if (kcn_buf_trailingdata(kb) < KCN_MSG_ADD_MINSIZ ||
-	    kmh->kmh_len < KCN_MSG_ADD_MINSIZ) {
+	if (kmh->kmh_len < KCN_MSG_ADD_MINSIZ) {
 		errno = EINVAL;
 		goto bad;
 	}
+	assert(kcn_buf_trailingdata(kb) >= KCN_MSG_ADD_MINSIZ);
 	kma->kma_type = kcn_buf_get8(kb);
 	kma->kma_time = kcn_buf_get64(kb);
 	kma->kma_val = kcn_buf_get64(kb);
