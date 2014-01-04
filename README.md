@@ -142,6 +142,7 @@ in following order:
 	config.h.in		|
 	Makefile.in		|
 	kcndbd/Makefile.in	|
+	kcndbctl/Makefile.in	|
 	key2loc/Makefile.in	|
 	lib/Makefile.in		V
 	configure	(newest timestamp)
