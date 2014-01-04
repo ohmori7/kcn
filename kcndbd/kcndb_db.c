@@ -265,7 +265,7 @@ kcndb_db_search(const struct kcn_eq *ke, size_t maxnlocs,
 	size_t i, n, score;
 
 	kdt = kcndb_db_table_lookup(ke->ke_type);
-	if (! kcndb_file_seek_head(kdt->kdt_table, 0))
+	if (! kcndb_file_seek_head(kdt->kdt_table, 0)) /* XXX: should improve */
 		goto bad;
 	kb = kcndb_file_buf(kdt->kdt_table);
 	kcn_buf_reset(kb, 0);
