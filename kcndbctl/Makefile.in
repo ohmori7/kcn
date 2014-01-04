@@ -51,7 +51,8 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
-am_kcndbctl_OBJECTS = kcndbctl_main.$(OBJEXT) kcndbctl_file.$(OBJEXT)
+am_kcndbctl_OBJECTS = kcndbctl_main.$(OBJEXT) kcndbctl_msg.$(OBJEXT) \
+	kcndbctl_file.$(OBJEXT)
 kcndbctl_OBJECTS = $(am_kcndbctl_OBJECTS)
 kcndbctl_DEPENDENCIES =
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
@@ -179,9 +180,9 @@ target_vendor = @target_vendor@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-kcndbctl_SOURCES = kcndbctl_main.c kcndbctl_file.c
+kcndbctl_SOURCES = kcndbctl_main.c kcndbctl_msg.c kcndbctl_file.c
 kcndbctl_LDADD = @KCN_LIBS@ @EVENT_LIBS@
-noinst_HEADERS = kcndbctl_file.h
+noinst_HEADERS = kcndbctl_msg.h kcndbctl_file.h
 all: all-am
 
 .SUFFIXES:
@@ -265,6 +266,7 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/kcndbctl_file.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/kcndbctl_main.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/kcndbctl_msg.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<

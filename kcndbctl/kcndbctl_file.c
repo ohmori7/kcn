@@ -28,24 +28,6 @@
 #include "kcndbctl_file.h"
 
 static bool
-path2tabletype(const char *path, enum kcn_eq_type *typep)
-{
-	char buf[MAXPATHLEN];
-	enum kcn_eq_type type;
-
-	for (type = KCN_EQ_TYPE_MIN + 1; type < KCN_EQ_TYPE_MAX; type++) {
-		(void)snprintf(buf, sizeof(buf), "%s.txt",
-		    kcn_eq_type_ntoa(type));
-		if (strstr(path, buf) != NULL) {
-			*typep = type;
-			return true;
-		}
-	}
-	errno = ENOENT;
-	return false;
-}
-
-static bool
 getfilesize(int fd, size_t *sizep)
 {
 	struct stat st;
@@ -184,27 +166,15 @@ readfile(int fd, short event, void *arg)
 }
 
 int
-kcndbctl_file_process(const char *path)
+kcndbctl_file_process(enum kcn_eq_type type, struct kcn_net *kn,
+    const char *path)
 {
-	struct event_base *evb;
 	struct kcn_file kf;
-	int fd;
+	int fd, rc;
 
+	kf.kf_type = type;
 	kf.kf_line = 0;
-
-	if (! path2tabletype(path, &kf.kf_type))
-		err(EXIT_FAILURE, "cannot guess table type from file name");
-	KCN_LOG(INFO, "choose a table type of %s",
-	    kcn_eq_type_ntoa(kf.kf_type));
-
-	evb = event_init();
-	if (evb == NULL)
-		err(EXIT_FAILURE, "cannot allocate event base");
-
-	kf.kf_kn = kcn_client_init(evb, NULL);
-	if (kf.kf_kn == NULL)
-		err(EXIT_FAILURE, "cannot connect to kcndbd: %s",
-		    strerror(errno));
+	kf.kf_kn = kn;
 
 	fd = open(path, O_RDONLY);
 	if (fd == -1)
@@ -216,18 +186,18 @@ kcndbctl_file_process(const char *path)
 	if (! bufalloc(&kf.kf_kb, kf.kf_size))
 		err(EXIT_FAILURE, "cannot alloc. buffer: %s", strerror(errno));
 	event_set(&kf.kf_ev, fd, EV_READ, readfile, &kf);
-	if (event_base_set(evb, &kf.kf_ev) == -1)
+	if (event_base_set(kcn_net_event_base(kf.kf_kn), &kf.kf_ev) == -1)
 		err(EXIT_FAILURE, "cannot set event base: %s", strerror(errno));
 	if (event_add(&kf.kf_ev, NULL) == -1)
 		err(EXIT_FAILURE, "cannot enable event: %s", strerror(errno));
 
-	kcn_net_loop(kf.kf_kn);
+	if (kcn_net_loop(kf.kf_kn))
+		rc = EXIT_SUCCESS;
+	else
+		rc = EXIT_FAILURE;
 
 	(void)flock(fd, LOCK_UN);
 	(void)close(fd);
 
-	kcn_client_finish(kf.kf_kn);
-	event_base_free(evb);
-
-	return 0;
+	return rc;
 }
