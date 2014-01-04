@@ -141,32 +141,41 @@ static bool
 kcndb_db_rdlock(const struct kcndb_db_table *kdt)
 {
 	struct kcndb_db_base *kdb = &kcndb_db_base[TYPE2INDEX(kdt->kdt_type)];
+	int error;
 
-	errno = pthread_rwlock_rdlock(&kdb->kdb_lock);
-	if (errno != 0)
+	error = pthread_rwlock_rdlock(&kdb->kdb_lock);
+	if (error != 0) {
+		errno = error;
 		KCN_LOG(ERR, "database read lock error: %s", strerror(errno));
-	return errno == 0 ? true : false;
+	}
+	return error == 0 ? true : false;
 }
 
 static bool
 kcndb_db_wrlock(const struct kcndb_db_table *kdt)
 {
 	struct kcndb_db_base *kdb = &kcndb_db_base[TYPE2INDEX(kdt->kdt_type)];
+	int error;
 
-	errno = pthread_rwlock_wrlock(&kdb->kdb_lock);
-	if (errno != 0)
+	error = pthread_rwlock_wrlock(&kdb->kdb_lock);
+	if (error != 0) {
+		errno = error;
 		KCN_LOG(ERR, "database write lock error: %s", strerror(errno));
-	return errno == 0 ? true : false;
+	}
+	return error == 0 ? true : false;
 }
 
 static void
 kcndb_db_unlock(const struct kcndb_db_table *kdt)
 {
 	struct kcndb_db_base *kdb = &kcndb_db_base[TYPE2INDEX(kdt->kdt_type)];
+	int error;
 
-	errno = pthread_rwlock_unlock(&kdb->kdb_lock);
-	if (errno != 0)
+	error = pthread_rwlock_unlock(&kdb->kdb_lock);
+	if (error != 0) {
+		errno = error;
 		KCN_LOG(ERR, "database unlock failed: %s", strerror(errno));
+	}
 }
 
 static struct kcndb_db_table *
