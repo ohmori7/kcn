@@ -3,7 +3,7 @@
 #define KCN_MSG_MAXSIZ		4096
 #define KCN_MSG_MAXBODYSIZ	(KCN_MSG_MAXSIZ - KCN_MSG_HDRSIZ)
 #define KCN_MSG_QUERY_SIZ	(1 + 1 + 1 + 1 + 8 + 8 + 8)
-#define KCN_MSG_RESPONSE_MINSIZ	(1 + 1 + 1)
+#define KCN_MSG_RESPONSE_MINSIZ	(1 + 1)
 #define KCN_MSG_ADD_MINSIZ	(1 + 8 + 8)
 #define KCN_MSG_MAXLOCSIZ						\
 	(KCN_MSG_MAXBODYSIZ - max(KCN_MSG_RESPONSE_MINSIZ, KCN_MSG_ADD_MINSIZ))
@@ -30,9 +30,9 @@ struct kcn_msg_query {
 
 struct kcn_msg_response {
 	uint8_t kmr_error;
-	uint8_t kmr_leftcount;
 	uint8_t kmr_score;
-	struct kcn_info *kmr_ki;
+	const char *kmr_loc;
+	size_t kmr_loclen;
 };
 
 struct kcn_msg_add {
@@ -47,7 +47,7 @@ bool kcn_msg_header_decode(struct kcn_buf *, struct kcn_msg_header *);
 void kcn_msg_query_encode(struct kcn_buf *, const struct kcn_msg_query *);
 bool kcn_msg_query_decode(struct kcn_buf *, const struct kcn_msg_header *,
     struct kcn_msg_query *);
-void kcn_msg_response_init(struct kcn_msg_response *, struct kcn_info *);
+void kcn_msg_response_init(struct kcn_msg_response *);
 void kcn_msg_response_encode(struct kcn_buf *, const struct kcn_msg_response *);
 bool kcn_msg_response_decode(struct kcn_buf *, const struct kcn_msg_header *,
     struct kcn_msg_response *);

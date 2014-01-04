@@ -10,7 +10,6 @@
 #include <event.h>
 
 #include "kcn.h"
-#include "kcn_info.h"
 #include "kcn_eq.h"
 #include "kcn_log.h"
 #include "kcn_socket.h"
@@ -130,37 +129,42 @@ kcndb_server_loop(void)
 }
 
 static bool
+kcndb_server_response_send(const struct kcndb_db_record *kdr, size_t score,
+    void *arg)
+{
+	struct kcn_net *kn = arg;
+	struct kcn_buf okb;
+	struct kcn_msg_response kmr;
+
+	kcn_net_opkt(kn, &okb);
+#define KCNDB_SERVER_RESPONSE_MAGIC	((void *)1U)
+	if (kdr != KCNDB_SERVER_RESPONSE_MAGIC) {
+		kmr.kmr_error = 0;
+		kmr.kmr_score = score;
+		kmr.kmr_loc = kdr->kdr_loc;
+		kmr.kmr_loclen = kdr->kdr_loclen;
+	} else {
+		kmr.kmr_error = score;
+		kmr.kmr_score = 0;
+		kmr.kmr_loc = 0;
+		kmr.kmr_loclen = 0;
+	}
+	kcn_msg_response_encode(&okb, &kmr);
+	return kcn_net_write(kn, &okb);
+}
+
+static bool
 kcndb_server_query_process(struct kcn_net *kn, struct kcn_buf *ikb,
     const struct kcn_msg_header *kmh)
 {
-	struct kcn_buf okb;
 	struct kcn_msg_query kmq;
-	struct kcn_msg_response kmr;
-	struct kcn_info *ki;
 
-	if (! kcn_msg_query_decode(ikb, kmh, &kmq))
-		ki = NULL;
-	else
-		/* XXX */
-		ki = kcn_info_new(kmq.kmq_loctype, kmq.kmq_maxcount);
-
-	kcn_msg_response_init(&kmr, ki);
-	if (ki == NULL || ! kcndb_db_search(ki, &kmq.kmq_eq))
-		kmr.kmr_error = errno;
-	else  {
-		assert(kcn_info_nlocs(ki) > 0);
-		kmr.kmr_leftcount = kcn_info_nlocs(ki) - 1;
-	}
-
-	kcn_net_opkt(kn, &okb);
-	do {
-		kcn_msg_response_encode(&okb, &kmr);
-		if (! kcn_net_write(kn, &okb))
-			break;
-	} while (kmr.kmr_leftcount-- > 0);
-
-	kcn_info_destroy(ki); /* XXX */
-
+	if (kcn_msg_query_decode(ikb, kmh, &kmq) &&
+	    kcndb_db_search(&kmq.kmq_eq, kmq.kmq_maxcount,
+	    kcndb_server_response_send, kn))
+		errno = 0;
+	kcndb_server_response_send(KCNDB_SERVER_RESPONSE_MAGIC, errno, kn);
+	/* always return 0 in order to return a response with an error. */
 	return true;
 }
 

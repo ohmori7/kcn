@@ -12,6 +12,7 @@ struct kcndb_db_record {
 void kcndb_db_path_set(const char *);
 const char *kcndb_db_path_get(void);
 bool kcndb_db_record_add(enum kcn_eq_type, struct kcndb_db_record *);
-bool kcndb_db_search(struct kcn_info *, const struct kcn_eq *);
+bool kcndb_db_search(const struct kcn_eq *, size_t,
+    bool (*)(const struct kcndb_db_record *, size_t, void *), void *);
 bool kcndb_db_init(void);
 void kcndb_db_finish(void);

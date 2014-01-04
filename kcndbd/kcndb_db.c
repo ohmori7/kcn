@@ -11,7 +11,6 @@
 
 #include "kcn.h"
 #include "kcn_str.h"
-#include "kcn_info.h"
 #include "kcn_eq.h"
 #include "kcn_log.h"
 #include "kcn_buf.h"
@@ -257,12 +256,13 @@ kcndb_db_record_add(enum kcn_eq_type type, struct kcndb_db_record *kdr)
 }
 
 bool
-kcndb_db_search(struct kcn_info *ki, const struct kcn_eq *ke)
+kcndb_db_search(const struct kcn_eq *ke, size_t maxnlocs,
+    bool (*cb)(const struct kcndb_db_record *, size_t, void *), void *arg)
 {
 	struct kcndb_db_table *kdt;
 	struct kcn_buf *kb;
 	struct kcndb_db_record kdr;
-	size_t i, score;
+	size_t i, n, score;
 
 	kdt = kcndb_db_table_lookup(ke->ke_type);
 	if (! kcndb_file_seek_head(kdt->kdt_table, 0))
@@ -271,7 +271,7 @@ kcndb_db_search(struct kcn_info *ki, const struct kcn_eq *ke)
 	kcn_buf_reset(kb, 0);
 
 	score = 0; /* XXX: should compute score. */
-	for (i = 0; kcn_info_nlocs(ki) < kcn_info_maxnlocs(ki); i++) {
+	for (i = 0, n = 0; n < maxnlocs; i++) {
 		if (! kcndb_db_record_read(kdt, &kdr)) {
 			if (errno == ESHUTDOWN)
 				break;
@@ -318,13 +318,14 @@ kcndb_db_search(struct kcn_info *ki, const struct kcn_eq *ke)
 			goto bad;
 		KCN_LOG(DEBUG, "record[%zu]: match loc=%.*s",
 		    i, (int)kdr.kdr_loclen, kdr.kdr_loc);
-		if (! kcn_info_loc_add(ki, kdr.kdr_loc, kdr.kdr_loclen, score))
+		if (! (*cb)(&kdr, score, arg))
 			goto bad;
+		++n;
 	}
 
 	KCN_LOG(INFO, "%zu record(s) read", i);
 
-	if (kcn_info_nlocs(ki) == 0) {
+	if (n == 0) {
 		KCN_LOG(DEBUG, "no matching record found");
 		errno = ESRCH;
 		goto bad;

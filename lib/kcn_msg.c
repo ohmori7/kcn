@@ -10,7 +10,6 @@
 #include "kcn.h"
 #include "kcn_log.h"
 #include "kcn_buf.h"
-#include "kcn_info.h"
 #include "kcn_eq.h"
 #include "kcn_msg.h"
 
@@ -120,36 +119,24 @@ kcn_msg_query_decode(struct kcn_buf *kb, const struct kcn_msg_header *kmh,
 }
 
 void
-kcn_msg_response_init(struct kcn_msg_response *kmr, struct kcn_info *ki)
+kcn_msg_response_init(struct kcn_msg_response *kmr)
 {
 
 	kmr->kmr_error = 0;
-	kmr->kmr_leftcount = 0;
 	kmr->kmr_score = 0;
-	kmr->kmr_ki = ki;
+	kmr->kmr_loc = NULL;
+	kmr->kmr_loclen = 0;
 }
 
 void
 kcn_msg_response_encode(struct kcn_buf *kb, const struct kcn_msg_response *kmr)
 {
-	const struct kcn_info *ki;
-	const char *loc;
-	size_t idx;
 
 	kcn_msg_pkt_init(kb);
 	kcn_buf_put8(kb, kmr->kmr_error);
-	kcn_buf_put8(kb, kmr->kmr_leftcount);
 	kcn_buf_put8(kb, kmr->kmr_score);
-
-	ki = kmr->kmr_ki;
-	if (ki != NULL && kcn_info_nlocs(ki) > 0) {
-		assert(kcn_info_nlocs(ki) > kmr->kmr_leftcount);
-		idx = kcn_info_nlocs(ki) - kmr->kmr_leftcount - 1;
-		loc = kcn_info_loc(ki, idx);
-		assert(loc != NULL);
-		kcn_buf_put(kb, loc, strlen(loc));
-	}
-
+	if (kmr->kmr_loc != NULL)
+		kcn_buf_put(kb, kmr->kmr_loc, kmr->kmr_loclen);
 	kcn_msg_header_encode(kb, KCN_MSG_TYPE_RESPONSE);
 }
 
@@ -157,7 +144,6 @@ bool
 kcn_msg_response_decode(struct kcn_buf *kb, const struct kcn_msg_header *kmh,
     struct kcn_msg_response *kmr)
 {
-	struct kcn_info *ki = kmr->kmr_ki;
 	size_t len = kmh->kmh_len;
 
 	if (kcn_buf_trailingdata(kb) < KCN_MSG_RESPONSE_MINSIZ ||
@@ -166,21 +152,14 @@ kcn_msg_response_decode(struct kcn_buf *kb, const struct kcn_msg_header *kmh,
 		goto bad;
 	}
 	kmr->kmr_error = kcn_buf_get8(kb);
-	kmr->kmr_leftcount = kcn_buf_get8(kb);
 	kmr->kmr_score = kcn_buf_get8(kb);
-	len -= KCN_MSG_RESPONSE_MINSIZ;
+	kmr->kmr_loclen = len - KCN_MSG_RESPONSE_MINSIZ;
+	if (kmr->kmr_loclen > 0)
+		kmr->kmr_loc = kcn_buf_current(kb);
+	else
+		kmr->kmr_loc = NULL;
+	kcn_buf_forward(kb, kmr->kmr_loclen);
 	kcn_buf_trim_head(kb, kcn_buf_headingdata(kb));
-	if (kcn_info_maxnlocs(ki) - kcn_info_nlocs(ki) < kmr->kmr_leftcount) {
-		KCN_LOG(ERR, "too many responses, %u", kmr->kmr_leftcount);
-		errno = ETOOMANYREFS; /* XXX */
-		goto bad;
-	}
-
-	if (! kcn_info_loc_add(kmr->kmr_ki, kcn_buf_current(kb), len,
-	    kmr->kmr_score))
-		goto bad;
-	kcn_buf_trim_head(kb, len);
-
 	return true;
   bad:
 	return false;

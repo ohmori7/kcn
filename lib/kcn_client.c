@@ -19,6 +19,11 @@
 #include "kcn_netstat.h"
 #include "kcn_client.h"
 
+struct kcn_client_response {
+	int kcr_error;
+	struct kcn_info *kcr_ki;
+};
+
 static int kcn_client_read(struct kcn_net *, struct kcn_buf *, void *);
 
 struct kcn_net *
@@ -59,25 +64,38 @@ kcn_client_finish(struct kcn_net *kn)
 static int
 kcn_client_read(struct kcn_net *kn, struct kcn_buf *kb, void *arg)
 {
-	struct kcn_msg_response *kmr = arg;
+	struct kcn_client_response *kcr = arg;
+	struct kcn_info *ki = kcr->kcr_ki;
+	struct kcn_msg_response kmr;
 	struct kcn_msg_header kmh;
 
 	(void)kn;
-	do {
+	for (;;) {
 		if (! kcn_msg_header_decode(kb, &kmh))
-			goto bad;
+			break;
 		if (kmh.kmh_type != KCN_MSG_TYPE_RESPONSE) {
 			errno = EINVAL;
-			goto bad;
+			break;
 		}
-		if (! kcn_msg_response_decode(kb, &kmh, kmr))
-			goto bad;
-	} while (kmr->kmr_leftcount > 0);
-	return 0;
-  bad:
+		kcn_msg_response_init(&kmr);
+		if (! kcn_msg_response_decode(kb, &kmh, &kmr))
+			break;
+		if (kmr.kmr_loclen == 0) {
+			if (kmr.kmr_error != EAGAIN)
+				errno = kmr.kmr_error;
+			break;
+		}
+		if (kcn_info_maxnlocs(ki) == kcn_info_nlocs(ki)) {
+			errno = ETOOMANYREFS; /* XXX */
+			break;
+		}
+		if (! kcn_info_loc_add(ki,
+		    kmr.kmr_loc, kmr.kmr_loclen, kmr.kmr_score))
+			break;
+	}
 	if (errno != EAGAIN)
-		kmr->kmr_error = errno;
-	return errno;
+		kcr->kcr_error = errno;
+	return kcr->kcr_error;
 }
 
 static bool
@@ -107,27 +125,24 @@ kcn_client_search(struct kcn_info *ki, const struct kcn_msg_query *kmq)
 {
 	struct event_base *evb;
 	struct kcn_net *kn;
-	struct kcn_msg_response kmr;
+	struct kcn_client_response kcr;
 
 	evb = event_init();
 	if (evb == NULL)
 		goto bad;
 
-	kn = kcn_client_init(evb, &kmr);
+	kcr.kcr_error = 0;
+	kcr.kcr_ki = ki;
+	kn = kcn_client_init(evb, &kcr);
 	if (kn == NULL)
 		goto bad;
 
-	kcn_msg_response_init(&kmr, ki);
 	if (! kcn_client_query_send(kn, kmq))
 		goto bad;
 	if (! kcn_net_loop(kn))
 		goto bad;
-	if (kmr.kmr_error != 0) {
-		errno = kmr.kmr_error;
-		goto bad;
-	}
-	if (kcn_info_nlocs(ki) == 0) {
-		errno = ESRCH;
+	if (kcr.kcr_error != 0) {
+		errno = kcr.kcr_error;
 		goto bad;
 	}
 	kcn_client_finish(kn);
