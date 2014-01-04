@@ -37,19 +37,19 @@ kcn_eq_type_aton(const char *s, enum kcn_eq_type *typep)
 {
 #define ISMATCH(a)							\
 	(strncasecmp((a), s, sizeof(a)) == 0 ? true : false)
-	if (ISMATCH("HDD") || ISMATCH("storage"))
+	if (ISMATCH("hdd") || ISMATCH("storage"))
 		*typep = KCN_EQ_TYPE_STORAGE;
-	else if (ISMATCH("CPU") || ISMATCH("load"))
+	else if (ISMATCH("cpu") || ISMATCH("load"))
 		*typep = KCN_EQ_TYPE_CPULOAD;
 	else if (ISMATCH("traffic"))
 		*typep = KCN_EQ_TYPE_TRAFFIC;
 	else if (ISMATCH("rtt"))
 		*typep = KCN_EQ_TYPE_RTT;
-	else if (ISMATCH("hop") || ISMATCH("ttl"))
+	else if (ISMATCH("hopcount") || ISMATCH("ttl"))
 		*typep = KCN_EQ_TYPE_HOPCOUNT;
-	else if (ISMATCH("as"))
+	else if (ISMATCH("aspathlen"))
 		*typep = KCN_EQ_TYPE_ASPATHLEN;
-	else if (ISMATCH("assoc"))
+	else if (ISMATCH("wlanassoc"))
 		*typep = KCN_EQ_TYPE_WLANASSOC;
 	else {
 		errno = ENOENT;
