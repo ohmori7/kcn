@@ -473,8 +473,11 @@ kcndb_db_search(struct kcndb_db *kd, const struct kcn_eq *ke, size_t maxnlocs,
 			continue;
 		}
 		if (! kcndb_db_loc_lookup(kdt, kdr.kdr_locidx,
-		    &kdr.kdr_loc, &kdr.kdr_loclen))
+		    &kdr.kdr_loc, &kdr.kdr_loclen)) {
+			KCN_LOG(DEBUG, "cannot find locator: %s",
+			    strerror(errno));
 			goto bad;
+		}
 		KCN_LOG(DEBUG, "record[%zu]: match loc=%.*s",
 		    i, (int)kdr.kdr_loclen, kdr.kdr_loc);
 		if (! (*cb)(&kdr, score, arg))
