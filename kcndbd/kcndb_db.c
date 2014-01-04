@@ -227,8 +227,8 @@ kcndb_db_record_read(struct kcndb_db_table *kdt, struct kcndb_db_record *kdr)
 {
 	struct kcn_buf *kb = kcndb_file_buf(kdt->kdt_table);
 
-#define KCNDB_HDRSIZ	(8 + 8 + 8)
-	if (! kcndb_file_ensure(kdt->kdt_table, KCNDB_HDRSIZ))
+#define KCNDB_DB_RECORDSIZ	(8 + 8 + 8)
+	if (! kcndb_file_ensure(kdt->kdt_table, KCNDB_DB_RECORDSIZ))
 		return false;
 
 	kdr->kdr_time = kcn_buf_get64(kb);
