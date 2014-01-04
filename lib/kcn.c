@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "kcn_info.h"
 #include "kcn.h"
 #include "kcn_db.h"
 #include "kcn_netstat.h"
