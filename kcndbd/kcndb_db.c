@@ -325,7 +325,7 @@ kcndb_db_loc_lookup(struct kcndb_db_table *kdt, uint64_t idx,
 	struct kcn_buf *kb = kcndb_file_buf(kf);
 
 	if (kcndb_db_loc_size(kdt) < idx) {
-		errno = EINVAL;
+		errno = ENXIO;
 		return false;
 	}
 	kcn_buf_reset(kb, 0);
