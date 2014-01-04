@@ -63,10 +63,10 @@ identifier in KCN, i.e. keywords,  as follows:
 google searching engine.  Database engine is automatically selected in
 accordance with input keywords.  For examples,
 
-          % key2loc latency lt 100
+          % key2loc rtt lt 100
 
 this may choose KCN database, and search for a FQDN of a host that can be
-reached with a latency, 100 msec or less.
+reached with 100 msec or less of RTT.
 
   On the other hand,
 
