@@ -360,17 +360,15 @@ static bool
 kcndb_db_record_read_last(struct kcndb_db_table *kdt,
     struct kcndb_db_record *kdr)
 {
-	struct kcndb_db_base *kdb;
 	size_t off;
 
-	kdb = &kcndb_db_base[TYPE2INDEX(kdt->kdt_type)];
-	if (kdb->kdb_tablesize < KCNDB_DB_RECORDSIZ) {
+	if (kcndb_db_table_size(kdt) < KCNDB_DB_RECORDSIZ) {
 		kdr->kdr_time = 0;
 		kdr->kdr_val = 0;
 		kdr->kdr_locidx = 0;
 		return true;
 	}
-	off = kdb->kdb_tablesize - KCNDB_DB_RECORDSIZ;
+	off = kcndb_db_table_size(kdt) - KCNDB_DB_RECORDSIZ;
 	if (! kcndb_file_seek_head(kdt->kdt_table, off))
 		return false;
 	return kcndb_db_record_read(kdt, kdr);
