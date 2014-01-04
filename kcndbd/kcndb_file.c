@@ -99,13 +99,6 @@ kcndb_file_size_get(const struct kcndb_file *kf, size_t *sizep)
 	return true;
 }
 
-int
-kcndb_file_fd(const struct kcndb_file *kf)
-{
-
-	return kf->kf_fd;
-}
-
 struct kcn_buf *
 kcndb_file_buf(struct kcndb_file *kf)
 {
