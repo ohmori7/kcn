@@ -93,9 +93,8 @@ kcn_client_read(struct kcn_net *kn, struct kcn_buf *kb, void *arg)
 		    kmr.kmr_loc, kmr.kmr_loclen, kmr.kmr_score))
 			break;
 	}
-	if (errno != EAGAIN)
-		kcr->kcr_error = errno;
-	return kcr->kcr_error;
+	kcr->kcr_error = errno;
+	return errno;
 }
 
 static bool
