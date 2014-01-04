@@ -142,6 +142,13 @@ kcn_net_state_change(struct kcn_net *kn, enum kcn_net_state nstate)
 #endif /* HAVE_LIBEVENT_RAISE_EV_READ_WITH_EINPROGRESS */
 }
 
+struct event_base *
+kcn_net_event_base(const struct kcn_net *kn)
+{
+
+	return kn->kn_evb;
+}
+
 void
 kcn_net_obuf(struct kcn_net *kn, struct kcn_buf *kb)
 {
