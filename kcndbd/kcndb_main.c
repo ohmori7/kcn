@@ -13,6 +13,7 @@
 #include "kcn_eq.h"
 #include "kcn_str.h"
 #include "kcn_log.h"
+#include "kcn_signal.h"
 #include "kcn_netstat.h"
 
 #include "kcndb_db.h"
@@ -62,6 +63,10 @@ main(int argc, char * const argv[])
 	}
 	argc -= optind;
 	argv += optind;
+
+	if (! kcn_signal_init())
+		usage("cannot initialize signals");
+		/*NOTREACHED*/
 
 	if (! kcndb_db_init())
 		usage("cannot open database path, \"%s\"", kcndb_db_path_get());
