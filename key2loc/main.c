@@ -1,5 +1,6 @@
 #include <sys/time.h>
 #include <err.h>
+#include <errno.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -119,8 +120,9 @@ doit(const char *db, enum kcn_loc_type loctype, size_t nmaxlocs,
     const char *country, const char *userip, int keyc, char * const keyv[])
 {
 	struct kcn_info *ki;
-	size_t i;
+	size_t i, oerrno;
 	struct timeval tvs, tve, tvd;
+	bool rc;
 
 	ki = kcn_info_new(loctype, nmaxlocs);
 	if (ki == NULL)
@@ -129,12 +131,15 @@ doit(const char *db, enum kcn_loc_type loctype, size_t nmaxlocs,
 	kcn_info_country_set(ki, country);
 	kcn_info_userip_set(ki, userip);
 	gettimeofday(&tvs, NULL);
-	if (! kcn_searchv(ki, keyc, keyv))
-		err(EXIT_FAILURE, "search failure");
+	rc = kcn_searchv(ki, keyc, keyv);
+	oerrno = errno;
 	gettimeofday(&tve, NULL);
 	timersub(&tve, &tvs, &tvd);
-	fprintf(stderr, "Resolved with %zu.%06zu sec\n",
+	fprintf(stderr, "Resolution finishes with %zu.%06zu sec\n",
 	    (size_t)tvd.tv_sec, (size_t)tvd.tv_usec);
+	errno = oerrno;
+	if (! rc)
+		err(EXIT_FAILURE, "search failure");
 	for (i = 0; i < kcn_info_nlocs(ki); i++)
 		printf("%s\n", kcn_info_loc(ki, i));
 	kcn_info_destroy(ki);
