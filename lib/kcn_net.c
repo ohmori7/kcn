@@ -149,6 +149,13 @@ kcn_net_obuf(struct kcn_net *kn, struct kcn_buf *kb)
 	kcn_buf_init(kb, kn->kn_obufdata);
 }
 
+void *
+kcn_net_data(const struct kcn_net *kn)
+{
+
+	return kn->kn_data;
+}
+
 static bool
 kcn_net_event_enable(struct kcn_net *kn, struct event *ev, const char *name)
 {

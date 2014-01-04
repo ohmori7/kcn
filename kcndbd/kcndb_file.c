@@ -58,17 +58,6 @@ kcndb_file_destroy(struct kcndb_file *kf)
 	free(kf);
 }
 
-static bool
-kcndb_file_size_get(struct kcndb_file *kf)
-{
-	struct stat st;
-
-	if (fstat(kf->kf_fd, &st) == -1)
-		return false;
-	kf->kf_size = st.st_size; /* convert off_t to size_t */
-	return true;
-}
-
 struct kcndb_file *
 kcndb_file_open(const char *path)
 {
@@ -86,10 +75,6 @@ kcndb_file_open(const char *path)
 		KCN_LOG(DEBUG, "cannot open file: %s", strerror(errno));
 		goto bad;
 	}
-	if (! kcndb_file_size_get(kf)) {
-		KCN_LOG(DEBUG, "cannot get file size: %s", strerror(errno));
-		goto bad;
-	}
 	return kf;
   bad:
 	kcndb_file_destroy(kf);
@@ -103,18 +88,22 @@ kcndb_file_close(struct kcndb_file *kf)
 	kcndb_file_destroy(kf);
 }
 
+bool
+kcndb_file_size_get(const struct kcndb_file *kf, size_t *sizep)
+{
+	struct stat st;
+
+	if (fstat(kf->kf_fd, &st) == -1)
+		return false;
+	*sizep = st.st_size; /* convert off_t to size_t */
+	return true;
+}
+
 int
 kcndb_file_fd(const struct kcndb_file *kf)
 {
 
 	return kf->kf_fd;
-}
-
-size_t
-kcndb_file_size(const struct kcndb_file *kf)
-{
-
-	return kf->kf_size;
 }
 
 struct kcn_buf *

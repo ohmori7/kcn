@@ -9,10 +9,13 @@ struct kcndb_db_record {
 	size_t kdr_loclen;
 };
 
+struct kcndb_db;
+
 void kcndb_db_path_set(const char *);
 const char *kcndb_db_path_get(void);
-bool kcndb_db_record_add(enum kcn_eq_type, struct kcndb_db_record *);
-bool kcndb_db_search(const struct kcn_eq *, size_t,
+bool kcndb_db_record_add(struct kcndb_db *, enum kcn_eq_type,
+    struct kcndb_db_record *);
+bool kcndb_db_search(struct kcndb_db *, const struct kcn_eq *, size_t,
     bool (*)(const struct kcndb_db_record *, size_t, void *), void *);
-bool kcndb_db_init(void);
-void kcndb_db_finish(void);
+struct kcndb_db *kcndb_db_new(void);
+void kcndb_db_destroy(struct kcndb_db *);

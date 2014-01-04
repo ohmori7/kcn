@@ -68,10 +68,6 @@ main(int argc, char * const argv[])
 		usage("cannot initialize signals");
 		/*NOTREACHED*/
 
-	if (! kcndb_db_init())
-		usage("cannot open database path, \"%s\"", kcndb_db_path_get());
-		/*NOTREACHED*/
-
 	if (! fflag && daemon(1, 1) == -1)
 		usage("cannot daemonize");
 		/*NOTREACHED*/
@@ -81,8 +77,6 @@ main(int argc, char * const argv[])
 		/*NOTREACHED*/
 
 	kcndb_server_loop();
-
-	kcndb_db_finish();
 
 	return 0;
 }

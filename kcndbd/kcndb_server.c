@@ -35,6 +35,7 @@ struct kcndb_thread {
 	unsigned short kt_number;
 	int kt_listenfd;
 	struct event_base *kt_evb;
+	struct kcndb_db *kt_db;
 };
 
 #define KCNDB_THREAD_NUMBER_MAIN	0
@@ -62,6 +63,7 @@ kcndb_thread_finish(struct kcndb_thread *kt)
 
 	if (kt->kt_evb != NULL)
 		event_base_free(kt->kt_evb);
+	kcndb_db_destroy(kt->kt_db);
 }
 
 void
@@ -157,10 +159,12 @@ static bool
 kcndb_server_query_process(struct kcn_net *kn, struct kcn_buf *ikb,
     const struct kcn_msg_header *kmh)
 {
+	struct kcndb_thread *kt;
 	struct kcn_msg_query kmq;
 
+	kt = kcn_net_data(kn);
 	if (kcn_msg_query_decode(ikb, kmh, &kmq) &&
-	    kcndb_db_search(&kmq.kmq_eq, kmq.kmq_maxcount,
+	    kcndb_db_search(kt->kt_db, &kmq.kmq_eq, kmq.kmq_maxcount,
 	    kcndb_server_response_send, kn))
 		errno = 0;
 	kcndb_server_response_send(KCNDB_SERVER_RESPONSE_MAGIC, errno, kn);
@@ -172,18 +176,19 @@ static bool
 kcndb_server_add_process(struct kcn_net *kn, struct kcn_buf *kb,
     const struct kcn_msg_header *kmh)
 {
+	struct kcndb_thread *kt;
 	struct kcn_msg_add kma;
 	struct kcndb_db_record kdr;
 	bool rc;
 
-	(void)kn;
+	kt = kcn_net_data(kn);
 	if (! kcn_msg_add_decode(kb, kmh, &kma))
 		return false;
 	kdr.kdr_time = kma.kma_time;
 	kdr.kdr_val = kma.kma_val;
 	kdr.kdr_loc = kma.kma_loc;
 	kdr.kdr_loclen = kma.kma_loclen;
-	rc = kcndb_db_record_add(kma.kma_type, &kdr);
+	rc = kcndb_db_record_add(kt->kt_db, kma.kma_type, &kdr);
 	return rc;
 }
 
@@ -258,8 +263,13 @@ kcndb_server_main(void *arg)
 	LOG(DEBUG, "start%s", "");
 
 	kt->kt_evb = event_init();
+	kt->kt_db = kcndb_db_new();
 	if (kt->kt_evb == NULL) {
 		LOG(ERR, "event_init() failed: %s", strerror(errno));
+		goto out;
+	}
+	if (kt->kt_db == NULL) {
+		LOG(ERR, "cannot allocate database: %s", strerror(errno));
 		goto out;
 	}
 
