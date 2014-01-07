@@ -385,8 +385,9 @@ kcndb_db_record_add(struct kcndb_db *kd, enum kcn_eq_type type,
 
 	kdt = kcndb_db_table_lookup(kd, type);
 	kb = kcndb_file_buf(kdt->kdt_table);
-	if (! kcndb_db_wrlock(kdt))
-		return false;
+	rc = kcndb_db_wrlock(kdt);
+	if (! rc)
+		goto bad;
 	rc = kcndb_db_record_read_last(kdt, &kdr0);
 	if (! rc)
 		goto out;
@@ -405,8 +406,20 @@ kcndb_db_record_add(struct kcndb_db *kd, enum kcn_eq_type type,
 	rc = kcndb_file_append(kdt->kdt_table);
 	if (rc)
 		kcndb_db_table_size_increment(kdt, KCNDB_DB_RECORDSIZ);
+
   out:
 	kcndb_db_unlock(kdt);
+  bad:
+	if (rc)
+		KCN_LOG(DEBUG, "record: add %llu %llu %.*s@%llu",
+		    (unsigned long long)kdr->kdr_time,
+		    (unsigned long long)kdr->kdr_val,
+		    (int)kdr->kdr_loclen, kdr->kdr_loc, kdr->kdr_locidx);
+	else
+		KCN_LOG(ERR, "record: cannot add: %llu %llu %.*s",
+		    (unsigned long long)kdr->kdr_time,
+		    (unsigned long long)kdr->kdr_val,
+		    (int)kdr->kdr_loclen, kdr->kdr_loc);
 	return rc;
 }
 
