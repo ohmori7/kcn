@@ -24,6 +24,8 @@ struct kcn_client_response {
 	struct kcn_info *kcr_ki;
 };
 
+static const char *kcn_client_server_name = KCN_NETSTAT_SERVER_STR_DEFAULT;
+
 static int kcn_client_read(struct kcn_net *, struct kcn_buf *, void *);
 
 struct kcn_net *
@@ -34,7 +36,7 @@ kcn_client_init(struct event_base *evb, void *data)
 	struct kcn_net *kn;
 	int fd;
 
-	if (! kcn_sockaddr_aton(&ss, KCN_NETSTAT_SERVER_STR_DEFAULT,
+	if (! kcn_sockaddr_aton(&ss, kcn_client_server_name,
 	    KCN_NETSTAT_PORT_STR_DEFAULT)) {
 		KCN_LOG(ERR, "cannot get numeric server address");
 		goto bad;
@@ -59,6 +61,13 @@ kcn_client_finish(struct kcn_net *kn)
 {
 
 	kcn_net_destroy(kn);
+}
+
+void
+kcn_client_server_name_set(const char *name)
+{
+
+	kcn_client_server_name = name;
 }
 
 static int

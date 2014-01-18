@@ -2,6 +2,7 @@
 #include <err.h>
 #include <errno.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -13,6 +14,10 @@
 #include "kcn_db.h"
 #include "kcn_netstat.h"
 #include "kcn_google.h"
+#include "kcn_buf.h"
+#include "kcn_eq.h"
+#include "kcn_msg.h"
+#include "kcn_client.h"
 
 #define KCN_DB_DEFAULT			NULL
 #define KCN_LOC_COUNT_MAX_DEFAULT	1
@@ -26,7 +31,7 @@ int
 main(int argc, char * const argv[])
 {
 	enum kcn_loc_type loctype;
-	const char *p, *pname, *db, *country, *userip;
+	const char *p, *pname, *db, *country, *userip, *server;
 	int n, ch;
 
 	pname = (p = strrchr(argv[0], '/')) != NULL ? p + 1 : argv[0];
@@ -38,8 +43,9 @@ main(int argc, char * const argv[])
 	loctype = KCN_LOC_TYPE_DEFAULT;
 	country = NULL;
 	userip = NULL;
+	server = NULL;
 	n = KCN_LOC_COUNT_MAX_DEFAULT;
-	while ((ch = getopt(argc, argv, "c:hi:n:l:t:v?")) != -1) {
+	while ((ch = getopt(argc, argv, "c:hi:n:l:s:t:v?")) != -1) {
 		switch (ch) {
 		case 'c':
 			country = optarg;
@@ -61,6 +67,12 @@ main(int argc, char * const argv[])
 			break;
 		case 'n':
 			n = atoi(optarg);
+			break;
+		case 's':
+			if (server != NULL)
+				usage(pname, "multiple servers specified");
+				/*NOTREACHED*/
+			server = optarg;
 			break;
 		case 't':
 			if (! kcn_db_exists(optarg))
@@ -84,6 +96,9 @@ main(int argc, char * const argv[])
 		usage(pname, "no keywords specified");
 		/*NOTREACHED*/
 
+	if (server != NULL)
+		kcn_client_server_name_set(server);
+
 	doit(db, loctype, n, country, userip, argc, argv);
 	return 0;
 }
@@ -105,6 +120,7 @@ Options:\n\
 		URI: URI\n\
 		IP: IP address (not supported yet)\n\
 	-n number: the maximum number of locators returned\n\
+	-s server: KCN database server\n\
 	-t type: a type of database listed below\n\
 	-v: increment verbosity (can be specified 7 times at maximum)\n\
 \n",
