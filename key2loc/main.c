@@ -154,6 +154,7 @@ doit(size_t r, const char *db, enum kcn_loc_type loctype, size_t nmaxlocs,
 	kcn_info_userip_set(ki, userip);
 
 	for (i = 0; i < r; i++) {
+		kcn_info_loc_free(ki);
 		gettimeofday(&tvs, NULL);
 		rc = kcn_searchv(ki, keyc, keyv);
 		oerrno = errno;

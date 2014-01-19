@@ -51,13 +51,11 @@ kcn_info_new(enum kcn_loc_type loctype, size_t maxnlocs)
 void
 kcn_info_destroy(struct kcn_info *ki)
 {
-	size_t i;
 
 	if (ki == NULL)
 		return;
 	kcn_info_db_unset(ki);
-	for (i = 0; i < ki->ki_nlocs; i++)
-		free(ki->ki_locs[i].kl_uri);
+	kcn_info_loc_free(ki);
 	free(ki);
 }
 
@@ -169,4 +167,16 @@ kcn_info_loc_add(struct kcn_info *ki, const char *locstr, size_t locstrlen,
 	kl->kl_score = score;
 	++ki->ki_nlocs;
 	return true;
+}
+
+void
+kcn_info_loc_free(struct kcn_info *ki)
+{
+	size_t i;
+
+	for (i = 0; i < ki->ki_nlocs; i++) {
+		free(ki->ki_locs[i].kl_uri);
+		ki->ki_locs[i].kl_uri = NULL;
+	}
+	ki->ki_nlocs = 0;
 }

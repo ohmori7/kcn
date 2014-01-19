@@ -19,3 +19,4 @@ size_t kcn_info_nlocs(const struct kcn_info *);
 const char *kcn_info_loc(const struct kcn_info *, size_t);
 size_t kcn_info_loc_score(const struct kcn_info *, size_t);
 bool kcn_info_loc_add(struct kcn_info *, const char *, size_t, size_t);
+void kcn_info_loc_free(struct kcn_info *);
