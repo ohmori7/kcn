@@ -107,13 +107,18 @@ kcn_sockaddr_aton(struct sockaddr_storage *ss,
 	hai.ai_protocol = 0;
 	error = getaddrinfo(nodename, servname, &hai, &rai);
 	if (error != 0)
-		goto out;
+		goto bad;
 	assert(rai != NULL);
 	assert(sizeof(*ss) >= rai->ai_addrlen);
 	memcpy(ss, rai->ai_addr, rai->ai_addrlen);
 	freeaddrinfo(rai);
-  out:
-	return error == 0 ? true : false;
+	return true;
+  bad:
+	if (error == EAI_AGAIN)
+		errno = EAGAIN;
+	else if (error != EAI_SYSTEM)
+		errno = EINVAL;
+	return false;
 }
 
 bool
