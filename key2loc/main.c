@@ -24,7 +24,7 @@
 #define KCN_LOC_TYPE_DEFAULT		KCN_LOC_TYPE_DOMAINNAME
 
 static void usage(const char *, const char *);
-static void doit(const char *, enum kcn_loc_type, size_t,
+static void doit(size_t, const char *, enum kcn_loc_type, size_t,
     const char *, const char *, int, char * const []);
 
 int
@@ -32,6 +32,7 @@ main(int argc, char * const argv[])
 {
 	enum kcn_loc_type loctype;
 	const char *p, *pname, *db, *country, *userip, *server;
+	size_t r;
 	int n, ch;
 
 	pname = (p = strrchr(argv[0], '/')) != NULL ? p + 1 : argv[0];
@@ -44,8 +45,9 @@ main(int argc, char * const argv[])
 	country = NULL;
 	userip = NULL;
 	server = NULL;
+	r = 1;
 	n = KCN_LOC_COUNT_MAX_DEFAULT;
-	while ((ch = getopt(argc, argv, "c:hi:n:l:s:t:v?")) != -1) {
+	while ((ch = getopt(argc, argv, "c:hi:n:l:r:s:t:v?")) != -1) {
 		switch (ch) {
 		case 'c':
 			country = optarg;
@@ -67,6 +69,9 @@ main(int argc, char * const argv[])
 			break;
 		case 'n':
 			n = atoi(optarg);
+			break;
+		case 'r':
+			r = atoi(optarg);
 			break;
 		case 's':
 			if (server != NULL)
@@ -99,7 +104,7 @@ main(int argc, char * const argv[])
 	if (server != NULL)
 		kcn_client_server_name_set(server);
 
-	doit(db, loctype, n, country, userip, argc, argv);
+	doit(r, db, loctype, n, country, userip, argc, argv);
 	return 0;
 }
 
@@ -120,6 +125,7 @@ Options:\n\
 		URI: URI\n\
 		IP: IP address (not supported yet)\n\
 	-n number: the maximum number of locators returned\n\
+	-r count: repeat to query for ``count'' times\n\
 	-s server: KCN database server\n\
 	-t type: a type of database listed below\n\
 	-v: increment verbosity (can be specified 7 times at maximum)\n\
@@ -132,7 +138,7 @@ Supported database types are:\n");
 }
 
 static void
-doit(const char *db, enum kcn_loc_type loctype, size_t nmaxlocs,
+doit(size_t r, const char *db, enum kcn_loc_type loctype, size_t nmaxlocs,
     const char *country, const char *userip, int keyc, char * const keyv[])
 {
 	struct kcn_info *ki;
@@ -146,16 +152,19 @@ doit(const char *db, enum kcn_loc_type loctype, size_t nmaxlocs,
 	kcn_info_db_set(ki, db);
 	kcn_info_country_set(ki, country);
 	kcn_info_userip_set(ki, userip);
-	gettimeofday(&tvs, NULL);
-	rc = kcn_searchv(ki, keyc, keyv);
-	oerrno = errno;
-	gettimeofday(&tve, NULL);
-	timersub(&tve, &tvs, &tvd);
-	fprintf(stderr, "Resolution finishes with %zu.%06zu sec\n",
-	    (size_t)tvd.tv_sec, (size_t)tvd.tv_usec);
-	errno = oerrno;
-	if (! rc)
-		err(EXIT_FAILURE, "search failure");
+
+	for (i = 0; i < r; i++) {
+		gettimeofday(&tvs, NULL);
+		rc = kcn_searchv(ki, keyc, keyv);
+		oerrno = errno;
+		gettimeofday(&tve, NULL);
+		timersub(&tve, &tvs, &tvd);
+		fprintf(stderr, "Resolution finishes with %zu.%06zu sec\n",
+		    (size_t)tvd.tv_sec, (size_t)tvd.tv_usec);
+		errno = oerrno;
+		if (! rc)
+			err(EXIT_FAILURE, "search failure");
+	}
 	for (i = 0; i < kcn_info_nlocs(ki); i++)
 		printf("%s\n", kcn_info_loc(ki, i));
 	kcn_info_destroy(ki);
